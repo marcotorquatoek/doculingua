@@ -6,233 +6,180 @@
 <title>DocuLingua</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-  *{box-sizing:border-box;margin:0;padding:0}
-  :root{
-    --bg:#f1f5f9;--white:#fff;--dark:#0f172a;--brand:#2563eb;--brand2:#1d4ed8;
-    --green:#16a34a;--yellow:#b45309;--red:#dc2626;--purple:#7c3aed;--gray:#94a3b8;
-    --border:#e2e8f0;--text:#0f172a;--text2:#475569;--text3:#94a3b8;
-    --green-bg:#dcfce7;--yellow-bg:#fef3c7;--red-bg:#fee2e2;--purple-bg:#ede9fe;
-  }
-  body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-  
-  /* AUTH */
-  #auth-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--dark)}
-  .auth-card{background:var(--white);border-radius:16px;padding:40px;width:100%;max-width:400px;box-shadow:0 25px 50px rgba(0,0,0,.3)}
-  .auth-logo{text-align:center;margin-bottom:28px}
-  .auth-logo .logo-icon{width:56px;height:56px;border-radius:14px;background:linear-gradient(135deg,#1e3a8a,#3b82f6);display:inline-flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;color:#fff;margin-bottom:12px}
-  .auth-logo h1{font-size:24px;font-weight:800;color:var(--dark)}
-  .auth-logo p{font-size:13px;color:var(--text3);margin-top:4px}
-  .form-group{margin-bottom:16px}
-  .form-group label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);margin-bottom:6px}
-  .form-group input{width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;outline:none;transition:.2s}
-  .form-group input:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(37,99,235,.15)}
-  .btn-primary{width:100%;padding:11px;background:var(--brand);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;transition:.2s}
-  .btn-primary:hover{background:var(--brand2)}
-  .btn-primary:disabled{opacity:.6;cursor:not-allowed}
-  .error-msg{background:#fee2e2;border:1px solid #fca5a5;color:#dc2626;font-size:13px;padding:10px 14px;border-radius:8px;margin-bottom:12px}
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f1f5f9;--white:#fff;--dark:#0f172a;--brand:#2563eb;--brand2:#1d4ed8;
+  --green:#16a34a;--yellow:#b45309;--red:#dc2626;--purple:#7c3aed;--gray:#94a3b8;
+  --border:#e2e8f0;--text:#0f172a;--text2:#475569;--text3:#94a3b8;
+  --green-bg:#dcfce7;--yellow-bg:#fef3c7;--red-bg:#fee2e2;--purple-bg:#ede9fe;
+}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
 
-  /* LAYOUT */
-  #app{display:none;height:100vh;overflow:hidden}
-  .layout{display:flex;height:100vh}
-  
-  /* SIDEBAR */
-  .sidebar{width:220px;background:var(--dark);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;transition:.3s}
-  .sidebar-logo{padding:20px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:10px}
-  .sidebar-logo .s-icon{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#1e3a8a,#3b82f6);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:14px;flex-shrink:0}
-  .sidebar-logo span{color:#fff;font-weight:800;font-size:15px}
-  .sidebar-role{padding:16px 20px 8px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.3)}
-  .sidebar-nav{flex:1;padding:8px}
-  .nav-btn{width:100%;display:flex;align-items:center;gap:10px;padding:10px 12px;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;text-align:left;color:rgba(255,255,255,.5);background:transparent;transition:.15s;margin-bottom:2px}
-  .nav-btn:hover{color:rgba(255,255,255,.8);background:rgba(255,255,255,.05)}
-  .nav-btn.active{background:var(--brand);color:#fff}
-  .sidebar-footer{padding:16px;border-top:1px solid rgba(255,255,255,.06)}
-  .user-email{font-size:11px;color:rgba(255,255,255,.3);margin-bottom:8px;word-break:break-all}
-  .logout-btn{background:none;border:none;color:rgba(255,255,255,.4);font-size:12px;cursor:pointer;display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:6px;transition:.15s}
-  .logout-btn:hover{color:rgba(255,255,255,.7);background:rgba(255,255,255,.05)}
-  
-  /* MOBILE TOPBAR */
-  .mobile-topbar{display:none;background:var(--dark);padding:12px 16px;align-items:center;justify-content:space-between;position:fixed;top:0;left:0;right:0;z-index:100}
-  .mobile-topbar .m-logo{display:flex;align-items:center;gap:8px;color:#fff;font-weight:800;font-size:14px}
-  .hamburger{background:none;border:none;color:rgba(255,255,255,.7);cursor:pointer;padding:6px;border-radius:6px}
-  .mobile-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200}
-  .mobile-drawer{position:fixed;top:0;left:0;bottom:0;width:240px;background:var(--dark);z-index:201;display:flex;flex-direction:column;transform:translateX(-100%);transition:.25s}
-  .mobile-drawer.open{transform:translateX(0)}
-  
-  /* MAIN */
-  .main{flex:1;overflow-y:auto;background:var(--bg)}
-  .page{display:none;padding:24px}
-  .page.active{display:block}
-  
-  /* PAGE HEADER */
-  .page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;gap:12px;flex-wrap:wrap}
-  .page-title{font-size:22px;font-weight:800;color:var(--dark)}
-  .page-sub{font-size:13px;color:var(--text3);margin-top:3px}
-  
-  /* KPI CARDS */
-  .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
-  .kpi-card{background:var(--white);border-radius:12px;padding:18px 20px;box-shadow:0 1px 3px rgba(0,0,0,.06);border-left:4px solid var(--brand)}
-  .kpi-value{font-size:28px;font-weight:800;line-height:1}
-  .kpi-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-top:8px;color:var(--text)}
-  .kpi-sub{font-size:11px;color:var(--text3);margin-top:2px}
-  
-  /* LANG STATS */
-  .lang-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
-  .lang-card{background:var(--white);border-radius:12px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
-  .lang-card-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
-  .lang-flag{font-size:24px}
-  .lang-name{font-weight:800;font-size:13px;color:var(--dark)}
-  .lang-sub{font-size:11px;color:var(--text3)}
-  .lang-pct{font-size:20px;font-weight:800;margin-left:auto}
-  .lang-bar-wrap{background:#f1f5f9;border-radius:99px;height:6px;margin-top:8px;overflow:hidden}
-  .lang-bar{height:100%;border-radius:99px;transition:.4s}
-  .lang-stats-row{display:flex;justify-content:space-between;font-size:11px;margin-top:4px}
-  
-  /* FILTERS */
-  .filters-bar{background:var(--white);border-radius:12px;padding:14px 16px;box-shadow:0 1px 3px rgba(0,0,0,.06);margin-bottom:16px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-  .filters-bar input,.filters-bar select{padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;outline:none;background:var(--white);color:var(--text)}
-  .filters-bar input{flex:1;min-width:160px}
-  .filters-bar input:focus,.filters-bar select:focus{border-color:var(--brand)}
-  .clear-btn{background:none;border:none;color:var(--brand);font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}
-  
-  /* TABLE */
-  .table-wrap{background:var(--white);border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.06);overflow:hidden}
-  .table-scroll{overflow-x:auto}
-  table{width:100%;border-collapse:collapse}
-  thead th{padding:10px 14px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);background:#f8fafc;border-bottom:2px solid var(--border);white-space:nowrap;text-align:left}
-  tbody td{padding:11px 14px;font-size:13px;border-bottom:1px solid #f8fafc;vertical-align:middle}
-  tbody tr:last-child td{border-bottom:none}
-  tbody tr:hover td{background:#f8fafc}
-  .table-footer{padding:10px 14px;border-top:1px solid var(--border);font-size:12px;color:var(--text3)}
-  
-  /* STATUS BADGES */
-  .badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;white-space:nowrap}
-  .badge.completed{background:var(--green-bg);color:var(--green)}
-  .badge.in_progress{background:var(--yellow-bg);color:var(--yellow)}
-  .badge.outdated{background:var(--purple-bg);color:var(--purple)}
-  .badge.missing{background:var(--red-bg);color:var(--red)}
-  .badge.na{background:#f1f5f9;color:var(--gray)}
-  
-  /* STATUS SELECT */
-  .status-sel{border:none;border-radius:99px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;outline:none}
-  .status-sel.completed{background:var(--green-bg);color:var(--green)}
-  .status-sel.in_progress{background:var(--yellow-bg);color:var(--yellow)}
-  .status-sel.outdated{background:var(--purple-bg);color:var(--purple)}
-  .status-sel.missing{background:var(--red-bg);color:var(--red)}
-  
-  /* BUTTONS */
-  .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;border:none;transition:.15s}
-  .btn-sm{padding:5px 12px;font-size:12px;border-radius:7px}
-  .btn-blue{background:var(--brand);color:#fff}.btn-blue:hover{background:var(--brand2)}
-  .btn-gray{background:#f1f5f9;color:var(--text2)}.btn-gray:hover{background:var(--border)}
-  .btn-ghost{background:transparent;color:var(--text3)}.btn-ghost:hover{background:#f1f5f9;color:var(--text2)}
-  .btn-red{background:#fee2e2;color:var(--red)}.btn-red:hover{background:#fecaca}
-  
-  /* MODAL */
-  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:center;justify-content:center;padding:16px}
-  .modal-overlay.open{display:flex}
-  .modal{background:var(--white);border-radius:16px;width:100%;max-width:520px;box-shadow:0 25px 50px rgba(0,0,0,.3);max-height:90vh;overflow-y:auto}
-  .modal-header{padding:20px 24px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
-  .modal-title{font-size:16px;font-weight:800;color:var(--dark)}
-  .modal-close{background:none;border:none;font-size:22px;color:var(--text3);cursor:pointer;line-height:1;padding:4px 8px;border-radius:6px}.modal-close:hover{background:var(--bg)}
-  .modal-body{padding:20px 24px}
-  .modal-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
-  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  .form-field{margin-bottom:14px}
-  .form-field label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);margin-bottom:6px}
-  .form-field input,.form-field select,.form-field textarea{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;outline:none;background:var(--white);color:var(--text);font-family:inherit}
-  .form-field input:focus,.form-field select:focus,.form-field textarea:focus{border-color:var(--brand)}
-  .form-field textarea{resize:vertical;min-height:60px}
-  
-  /* TABS */
-  .tabs{display:flex;gap:2px;border-bottom:2px solid var(--border);margin-bottom:16px}
-  .tab{padding:10px 16px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--text3);border-bottom:2px solid transparent;margin-bottom:-2px;transition:.15s}
-  .tab.active{color:var(--brand);border-bottom-color:var(--brand)}
-  .tab-content{display:none}.tab-content.active{display:block}
-  
-  /* MOBILE CARDS */
-  .doc-cards{display:none;flex-direction:column;gap:12px}
-  .doc-card{background:var(--white);border-radius:12px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
-  .doc-card-header{display:flex;justify-content:space-between;gap:8px;margin-bottom:10px}
-  .doc-card-name{font-weight:700;font-size:14px;color:var(--dark);line-height:1.3}
-  .doc-card-cat{font-size:11px;color:var(--text3);margin-top:3px}
-  .doc-card-ver{font-family:monospace;font-size:11px;background:#f1f5f9;padding:3px 8px;border-radius:5px;font-weight:700;flex-shrink:0}
-  .doc-card-langs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
-  .lang-pill{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:99px;font-size:11px;font-weight:700}
-  .doc-card-footer{display:flex;align-items:center;justify-content:space-between;gap:8px}
-  .progress-wrap{flex:1}
-  .progress-label{display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px;color:var(--text3)}
-  .progress-bar-bg{background:#f1f5f9;border-radius:99px;height:5px;overflow:hidden}
-  .progress-bar-fill{height:100%;border-radius:99px;transition:.4s}
-  .doc-card-actions{display:flex;gap:4px}
-  
-  /* TRANSLATOR CARD */
-  .tr-card{background:var(--white);border-radius:12px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.06);border-left:4px solid var(--border)}
-  .tr-card.missing{border-left-color:var(--red)}
-  .tr-card.in_progress{border-left-color:var(--yellow)}
-  .tr-card.outdated{border-left-color:var(--purple)}
-  .tr-card.completed{border-left-color:var(--green)}
-  
-  /* QUICK FILTERS */
-  .qf-wrap{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
-  .qf-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:99px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid;transition:.15s}
-  
-  /* DETAIL MODAL TABS */
-  .detail-status-grid{display:flex;flex-wrap:wrap;gap:8px}
-  .status-choice{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;border:2px solid;transition:.15s}
+/* LAYOUT */
+#app{height:100vh;overflow:hidden;display:flex;flex-direction:column}
+.layout{display:flex;flex:1;overflow:hidden}
 
-  /* SPINNER */
-  .spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block;vertical-align:middle}
-  @keyframes spin{to{transform:rotate(360deg)}}
-  
-  /* TOAST */
-  #toast{position:fixed;bottom:24px;right:24px;background:var(--dark);color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:999;opacity:0;transform:translateY(8px);transition:.25s;pointer-events:none}
-  #toast.show{opacity:1;transform:translateY(0)}
+/* SIDEBAR */
+.sidebar{width:220px;background:var(--dark);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
+.sidebar-logo{padding:20px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:10px}
+.s-icon{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#1e3a8a,#3b82f6);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:14px;flex-shrink:0}
+.sidebar-logo span{color:#fff;font-weight:800;font-size:15px}
+.sidebar-role{padding:16px 20px 8px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.3)}
+.sidebar-nav{flex:1;padding:8px}
+.nav-btn{width:100%;display:flex;align-items:center;gap:10px;padding:10px 12px;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;text-align:left;color:rgba(255,255,255,.5);background:transparent;transition:.15s;margin-bottom:2px}
+.nav-btn:hover{color:rgba(255,255,255,.8);background:rgba(255,255,255,.05)}
+.nav-btn.active{background:var(--brand);color:#fff}
 
-  /* RESPONSIVE */
-  @media(max-width:768px){
-    .sidebar{display:none}
-    .mobile-topbar{display:flex}
-    .main{padding-top:56px}
-    .page{padding:16px}
-    .kpi-grid{grid-template-columns:1fr 1fr}
-    .lang-grid{grid-template-columns:1fr 1fr}
-    .table-wrap .table-scroll table{display:none}
-    .doc-cards{display:flex}
-    .page-title{font-size:18px}
-    .filters-bar input{min-width:120px}
-  }
-  @media(max-width:480px){
-    .kpi-grid{grid-template-columns:1fr 1fr}
-    .lang-grid{grid-template-columns:1fr 1fr}
-    .form-row{grid-template-columns:1fr}
-  }
+/* MOBILE TOPBAR */
+.mobile-topbar{display:none;background:var(--dark);padding:12px 16px;align-items:center;justify-content:space-between;flex-shrink:0}
+.mobile-topbar .m-logo{display:flex;align-items:center;gap:8px;color:#fff;font-weight:800;font-size:14px}
+.hamburger{background:none;border:none;color:rgba(255,255,255,.7);cursor:pointer;padding:6px;border-radius:6px}
+.mobile-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200}
+.mobile-drawer{position:fixed;top:0;left:0;bottom:0;width:240px;background:var(--dark);z-index:201;display:flex;flex-direction:column;transform:translateX(-100%);transition:.25s}
+.mobile-drawer.open{transform:translateX(0)}
+
+/* MAIN */
+.main{flex:1;overflow-y:auto;background:var(--bg)}
+.page{display:none;padding:24px}
+.page.active{display:block}
+
+/* PAGE HEADER */
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;gap:12px;flex-wrap:wrap}
+.page-title{font-size:22px;font-weight:800;color:var(--dark)}
+.page-sub{font-size:13px;color:var(--text3);margin-top:3px}
+
+/* KPI */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.kpi-card{background:var(--white);border-radius:12px;padding:18px 20px;box-shadow:0 1px 3px rgba(0,0,0,.06);border-left:4px solid}
+.kpi-value{font-size:28px;font-weight:800;line-height:1}
+.kpi-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-top:8px}
+.kpi-sub{font-size:11px;color:var(--text3);margin-top:2px}
+
+/* LANG STATS */
+.lang-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.lang-card{background:var(--white);border-radius:12px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.lang-card-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.lang-flag{font-size:24px}
+.lang-name{font-weight:800;font-size:13px}
+.lang-sub{font-size:11px;color:var(--text3)}
+.lang-pct{font-size:20px;font-weight:800;margin-left:auto}
+.lang-bar-wrap{background:#f1f5f9;border-radius:99px;height:6px;overflow:hidden}
+.lang-bar{height:100%;border-radius:99px;transition:.4s}
+.lang-stats-row{display:flex;gap:10px;flex-wrap:wrap;font-size:11px;margin-top:6px}
+
+/* FILTERS */
+.filters-bar{background:var(--white);border-radius:12px;padding:14px 16px;box-shadow:0 1px 3px rgba(0,0,0,.06);margin-bottom:16px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.filters-bar input,.filters-bar select{padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;outline:none;background:var(--white);color:var(--text)}
+.filters-bar input{flex:1;min-width:160px}
+.filters-bar input:focus,.filters-bar select:focus{border-color:var(--brand)}
+.clear-btn{background:none;border:none;color:var(--brand);font-size:12px;font-weight:700;cursor:pointer}
+
+/* TABLE */
+.table-wrap{background:var(--white);border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.06);overflow:hidden}
+.table-scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+thead th{padding:10px 14px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);background:#f8fafc;border-bottom:2px solid var(--border);white-space:nowrap;text-align:left}
+tbody td{padding:11px 14px;font-size:13px;border-bottom:1px solid #f8fafc;vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:#f8fafc}
+.table-footer{padding:10px 14px;border-top:1px solid var(--border);font-size:12px;color:var(--text3)}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;white-space:nowrap}
+.badge.completed{background:var(--green-bg);color:var(--green)}
+.badge.in_progress{background:var(--yellow-bg);color:var(--yellow)}
+.badge.outdated{background:var(--purple-bg);color:var(--purple)}
+.badge.missing{background:var(--red-bg);color:var(--red)}
+
+/* STATUS SELECT */
+.status-sel{border:none;border-radius:99px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;outline:none}
+.status-sel.completed{background:var(--green-bg);color:var(--green)}
+.status-sel.in_progress{background:var(--yellow-bg);color:var(--yellow)}
+.status-sel.outdated{background:var(--purple-bg);color:var(--purple)}
+.status-sel.missing{background:var(--red-bg);color:var(--red)}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;border:none;transition:.15s}
+.btn-sm{padding:5px 12px;font-size:12px;border-radius:7px}
+.btn-blue{background:var(--brand);color:#fff}.btn-blue:hover{background:var(--brand2)}
+.btn-gray{background:#f1f5f9;color:var(--text2)}.btn-gray:hover{background:var(--border)}
+.btn-ghost{background:transparent;color:var(--text3)}.btn-ghost:hover{background:#f1f5f9}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:center;justify-content:center;padding:16px}
+.modal-overlay.open{display:flex}
+.modal{background:var(--white);border-radius:16px;width:100%;max-width:520px;box-shadow:0 25px 50px rgba(0,0,0,.3);max-height:90vh;overflow-y:auto}
+.modal-header{padding:20px 24px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-size:16px;font-weight:800}
+.modal-close{background:none;border:none;font-size:22px;color:var(--text3);cursor:pointer;padding:4px 8px;border-radius:6px}.modal-close:hover{background:var(--bg)}
+.modal-body{padding:20px 24px}
+.modal-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-field{margin-bottom:14px}
+.form-field label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);margin-bottom:6px}
+.form-field input,.form-field select,.form-field textarea{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;outline:none;background:var(--white);color:var(--text);font-family:inherit}
+.form-field input:focus,.form-field select:focus,.form-field textarea:focus{border-color:var(--brand)}
+.form-field textarea{resize:vertical;min-height:60px}
+.error-msg{background:#fee2e2;border:1px solid #fca5a5;color:#dc2626;font-size:12px;padding:10px 14px;border-radius:8px;margin-top:8px}
+
+/* TABS */
+.tabs{display:flex;gap:2px;border-bottom:2px solid var(--border);margin-bottom:16px}
+.tab{padding:10px 16px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--text3);border-bottom:2px solid transparent;margin-bottom:-2px;transition:.15s}
+.tab.active{color:var(--brand);border-bottom-color:var(--brand)}
+.tab-content{display:none}.tab-content.active{display:block}
+
+/* MOBILE CARDS */
+.doc-cards{display:none;flex-direction:column;gap:12px}
+.doc-card{background:var(--white);border-radius:12px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.doc-card-name{font-weight:700;font-size:14px;color:var(--dark);line-height:1.3}
+.doc-card-cat{font-size:11px;color:var(--text3);margin-top:3px}
+.doc-card-ver{font-family:monospace;font-size:11px;background:#f1f5f9;padding:3px 8px;border-radius:5px;font-weight:700;flex-shrink:0}
+.doc-card-langs{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.lang-pill{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:99px;font-size:11px;font-weight:700}
+.progress-wrap{flex:1}
+.progress-label{display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px;color:var(--text3)}
+.progress-bar-bg{background:#f1f5f9;border-radius:99px;height:5px;overflow:hidden}
+.progress-bar-fill{height:100%;border-radius:99px}
+
+/* DETAIL MODAL */
+.status-choice{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;border:2px solid;transition:.15s}
+
+/* TOAST */
+#toast{position:fixed;bottom:24px;right:24px;background:var(--dark);color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:999;opacity:0;transform:translateY(8px);transition:.25s;pointer-events:none}
+#toast.show{opacity:1;transform:translateY(0)}
+
+/* LOADING */
+#loading{position:fixed;inset:0;background:var(--dark);display:flex;align-items:center;justify-content:center;z-index:999;flex-direction:column;gap:16px}
+.spinner{width:32px;height:32px;border:3px solid rgba(255,255,255,.2);border-top-color:#3b82f6;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  .sidebar{display:none}
+  .mobile-topbar{display:flex}
+  .kpi-grid{grid-template-columns:1fr 1fr}
+  .lang-grid{grid-template-columns:1fr 1fr}
+  .table-wrap .table-scroll table{display:none}
+  .doc-cards{display:flex}
+  .page{padding:16px}
+  .page-title{font-size:18px}
+}
+@media(max-width:480px){
+  .form-row{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
 
-<!-- AUTH -->
-<div id="auth-screen">
-  <div class="auth-card">
-    <div class="auth-logo">
-      <div class="logo-icon">D</div>
-      <h1>DocuLingua</h1>
-      <p>Gestione traduzioni documentazione tecnica</p>
-    </div>
-    <div id="auth-error" class="error-msg" style="display:none"></div>
-    <div class="form-group">
-      <label>Email</label>
-      <input type="email" id="login-email" placeholder="nome@azienda.com" autocomplete="email">
-    </div>
-    <div class="form-group">
-      <label>Password</label>
-      <input type="password" id="login-pwd" placeholder="••••••••" autocomplete="current-password">
-    </div>
-    <button class="btn-primary" id="login-btn" onclick="doLogin()">Accedi</button>
-  </div>
+<!-- LOADING -->
+<div id="loading">
+  <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#1e3a8a,#3b82f6);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;color:#fff">D</div>
+  <div class="spinner"></div>
+  <div style="color:rgba(255,255,255,.5);font-size:13px">Caricamento dati…</div>
 </div>
 
 <!-- APP -->
-<div id="app">
+<div id="app" style="display:none">
   <!-- MOBILE TOPBAR -->
   <div class="mobile-topbar">
     <div class="m-logo">
@@ -245,21 +192,19 @@
       </svg>
     </button>
   </div>
-  
+
   <!-- MOBILE DRAWER -->
   <div class="mobile-overlay" id="mob-overlay" onclick="toggleDrawer()"></div>
   <div class="mobile-drawer" id="mob-drawer">
-    <div class="sidebar-logo" style="padding:20px 16px">
-      <div class="s-icon">D</div>
-      <span>DocuLingua</span>
-      <button onclick="toggleDrawer()" style="background:none;border:none;color:rgba(255,255,255,.4);cursor:pointer;margin-left:auto;font-size:20px;line-height:1">×</button>
+    <div style="padding:16px 16px 12px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="s-icon">D</div>
+        <span style="color:#fff;font-weight:800">DocuLingua</span>
+      </div>
+      <button onclick="toggleDrawer()" style="background:none;border:none;color:rgba(255,255,255,.4);cursor:pointer;font-size:22px;line-height:1">×</button>
     </div>
-    <div class="sidebar-role" id="mob-role-label">Amministratore</div>
+    <div style="padding:12px 20px 6px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.3)">Menu</div>
     <div class="sidebar-nav" id="mob-nav"></div>
-    <div class="sidebar-footer">
-      <div class="user-email" id="mob-email"></div>
-      <button class="logout-btn" onclick="doLogout()">↩ Esci</button>
-    </div>
   </div>
 
   <div class="layout">
@@ -269,21 +214,17 @@
         <div class="s-icon">D</div>
         <span>DocuLingua</span>
       </div>
-      <div class="sidebar-role" id="role-label">Amministratore</div>
+      <div class="sidebar-role">Gestione Traduzioni</div>
       <div class="sidebar-nav" id="desktop-nav"></div>
-      <div class="sidebar-footer">
-        <div class="user-email" id="user-email"></div>
-        <button class="logout-btn" onclick="doLogout()">↩ Esci</button>
-      </div>
     </div>
 
     <!-- MAIN -->
     <div class="main">
-      <!-- ADMIN DASHBOARD -->
-      <div class="page" id="page-dashboard">
+      <!-- DASHBOARD -->
+      <div class="page active" id="page-dashboard">
         <div class="page-header">
           <div>
-            <div class="page-title">Dashboard Admin</div>
+            <div class="page-title">Dashboard</div>
             <div class="page-sub">Monitoraggio traduzioni documentazione tecnica</div>
           </div>
           <button class="btn btn-blue" onclick="openDocModal(null)">+ Nuovo documento</button>
@@ -316,23 +257,17 @@
             </select>
             <button class="clear-btn" onclick="clearFilters()">✕ Azzera</button>
           </div>
-          <!-- Table (desktop) -->
           <div class="table-wrap">
             <div class="table-scroll">
-              <table id="docs-table">
+              <table>
                 <thead><tr>
                   <th>Documento</th><th>Categoria</th><th>Ver.</th>
-                  <th class="text-center">🇮🇹 IT</th>
-                  <th class="text-center">🇬🇧 EN</th>
-                  <th class="text-center">🇫🇷 FR</th>
-                  <th class="text-center">🇩🇪 DE</th>
-                  <th class="text-center">%</th>
-                  <th>Azioni</th>
+                  <th>🇮🇹 IT</th><th>🇬🇧 EN</th><th>🇫🇷 FR</th><th>🇩🇪 DE</th>
+                  <th>%</th><th>Azioni</th>
                 </tr></thead>
                 <tbody id="docs-tbody"></tbody>
               </table>
             </div>
-            <!-- Mobile cards -->
             <div class="doc-cards" id="doc-cards-mobile"></div>
             <div class="table-footer" id="table-footer"></div>
           </div>
@@ -342,73 +277,12 @@
         </div>
       </div>
 
-      <!-- ADMIN USERS -->
-      <div class="page" id="page-users">
+      <!-- STATISTICHE PER LINGUA (pagina separata) -->
+      <div class="page" id="page-bylang">
         <div class="page-header">
-          <div>
-            <div class="page-title">Utenti</div>
-            <div class="page-sub">Gestione accessi e ruoli</div>
-          </div>
+          <div><div class="page-title">Stato per lingua</div><div class="page-sub">Documenti da tradurre per ogni lingua</div></div>
         </div>
-        <div class="kpi-grid" id="users-kpi" style="grid-template-columns:repeat(3,1fr)"></div>
-        <div class="table-wrap" style="margin-top:16px">
-          <div class="table-scroll">
-            <table>
-              <thead><tr><th>Nome</th><th>Email</th><th>Ruolo</th><th>Lingua</th><th>Registrato</th></tr></thead>
-              <tbody id="users-tbody"></tbody>
-            </table>
-          </div>
-        </div>
-        <div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:12px;padding:16px;margin-top:16px;font-size:13px;color:#92400e">
-          <strong>Come creare utenti:</strong> vai su <strong>supabase.com</strong> → Authentication → Users → Add user.<br>
-          Poi nel SQL Editor:<br>
-          <code style="display:block;background:#fef3c7;padding:8px 12px;border-radius:6px;margin-top:8px;font-size:12px">UPDATE public.profiles SET role='translator', assigned_language='FR' WHERE email='utente@email.com';</code>
-        </div>
-      </div>
-
-      <!-- TRANSLATOR -->
-      <div class="page" id="page-translator">
-        <div class="page-header">
-          <div>
-            <div class="page-title" id="tr-title">Le mie traduzioni</div>
-            <div class="page-sub" id="tr-sub">La tua coda di lavoro</div>
-          </div>
-          <div id="tr-completion" style="background:#fff;border-radius:12px;padding:12px 20px;box-shadow:0 1px 3px rgba(0,0,0,.06);text-align:center">
-            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text3)">Completamento</div>
-            <div id="tr-pct" style="font-size:26px;font-weight:800;color:var(--dark)">0%</div>
-          </div>
-        </div>
-        <div class="kpi-grid" id="tr-kpi" style="grid-template-columns:repeat(4,1fr)"></div>
-        <div class="qf-wrap" id="tr-quickfilters"></div>
-        <div class="filters-bar">
-          <input type="text" id="tr-search" placeholder="🔍 Cerca documento…" oninput="renderTranslator()">
-          <select id="tr-filter-cat" onchange="renderTranslator()">
-            <option value="">Tutte le categorie</option>
-          </select>
-          <select id="tr-filter-status" onchange="renderTranslator()">
-            <option value="">Tutti gli stati</option>
-            <option value="missing">✗ Mancante</option>
-            <option value="in_progress">⏳ In corso</option>
-            <option value="outdated">↻ Obsoleta</option>
-            <option value="completed">✓ Completata</option>
-          </select>
-          <button class="clear-btn" onclick="clearTrFilters()">✕ Azzera</button>
-        </div>
-        <!-- Desktop table -->
-        <div class="table-wrap">
-          <div class="table-scroll">
-            <table id="tr-table">
-              <thead><tr>
-                <th>Documento</th><th>Categoria</th><th>Ver.</th>
-                <th>Stato traduzione</th><th>Aggiornato</th><th>Note</th><th></th>
-              </tr></thead>
-              <tbody id="tr-tbody"></tbody>
-            </table>
-          </div>
-          <!-- Mobile cards -->
-          <div class="doc-cards" id="tr-cards-mobile"></div>
-          <div class="table-footer" id="tr-footer"></div>
-        </div>
+        <div id="bylang-page-content"></div>
       </div>
     </div>
   </div>
@@ -441,10 +315,7 @@
         <label>Descrizione / Data</label>
         <input type="text" id="doc-desc" placeholder="es. 2025-01-15">
       </div>
-      <div id="doc-modal-warn" style="display:none;background:#fffbeb;border:1px solid #fcd34d;color:#92400e;font-size:12px;padding:10px 14px;border-radius:8px;margin-top:8px">
-        ⚠️ Modificare la versione marcherà le traduzioni esistenti come «obsolete».
-      </div>
-      <div id="doc-modal-error" class="error-msg" style="display:none;margin-top:10px"></div>
+      <div id="doc-modal-error" class="error-msg" style="display:none"></div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-gray" onclick="closeDocModal()">Annulla</button>
@@ -464,9 +335,9 @@
       <div id="tr-modal-doc-info" style="background:#f8fafc;border-radius:10px;padding:14px;margin-bottom:16px"></div>
       <div class="form-field">
         <label>Stato traduzione</label>
-        <div class="detail-status-grid" id="tr-modal-status-grid"></div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px" id="tr-modal-status-grid"></div>
       </div>
-      <div id="tr-modal-version-warn" style="display:none;background:#ede9fe;border:1px solid #c4b5fd;color:#6d28d9;font-size:12px;padding:10px 14px;border-radius:8px;margin-bottom:12px"></div>
+      <div id="tr-modal-version-warn" style="display:none;background:var(--purple-bg);border:1px solid #c4b5fd;color:var(--purple);font-size:12px;padding:10px 14px;border-radius:8px;margin-bottom:12px"></div>
       <div class="form-field">
         <label>Note interne</label>
         <textarea id="tr-modal-notes" rows="3" placeholder="Aggiungi note, riferimenti, problemi…"></textarea>
@@ -489,158 +360,91 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const { createClient } = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// ── CONFIG ─────────────────────────────────────────────────
-const LANGS = ['IT','FR','DE','EN'];
-const LANG_FLAGS = {IT:'🇮🇹',FR:'🇫🇷',DE:'🇩🇪',EN:'🇬🇧'};
-const LANG_NAMES = {IT:'Italiano',FR:'Français',DE:'Deutsch',EN:'English'};
+const LANGS = ['IT','EN','FR','DE'];
+const LANG_FLAGS = {IT:'🇮🇹',EN:'🇬🇧',FR:'🇫🇷',DE:'🇩🇪'};
+const LANG_NAMES = {IT:'Italiano',EN:'English',FR:'Français',DE:'Deutsch'};
 const STATUS = {
-  completed:  {label:'Completata',  icon:'✓', color:'var(--green)',  bg:'var(--green-bg)'},
-  in_progress:{label:'In corso',    icon:'⏳', color:'var(--yellow)', bg:'var(--yellow-bg)'},
-  outdated:   {label:'Obsoleta',    icon:'↻', color:'var(--purple)', bg:'var(--purple-bg)'},
-  missing:    {label:'Mancante',    icon:'✗', color:'var(--red)',    bg:'var(--red-bg)'},
+  completed:   {label:'Completata',  icon:'✓', color:'var(--green)',  bg:'var(--green-bg)'},
+  in_progress: {label:'In corso',    icon:'⏳', color:'var(--yellow)', bg:'var(--yellow-bg)'},
+  outdated:    {label:'Obsoleta',    icon:'↻', color:'var(--purple)', bg:'var(--purple-bg)'},
+  missing:     {label:'Mancante',    icon:'✗', color:'var(--red)',    bg:'var(--red-bg)'},
 };
 const CATEGORIES = ["Allarmi", "Area Riservata", "Bollettini Tecnici - Modifiche prodotti", "Caldaie EK", "Camini a legna", "Circolari Vecchie", "Comandi remoti", "Componenti", "Corsi", "Documentazione tecnica", "Domoklima", "Dropbox", "Elettronica", "Parametri e Banche Dati", "Recapiti/Procedure"];
-const INITIAL_DOCS = [{"idx": 0, "category": "Area Riservata", "name": "Inserimento Ordini Ricambi - Accensioni - Interventi - Fatturazione", "date": "2025-10-14"}, {"idx": 1, "category": "Area Riservata", "name": "Password Light", "date": "2023-07-26"}, {"idx": 2, "category": "Area Riservata", "name": "Prenotazione Corsi e Pernottamenti", "date": "2023-04-20"}, {"idx": 3, "category": "Recapiti/Procedure", "name": "FATTURAZIONE INTERVENTI 2025", "date": "2025-02-04"}, {"idx": 4, "category": "Recapiti/Procedure", "name": "PROCEDURE GENERALI 2025 Ordini-Spedizioni-Resi-Fatturazione", "date": "2025-01-09"}, {"idx": 5, "category": "Recapiti/Procedure", "name": "CENTRALINO", "date": "2024-09-06"}, {"idx": 6, "category": "Recapiti/Procedure", "name": "MODULO RICHIESTA SOSTITUZIONE RICAMBI E ACCESSORI", "date": "2024-04-15"}, {"idx": 7, "category": "Recapiti/Procedure", "name": "Procedura Imballo Reso Prodotti Finiti", "date": "2023-12-27"}, {"idx": 8, "category": "Recapiti/Procedure", "name": "Modulo Rapporto di Intervento", "date": "2023-12-01"}, {"idx": 9, "category": "Recapiti/Procedure", "name": "Bolla di RESO", "date": "2023-08-29"}, {"idx": 10, "category": "Recapiti/Procedure", "name": "Scheda Dimensionamento Impianto", "date": "2022-08-01"}, {"idx": 11, "category": "Recapiti/Procedure", "name": "Moduli Raccolta Dati INSTALLAZIONI", "date": "2022-07-29"}, {"idx": 12, "category": "Recapiti/Procedure", "name": "Modulo raccolta dati CAT", "date": "2022-07-29"}, {"idx": 13, "category": "Recapiti/Procedure", "name": "Contatti Post Vendita Italia Edilkamin", "date": "2022-06-24"}, {"idx": 14, "category": "Recapiti/Procedure", "name": "Modulo RESI", "date": "2021-10-20"}, {"idx": 15, "category": "Recapiti/Procedure", "name": "APPENDICE D norma UNI 10683", "date": "2021-06-01"}, {"idx": 16, "category": "Recapiti/Procedure", "name": "Modulo Smaltimento", "date": "2021-03-19"}, {"idx": 17, "category": "Recapiti/Procedure", "name": "Schema Dimensionamento Impiano", "date": "2020-07-14"}, {"idx": 18, "category": "Recapiti/Procedure", "name": "Fattura", "date": "2018-05-17"}, {"idx": 19, "category": "Recapiti/Procedure", "name": "INTERVENTI IN GARANZIA", "date": "2015-12-15"}, {"idx": 20, "category": "Recapiti/Procedure", "name": "PRIMA ACCENSIONE", "date": "2015-12-15"}, {"idx": 21, "category": "Circolari Vecchie", "name": "Cricolare CAT n° 14 Nara Plus e Piro Plus", "date": "2017-10-16"}, {"idx": 22, "category": "Circolari Vecchie", "name": "I.V.R.", "date": "2017-07-05"}, {"idx": 23, "category": "Circolari Vecchie", "name": "Circolare 8 bis -", "date": "2017-06-12"}, {"idx": 24, "category": "Circolari Vecchie", "name": "Circolare 9 - 17 - SUDDIVISIONE RICAMBI ASSISTENZA e RICAMBI ACCESSORI", "date": "2017-06-01"}, {"idx": 25, "category": "Circolari Vecchie", "name": "Circolare 8 - 17 - TRAINING UPGRADE 2017", "date": "2017-05-29"}, {"idx": 26, "category": "Circolari Vecchie", "name": "Circolare 7 - 17 RESO SCHEDE ELETTRONICHE", "date": "2017-05-25"}, {"idx": 27, "category": "Circolari Vecchie", "name": "Circolare 5 - 17 - FATTURE ED INTERVENTI", "date": "2017-02-21"}, {"idx": 28, "category": "Circolari Vecchie", "name": "Circolare 4 - 17 INTERVENTI 2016", "date": "2017-02-06"}, {"idx": 29, "category": "Circolari Vecchie", "name": "Circolare 3 - 17 STUFA BLADE", "date": "2017-02-01"}, {"idx": 30, "category": "Circolari Vecchie", "name": "Circolare 2 - 17 - NUOVA PROCEDURA FATTURAZIONE - INSERIMENTO INTERVENTI", "date": "2017-01-30"}, {"idx": 31, "category": "Circolari Vecchie", "name": "Circolare CAT 13 - Wi-Fi e GSM", "date": "2016-10-05"}, {"idx": 32, "category": "Circolari Vecchie", "name": "Circolare CAT N12 - O047 - Collegamenti sonde Otional - Firmware Laguna P", "date": "2016-07-28"}, {"idx": 33, "category": "Circolari Vecchie", "name": "Circolare CAT 10 - COMUNICAZIONI WIFI", "date": "2016-07-27"}, {"idx": 34, "category": "Circolari Vecchie", "name": "Circolare CAT n° 9 - RESI MATERIALE ERRATO", "date": "2016-07-25"}, {"idx": 35, "category": "Circolari Vecchie", "name": "Circolare CAT n°4 - Firmware per App e Pressostato", "date": "2016-07-24"}, {"idx": 36, "category": "Circolari Vecchie", "name": "Circolare CAT n3 - RESI PEZZI DI RICAMBIO", "date": "2016-07-23"}, {"idx": 37, "category": "Circolari Vecchie", "name": "Circolare 3-16 - Collegamenti schede HottoH su stufe Kikka e parametri L", "date": "2016-06-28"}, {"idx": 38, "category": "Circolari Vecchie", "name": "Circolare CAT n 2-2016 - Ufficio POST VENDITA EDILKAMIN", "date": "2016-03-26"}, {"idx": 39, "category": "Circolari Vecchie", "name": "Circolare cat 1-16 RESI", "date": "2016-02-26"}, {"idx": 40, "category": "Circolari Vecchie", "name": "Istruzioni_KitRelé_PompaAEperN100", "date": "2015-05-12"}, {"idx": 41, "category": "Circolari Vecchie", "name": "Documentazione Smontaggio griglia inferiore Pellkamin", "date": "2015-02-12"}, {"idx": 42, "category": "Circolari Vecchie", "name": "Circolare CAT n° 6-sonda Idropoint-Idrochip", "date": "2014-05-13"}, {"idx": 43, "category": "Circolari Vecchie", "name": "Circolare CAT n° 05-2014 - Circolatori basso consumo", "date": "2014-05-12"}, {"idx": 44, "category": "Circolari Vecchie", "name": "sk istruzioni modulo TIMER optional cod 941057", "date": "2014-05-07"}, {"idx": 45, "category": "Circolari Vecchie", "name": "Multimetro", "date": "2014-04-20"}, {"idx": 46, "category": "Circolari Vecchie", "name": "TINY - Sostituzione Molle", "date": "2014-03-16"}, {"idx": 47, "category": "Circolari Vecchie", "name": "Presentazioni 2014", "date": "2014-02-12"}, {"idx": 48, "category": "Circolari Vecchie", "name": "Bering Graphica", "date": "2014-02-12"}, {"idx": 49, "category": "Circolari Vecchie", "name": "Documentazione Aggiornamento Display Maxima", "date": "2014-02-12"}, {"idx": 50, "category": "Circolari Vecchie", "name": "PRESENTAZIONE NOVITA' 2014", "date": "2014-01-01"}, {"idx": 51, "category": "Circolari Vecchie", "name": "Circolare CAT N°19-2013", "date": "2013-02-12"}, {"idx": 52, "category": "Circolari Vecchie", "name": "Circolare CAT N° 19-2012 Pellet-blok possibile errore di cablaggio", "date": "2012-02-12"}, {"idx": 53, "category": "Dropbox", "name": "EDILKAMIN_ CIRCOLARE CAT n°16_2015 DROPBOX", "date": "2015-10-09"}, {"idx": 54, "category": "Dropbox", "name": "Documentazione Utilizzo Dropbox", "date": "2015-10-08"}, {"idx": 55, "category": "Componenti", "name": "COMPONENTI", "date": "2025-10-28"}, {"idx": 56, "category": "Componenti", "name": "ANTINE, PORTELLI, INSTALLAZIONE GUARNIZIONI", "date": "2025-09-02"}, {"idx": 57, "category": "Componenti", "name": "VITI e PERNI", "date": "2024-02-19"}, {"idx": 58, "category": "Componenti", "name": "GUARNIZIONI", "date": "2023-10-18"}, {"idx": 59, "category": "Componenti", "name": "ELENCO KIT E CODICI SPECIALI", "date": "2023-09-26"}, {"idx": 60, "category": "Componenti", "name": "MOTORIDUTTORI DI SERIE E RICAMBIO PRODOTTI A LISTINO", "date": "2020-06-25"}, {"idx": 61, "category": "Componenti", "name": "DISPLAY IRIS", "date": "2018-04-23"}, {"idx": 62, "category": "Componenti", "name": "Documentazione Componenti per tecnici EDILKAMIN Rev. 3 Settembre 2014", "date": "2014-09-03"}, {"idx": 63, "category": "Allarmi", "name": "ALLARMI, CAUSE E SOLUZIONI", "date": "2026-02-11"}, {"idx": 64, "category": "Parametri e Banche Dati", "name": "MODELLI E PARAMETRI", "date": "2026-03-20"}, {"idx": 65, "category": "Parametri e Banche Dati", "name": "BANCHE DATI", "date": "2025-12-12"}, {"idx": 66, "category": "Bollettini Tecnici - Modifiche prodotti", "name": "Bollettino Tecnico 19-05-13 Piedino NERO 1096410", "date": "2019-05-22"}, {"idx": 67, "category": "Bollettini Tecnici - Modifiche prodotti", "name": "Bollettino Tecnico 19-03-11-UNIFICAZIONE CABLAGGIO BLADE RADA ATC", "date": "2019-03-20"}, {"idx": 68, "category": "Bollettini Tecnici - Modifiche prodotti", "name": "Bollettino Tecnico 19-03-10 Kira Vyda Laima 14_settaggio parametri ventilatore canalizzazione", "date": "2019-03-14"}, {"idx": 69, "category": "Bollettini Tecnici - Modifiche prodotti", "name": "Bollettino Tecnico 19-03-08 Inserimento sensore pellet e nuovo APF KIRA H_VYDA H_BLADE H", "date": "2019-03-13"}, {"idx": 70, "category": "Bollettini Tecnici - Modifiche prodotti", "name": "Bollettino Tecnico 19-03-09 Perdita Lingua radiocomando Asola", "date": "2019-03-13"}, {"idx": 71, "category": "Bollettini Tecnici - Modifiche prodotti", "name": "Bollettino Tecnico 19-03-07 -REV01 Modifiche sistema pulizia LAGUNA - Copia", "date": "2019-03-07"}, {"idx": 72, "category": "Bollettini Tecnici - Modifiche prodotti", "name": "Bollettino Tecnico 19-03-07 Modifiche sistema pulizia LAGUNA", "date": "2019-03-05"}, {"idx": 73, "category": "Bollettini Tecnici - Modifiche prodotti", "name": "Bollettino Tecnico 19-02-01 KE90P -aggiornamento disegni e kit SPAZZOLA", "date": "2019-02-11"}, {"idx": 74, "category": "Bollettini Tecnici - Modifiche prodotti", "name": "Bollettino Tecnico 19-02-06 modifica codice vernice Bianca_BLADE H", "date": "2019-02-06"}, {"idx": 75, "category": "Bollettini Tecnici - Modifiche prodotti", "name": "Bollettino Tecnico 19-02-05 Cablaggio Idropellbox30", "date": "2019-02-05"}, {"idx": 76, "category": "Bollettini Tecnici - Modifiche prodotti", "name": "Bollettino Tecnico 19-02-04 Tubo Flex EVIA 666870", "date": "2019-02-04"}, {"idx": 77, "category": "Bollettini Tecnici - Modifiche prodotti", "name": "Bollettino Tecnico 19-02-03 estrattore Fumi 1053150_PL21_SIT", "date": "2019-02-03"}, {"idx": 78, "category": "Bollettini Tecnici - Modifiche prodotti", "name": "Bollettino Tecnico 19-02-02 Nuova Valvola Anticondensa OTMA", "date": "2019-02-02"}, {"idx": 79, "category": "Bollettini Tecnici - Modifiche prodotti", "name": "Bollettino Tecnico 1836 rev 01 020119_Modifica kit idraulici", "date": "2019-01-02"}, {"idx": 80, "category": "Bollettini Tecnici - Modifiche prodotti", "name": "Bollettino Tecnico 1836 Modifica kit idraulici OTMA_1054260_1054270_1054280", "date": "2018-12-21"}, {"idx": 81, "category": "Bollettini Tecnici - Modifiche prodotti", "name": "Bollettino Tecnico 1833 Aggiornamento APF_NARA_NARA PLUS_SLIDE 7KW", "date": "2018-11-09"}, {"idx": 82, "category": "Bollettini Tecnici - Modifiche prodotti", "name": "Bollettino Tecnico 1832 Modifiche struttura 1088630 BLADE EVO STRUTTURA BASE NEW", "date": "2018-10-24"}, {"idx": 83, "category": "Bollettini Tecnici - Modifiche prodotti", "name": "Bollettino Tecnico 1831 Modifiche TUBO ARIA CROGIOLO OTTAWA_ATLANTA UP", "date": "2018-10-24"}, {"idx": 84, "category": "Bollettini Tecnici - Modifiche prodotti", "name": "Bolllettino Tecnico 1830 Nuovi CODICI Prodotti MED18-348", "date": "2018-10-08"}, {"idx": 85, "category": "Bollettini Tecnici - Modifiche prodotti", "name": "Bollettino Tecnico 1829 Nuovi CODICI KIRA 14KW_VYDA 14KW", "date": "2018-09-28"}, {"idx": 86, "category": "Bollettini Tecnici - Modifiche prodotti", "name": "Bollettino Tecnico 1827 Unificazione Scheda HOTTOH", "date": "2018-09-19"}, {"idx": 87, "category": "Bollettini Tecnici - Modifiche prodotti", "name": "Bollettino Tecnico 1822 REV01 del 19-09-18 Nuovi CODICI Prodotti", "date": "2018-09-18"}, {"idx": 88, "category": "Bollettini Tecnici - Modifiche prodotti", "name": "Bollettino Tecnico 1820 Aggiunta regolazione piastrella inferiore SX KIRA", "date": "2018-07-25"}, {"idx": 89, "category": "Bollettini Tecnici - Modifiche prodotti", "name": "Bollettino Tecnico 1821 Nuovo Estrattore TRIAL_CHERIE UP", "date": "2018-07-25"}, {"idx": 90, "category": "Bollettini Tecnici - Modifiche prodotti", "name": "Bollettino Tecnico 1822 Nuovi CODICI Prodotti", "date": "2018-07-24"}, {"idx": 91, "category": "Bollettini Tecnici - Modifiche prodotti", "name": "Bollettino Tecnico 1819-Rotazione estrattore fumi 1086730_", "date": "2018-07-10"}, {"idx": 92, "category": "Bollettini Tecnici - Modifiche prodotti", "name": "Bollettino Tecnico 1818 Bocchette Ventilate", "date": "2018-07-02"}, {"idx": 93, "category": "Bollettini Tecnici - Modifiche prodotti", "name": "Bollettino Tecnico 1817 Modifiche BLADE", "date": "2018-06-21"}, {"idx": 94, "category": "Bollettini Tecnici - Modifiche prodotti", "name": "BOLLETTINO TECNICO 18-12 Nuovo Estrattore Fumi Lettore Ottico", "date": "2018-06-01"}, {"idx": 95, "category": "Bollettini Tecnici - Modifiche prodotti", "name": "BOLLETTINO TECNICO 18-13 Staffa trasporto CHERIE UP H", "date": "2018-06-01"}, {"idx": 96, "category": "Bollettini Tecnici - Modifiche prodotti", "name": "Bollettino Tecnico 1816 Estrasttoi fumi TRAIL_ BLADE_KIRA_VYDA HEkleaner", "date": "2018-05-25"}, {"idx": 97, "category": "Bollettini Tecnici - Modifiche prodotti", "name": "Bollettino Tecnico 1814 BLADE H_H Ekleaner_ Rivestimento METALLO", "date": "2018-05-22"}, {"idx": 98, "category": "Bollettini Tecnici - Modifiche prodotti", "name": "BOLLETTINO TECNICO 18-11 Sensore pellet", "date": "2018-04-27"}, {"idx": 99, "category": "Bollettini Tecnici - Modifiche prodotti", "name": "Bollettino Tecnico 18-01 Tally Ollare 2 pezzi _2_", "date": "2018-04-04"}, {"idx": 100, "category": "Bollettini Tecnici - Modifiche prodotti", "name": "Bollettino Tecnico 18-02 Energy label", "date": "2018-04-04"}, {"idx": 101, "category": "Bollettini Tecnici - Modifiche prodotti", "name": "Bollettino Tecnico 18-04 valv antiscoppio (2)", "date": "2018-04-04"}, {"idx": 102, "category": "Bollettini Tecnici - Modifiche prodotti", "name": "Bollettino tecnico 1803-Modifica cerniera chiusura serbatoio pellet KiraVydaLaima H", "date": "2018-04-04"}, {"idx": 103, "category": "Bollettini Tecnici - Modifiche prodotti", "name": "Bollettino tecnico 1805-Pellkamin12 kit ingr aria combustione", "date": "2018-04-04"}, {"idx": 104, "category": "Bollettini Tecnici - Modifiche prodotti", "name": "Bollettino tecnico 1806 prot fianchi Layma 14", "date": "2018-04-04"}, {"idx": 105, "category": "Bollettini Tecnici - Modifiche prodotti", "name": "Bollettino tecnico 1807Pellkamin12ass albero coclea", "date": "2018-04-04"}, {"idx": 106, "category": "Bollettini Tecnici - Modifiche prodotti", "name": "Bollettino Tecnico 1809 Radiocomando Asola new (2)", "date": "2018-04-04"}, {"idx": 107, "category": "Bollettini Tecnici - Modifiche prodotti", "name": "Bollettino Tecnico 1808 Pellkamin12 kit rialzo e rinf serb", "date": "2018-02-26"}, {"idx": 108, "category": "Domoklima", "name": "Allarmi-blocchi sistema Domoklima rev.00", "date": "2013-01-17"}, {"idx": 109, "category": "Domoklima", "name": "DOMOKLIMA-MANUALE UTENTE", "date": "2013-01-17"}, {"idx": 110, "category": "Domoklima", "name": "MANUALE DOMOKLIMA PER CAT MODULO GRAPHICA", "date": "2013-01-17"}, {"idx": 111, "category": "Domoklima", "name": "MANUALE DOMOKLIMA PER CAT TIPO ACS", "date": "2013-01-17"}, {"idx": 112, "category": "Domoklima", "name": "MANUALE DOMOKLIMA PER CAT TIPO COMBI", "date": "2013-01-17"}, {"idx": 113, "category": "Domoklima", "name": "PARAMETRI DOMOKLIMA", "date": "2013-01-17"}, {"idx": 114, "category": "Caldaie EK", "name": "Caldaie EK istruzioni e parametri", "date": "2012-12-15"}, {"idx": 115, "category": "Comandi remoti", "name": "ISTRUZIONI INSTALLAZIONE RADIOCOMANDO PHOENIX", "date": "2020-10-29"}, {"idx": 116, "category": "Comandi remoti", "name": "MISSING APF - Aggiornamento firmware radiocomando asola", "date": "2019-07-24"}, {"idx": 117, "category": "Comandi remoti", "name": "RADIOCOMANDO ASOLA CON TASTI FISICI in sostituzione della versione CON TASTI TOUCH", "date": "2018-07-06"}, {"idx": 118, "category": "Comandi remoti", "name": "Trasmissione temperatura radiocomando Linx sempre attiva", "date": "2017-11-08"}, {"idx": 119, "category": "Comandi remoti", "name": "Sonda o termostato Optional per ventole Blade", "date": "2017-07-20"}, {"idx": 120, "category": "Comandi remoti", "name": "Sonda o termostato Optional per ventole Pellkamin 12", "date": "2017-07-20"}, {"idx": 121, "category": "Comandi remoti", "name": "Utilizzo clima comfort con radiocomando", "date": "2014-04-15"}, {"idx": 122, "category": "Comandi remoti", "name": "Programmatore giornaliero a cavalieri", "date": "2013-04-20"}, {"idx": 123, "category": "Comandi remoti", "name": "Regolazione pannello grafico su kit A1-A2-B-C-D", "date": "2012-07-17"}, {"idx": 124, "category": "Camini a legna", "name": "COLLEGAMENTI ELETTRICI KIT AIR DIFFUSER", "date": "2024-06-27"}, {"idx": 125, "category": "Camini a legna", "name": "Sostituzione ventilatore Firebox Evo", "date": "2024-06-06"}, {"idx": 126, "category": "Camini a legna", "name": "Manutenzione leveraggio camini WINDO e BLOKK", "date": "2023-07-28"}, {"idx": 127, "category": "Camini a legna", "name": "REGOLATORI CAMINI A LEGNA", "date": "2023-06-30"}, {"idx": 128, "category": "Camini a legna", "name": "Registro aria frontale Windo3 P 50", "date": "2023-05-05"}, {"idx": 129, "category": "Camini a legna", "name": "REGOLAZIONI PORTELLO IC TEKNO 2", "date": "2023-01-20"}, {"idx": 130, "category": "Camini a legna", "name": "Connessioni elettriche Firebox e Ecostar", "date": "2022-10-28"}, {"idx": 131, "category": "Camini a legna", "name": "Combustione a legna", "date": "2021-05-07"}, {"idx": 132, "category": "Camini a legna", "name": "PRESENTAZIONE AIR DIFFUSER - BOCCHETTE VENTILATE", "date": "2021-05-07"}, {"idx": 133, "category": "Camini a legna", "name": "Istruzioni Scorrimenti Camini Legna serie Plus", "date": "2012-03-10"}, {"idx": 134, "category": "Camini a legna", "name": "Tekno - istruzione sostituzione ventilatori", "date": "2011-09-19"}, {"idx": 135, "category": "Camini a legna", "name": "Istruzioni Acquatondo Cristal Scorrimenti", "date": "2011-05-28"}, {"idx": 136, "category": "Camini a legna", "name": "Scorrimenti,Ventilazione,Varie Camini a Legna", "date": "2011-05-27"}, {"idx": 137, "category": "Documentazione tecnica", "name": "RICONOSCIMENTO CAMINETTI", "date": "2025-11-26"}, {"idx": 138, "category": "Documentazione tecnica", "name": "CHERIE UP CONNESSIONE ENCODER FUMI", "date": "2025-10-01"}, {"idx": 139, "category": "Documentazione tecnica", "name": "Ash-Kontrol Cherie H Evo - Tera H Evo", "date": "2025-05-12"}, {"idx": 140, "category": "Documentazione tecnica", "name": "KIT ACCENSIONE CHERIE EVO (cod. 920680)", "date": "2025-02-17"}, {"idx": 141, "category": "Documentazione tecnica", "name": "THE MIND IDRO LOGICA-IMPIANTI-CONNESSIONI", "date": "2024-09-05"}, {"idx": 142, "category": "Documentazione tecnica", "name": "HOTTOH IDRO LOGICA-IMPIANTI-CONNESSIONI", "date": "2024-06-27"}, {"idx": 143, "category": "Documentazione tecnica", "name": "LAGUNA P LOGICA-IMPIANTI-CONNESSIONI", "date": "2024-06-27"}, {"idx": 144, "category": "Documentazione tecnica", "name": "KIT Mascheratura EK63", "date": "2023-12-06"}, {"idx": 145, "category": "Documentazione tecnica", "name": "Sostituzione scovoli e spirali", "date": "2023-10-12"}, {"idx": 146, "category": "Documentazione tecnica", "name": "Legenda LED Circolatore R1156310", "date": "2023-09-21"}, {"idx": 147, "category": "Documentazione tecnica", "name": "Istruzioni installazione interfaccia pompa alta efficienza Kit Relè", "date": "2023-07-10"}, {"idx": 148, "category": "Documentazione tecnica", "name": "SCHEMI IMPIANTI TERMOPRODOTTI", "date": "2023-06-23"}, {"idx": 149, "category": "Documentazione tecnica", "name": "BLOCCO COCLEA G1 - G2", "date": "2023-01-20"}, {"idx": 150, "category": "Documentazione tecnica", "name": "PRESENTAZIONE NUOVI PRODOTTI CORSO AGGIORNAMENTO 2022", "date": "2022-07-15"}, {"idx": 151, "category": "Documentazione tecnica", "name": "ADEGUAMENTO PARAMETRI SISTEMA LEONARDO THE MIND", "date": "2022-02-03"}, {"idx": 152, "category": "Documentazione tecnica", "name": "Modulo Collaudo App The Mind", "date": "2021-12-30"}, {"idx": 153, "category": "Documentazione tecnica", "name": "Problematiche varie esposte in corso seconda sessione 2021", "date": "2021-06-09"}, {"idx": 154, "category": "Documentazione tecnica", "name": "Programma corso seconda sessione 2021", "date": "2021-06-09"}, {"idx": 155, "category": "Documentazione tecnica", "name": "Applicazione silicone su estrattore PL30 causa perdite imputabili a manomissione in utenza", "date": "2021-05-20"}, {"idx": 156, "category": "Documentazione tecnica", "name": "SPIEGAZIONE LED CIRCOLATORI", "date": "2021-03-05"}, {"idx": 157, "category": "Documentazione tecnica", "name": "ADEGUAMENTO PARAMETRI SISTEMA LEONARDO HOTTOH", "date": "2020-12-16"}, {"idx": 158, "category": "Documentazione tecnica", "name": "SCHEMA DI COLLEGAMENTO DEI TUBETTI IN SILICONE", "date": "2020-11-06"}, {"idx": 159, "category": "Documentazione tecnica", "name": "Sostituzione Scovoli Ecoidro-Idrotech-Idroflexa", "date": "2020-07-13"}, {"idx": 160, "category": "Documentazione tecnica", "name": "Posizionamento etichette corpi macchina", "date": "2020-02-05"}, {"idx": 161, "category": "Documentazione tecnica", "name": "Presentazione corsi CAT upgrade 2019", "date": "2019-09-27"}, {"idx": 162, "category": "Documentazione tecnica", "name": "TARATURA STUFE ROLLI E DISK", "date": "2019-05-09"}, {"idx": 163, "category": "Documentazione tecnica", "name": "Laguna P - Vite paletta bloccata", "date": "2019-03-19"}, {"idx": 164, "category": "Documentazione tecnica", "name": "Presentazione corsi CAT upgrade 2018", "date": "2018-09-20"}, {"idx": 165, "category": "Documentazione tecnica", "name": "Manuale per Centri di Assistenza Tecnica Edilkamin", "date": "2017-07-21"}, {"idx": 166, "category": "Documentazione tecnica", "name": "Presentazione corsi CAT upgrade 2017", "date": "2017-06-29"}, {"idx": 167, "category": "Documentazione tecnica", "name": "Documentazione INTERVENTO DI MANUTENZIONE PER SBLOCCO SCOVOLI DI PULIZIA Bijoux Strass Tresor Cameo", "date": "2017-05-11"}, {"idx": 168, "category": "Documentazione tecnica", "name": "Funzionamento Stufe, Termostufe e Caldaie", "date": "2014-03-01"}, {"idx": 169, "category": "Documentazione tecnica", "name": "Schemi indicativi caldaie con accumulo ACS o Puffer", "date": "2013-07-19"}, {"idx": 170, "category": "Documentazione tecnica", "name": "Istruzioni regolazione pannello cod. 741180 su kit A1-A2-B-C-D", "date": "2012-07-17"}, {"idx": 171, "category": "Elettronica", "name": "Elettronica THE MIND", "date": "2025-10-15"}, {"idx": 172, "category": "Elettronica", "name": "Elettronica SMART EK63", "date": "2025-10-14"}, {"idx": 173, "category": "Elettronica", "name": "Elettronica LINX", "date": "2025-10-13"}, {"idx": 174, "category": "Elettronica", "name": "Elettronica HOTTOH", "date": "2025-10-12"}, {"idx": 175, "category": "Elettronica", "name": "Elettronica MICRONOVA", "date": "2025-10-11"}, {"idx": 176, "category": "Elettronica", "name": "WI-FI e GSM - Lista Completa Prodotti Compatibili", "date": "2024-09-18"}, {"idx": 177, "category": "Elettronica", "name": "Multi Elettronica - PANNELLI, CONNESSIONI, ACCESSORI, CAVO BLU", "date": "2024-01-22"}, {"idx": 178, "category": "Corsi", "name": "WEBINAR EDILKAMIN SERVICE E NUOVI PRODOTTI 2026 - 28.11.25", "date": "2025-11-28"}, {"idx": 179, "category": "Corsi", "name": "Slide tecniche corso aggiornamento estivo 2025", "date": "2025-09-01"}, {"idx": 180, "category": "Corsi", "name": "WEBINAR NR.5 - THE MIND & EK63 - 27.09.24", "date": "2024-09-27"}, {"idx": 181, "category": "Corsi", "name": "WEBINAR AIEL - Incentivi in Italia - Conto termico e Bandi regionali", "date": "2024-07-29"}, {"idx": 182, "category": "Corsi", "name": "WIFI & GSM - LA FENICE", "date": "2024-06-25"}, {"idx": 183, "category": "Corsi", "name": "WEBINAR NR.4 - HOTTOH e MICRONOVA del 22-03-2024", "date": "2024-03-22"}, {"idx": 184, "category": "Corsi", "name": "WEBINAR NR.3 - AREA RISERVATA (Ordini Interventi Fatturazione) del 02-02-24", "date": "2024-02-02"}, {"idx": 185, "category": "Corsi", "name": "WEBINAR NR.2 - THE MIND del 19-01-2024", "date": "2024-01-19"}, {"idx": 186, "category": "Corsi", "name": "WEBINAR NR.1 - EK63 del 15-12-2023", "date": "2023-12-15"}, {"idx": 187, "category": "Corsi", "name": "NUOVI KIT IDRAULICI", "date": "2023-07-13"}, {"idx": 188, "category": "Elettronica", "name": "Elettronica THE MIND", "date": "2025-10-15"}, {"idx": 189, "category": "Elettronica", "name": "Elettronica SMART EK63", "date": "2025-10-14"}, {"idx": 190, "category": "Elettronica", "name": "Elettronica LINX", "date": "2025-10-13"}, {"idx": 191, "category": "Elettronica", "name": "Elettronica HOTTOH", "date": "2025-10-12"}, {"idx": 192, "category": "Elettronica", "name": "Elettronica MICRONOVA", "date": "2025-10-11"}, {"idx": 193, "category": "Elettronica", "name": "WI-FI e GSM - Lista Completa Prodotti Compatibili", "date": "2024-09-18"}, {"idx": 194, "category": "Elettronica", "name": "Multi Elettronica - PANNELLI, CONNESSIONI, ACCESSORI, CAVO BLU", "date": "2024-01-22"}];
 
-// ── STATE ──────────────────────────────────────────────────
-let currentUser = null;
-let currentProfile = null;
-let allDocs = [];         // documents from DB
-let allTranslations = []; // translations from DB
-let currentTrRow = null;  // for modal
+let allDocs = [];
+let allTranslations = [];
+let currentTrRow = null;
 
-// ── UTILS ──────────────────────────────────────────────────
+// ── UTILS ─────────────────────────────────────────────────
 function toast(msg, dur=2500) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), dur);
 }
-
 function badge(status) {
-  const s = STATUS[status] || {label:status, icon:'–', color:'var(--gray)', bg:'#f1f5f9'};
+  const s = STATUS[status] || {label:status,icon:'–',color:'var(--gray)',bg:'#f1f5f9'};
   return `<span class="badge ${status}">${s.icon} ${s.label}</span>`;
 }
-
 function pctColor(p) {
   return p===100?'var(--green)':p>=60?'var(--brand)':p>=30?'var(--yellow)':'var(--red)';
 }
-
 function progressBar(pct) {
   const c = pctColor(pct);
   return `<div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${pct}%;background:${c}"></div></div>`;
 }
-
 function calcDocPct(docId) {
-  const ts = allTranslations.filter(t => t.document_id === docId);
+  const ts = allTranslations.filter(t => t.document_id===docId);
   if (!ts.length) return 0;
-  return Math.round(ts.filter(t => t.status==='completed').length / ts.length * 100);
+  return Math.round(ts.filter(t=>t.status==='completed').length / ts.length * 100);
 }
-
 function getTranslation(docId, lang) {
   return allTranslations.find(t => t.document_id===docId && t.language===lang);
 }
-
 function fmtDate(d) {
   if (!d) return '–';
   return new Date(d).toLocaleDateString('it-IT');
 }
 
-// ── AUTH ───────────────────────────────────────────────────
-async function doLogin() {
-  const email = document.getElementById('login-email').value.trim();
-  const pwd   = document.getElementById('login-pwd').value;
-  const btn   = document.getElementById('login-btn');
-  const err   = document.getElementById('auth-error');
-  if (!email||!pwd) { err.textContent='Inserisci email e password'; err.style.display='block'; return; }
-  btn.innerHTML = '<span class="spinner"></span> Accesso…';
-  btn.disabled = true;
-  err.style.display = 'none';
-  const {error} = await sb.auth.signInWithPassword({email, password:pwd});
-  if (error) {
-    err.textContent = error.message;
-    err.style.display = 'block';
-    btn.innerHTML = 'Accedi';
-    btn.disabled = false;
-    return;
-  }
-  await initApp();
-}
-
-document.getElementById('login-pwd').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
-
-async function doLogout() {
-  await sb.auth.signOut();
-  document.getElementById('app').style.display = 'none';
-  document.getElementById('auth-screen').style.display = 'flex';
-  document.getElementById('login-email').value = '';
-  document.getElementById('login-pwd').value = '';
-}
-
-// ── INIT ───────────────────────────────────────────────────
-async function initApp() {
-  const { data:{ user } } = await sb.auth.getUser();
-  if (!user) return;
-  currentUser = user;
-  
-  // get profile
-  const { data:profile } = await sb.from('profiles').select('*').eq('id', user.id).single();
-  currentProfile = profile;
-  
-  document.getElementById('auth-screen').style.display = 'none';
-  document.getElementById('app').style.display = 'block';
-  
-  // set email
-  document.getElementById('user-email').textContent = user.email;
-  document.getElementById('mob-email').textContent = user.email;
-  
-  if (profile?.role === 'admin') {
-    setupAdminNav();
-    await loadAdminData();
-    showPage('dashboard');
-  } else {
-    setupTranslatorNav();
-    await loadTranslatorData();
-    showPage('translator');
-  }
-}
-
-function setupAdminNav() {
-  const html = `
-    <button class="nav-btn active" id="nav-dashboard" onclick="showPage('dashboard')">◈ Dashboard</button>
-    <button class="nav-btn" id="nav-users" onclick="showPage('users')">👥 Utenti</button>`;
-  document.getElementById('desktop-nav').innerHTML = html;
-  document.getElementById('mob-nav').innerHTML = html.replace(/onclick=/g, 'onclick=');
-  document.getElementById('role-label').textContent = 'Amministratore';
-  document.getElementById('mob-role-label').textContent = 'Amministratore';
+// ── INIT ──────────────────────────────────────────────────
+async function init() {
   // populate category selects
   CATEGORIES.forEach(c => {
     document.getElementById('filter-cat').innerHTML += `<option value="${c}">${c}</option>`;
     document.getElementById('doc-cat').innerHTML += `<option value="${c}">${c}</option>`;
   });
+
+  // build nav
+  const navHtml = `
+    <button class="nav-btn active" id="nav-dashboard" onclick="showPage('dashboard')">◈ Dashboard</button>
+    <button class="nav-btn" id="nav-bylang" onclick="showPage('bylang')">🌍 Per lingua</button>`;
+  document.getElementById('desktop-nav').innerHTML = navHtml;
+  document.getElementById('mob-nav').innerHTML = navHtml;
+
+  await loadData();
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  document.getElementById('app').style.flexDirection = 'column';
 }
 
-function setupTranslatorNav() {
-  const lang = currentProfile?.assigned_language || 'EN';
-  const html = `<button class="nav-btn active" id="nav-translator" onclick="showPage('translator')">${LANG_FLAGS[lang]} Le mie traduzioni</button>`;
-  document.getElementById('desktop-nav').innerHTML = html;
-  document.getElementById('mob-nav').innerHTML = html;
-  document.getElementById('role-label').textContent = 'Traduttore';
-  document.getElementById('mob-role-label').textContent = 'Traduttore';
-  CATEGORIES.forEach(c => {
-    document.getElementById('tr-filter-cat').innerHTML += `<option value="${c}">${c}</option>`;
-  });
+async function loadData() {
+  const [{data:docs}, {data:translations}] = await Promise.all([
+    sb.from('documents').select('*').order('sort_order', {ascending:true, nullsFirst:false}).order('name'),
+    sb.from('translations').select('*')
+  ]);
+  allDocs = docs || [];
+  allTranslations = translations || [];
+  renderDashboard();
 }
 
+// ── NAV ───────────────────────────────────────────────────
 function showPage(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-'+name).classList.add('active');
-  // update nav active
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   const nb = document.getElementById('nav-'+name);
   if (nb) nb.classList.add('active');
-  if (name==='users') loadUsers();
-  if (name==='dashboard') renderDashboard();
+  if (name==='bylang') renderByLangPage();
   closeDrawer();
 }
 
@@ -652,30 +456,7 @@ function switchTab(showId, hideId, btn) {
   if (showId==='tab-bylang') renderByLang();
 }
 
-// ── LOAD DATA ──────────────────────────────────────────────
-async function loadAdminData() {
-  const [{data:docs}, {data:translations}] = await Promise.all([
-    sb.from('documents').select('*').order('sort_order', {ascending:true, nullsFirst:false}).order('name'),
-    sb.from('translations').select('*')
-  ]);
-  allDocs = docs || [];
-  allTranslations = translations || [];
-  renderDashboard();
-}
-
-async function loadTranslatorData() {
-  const lang = currentProfile?.assigned_language;
-  const [{data:docs}, {data:translations}] = await Promise.all([
-    sb.from('documents').select('*').order('sort_order', {ascending:true, nullsFirst:false}).order('name'),
-    sb.from('translations').select('*').eq('language', lang)
-  ]);
-  allDocs = docs || [];
-  allTranslations = translations || [];
-  renderTranslatorHeader();
-  renderTranslator();
-}
-
-// ── DASHBOARD ──────────────────────────────────────────────
+// ── DASHBOARD ─────────────────────────────────────────────
 function renderDashboard() {
   renderKPIs();
   renderLangGrid();
@@ -685,14 +466,14 @@ function renderDashboard() {
 function renderKPIs() {
   const total    = allDocs.length;
   const complete = allDocs.filter(d => calcDocPct(d.id)===100).length;
-  const missing  = allDocs.filter(d => allTranslations.some(t => t.document_id===d.id && t.status==='missing')).length;
-  const outdated = allDocs.filter(d => allTranslations.some(t => t.document_id===d.id && t.status==='outdated')).length;
+  const missing  = allDocs.filter(d => allTranslations.some(t=>t.document_id===d.id&&t.status==='missing')).length;
+  const outdated = allDocs.filter(d => allTranslations.some(t=>t.document_id===d.id&&t.status==='outdated')).length;
   document.getElementById('kpi-grid').innerHTML = [
-    {v:total,    l:'Documenti totali', s:'archivio IT master',      c:'#3b82f6'},
-    {v:complete, l:'Completi',         s:'100% tutte le lingue',    c:'#16a34a'},
-    {v:missing,  l:'Con mancanze',     s:'almeno 1 lingua assente', c:'#dc2626'},
-    {v:outdated, l:'Versione obsoleta',s:'traduzione superata',     c:'#7c3aed'},
-  ].map(k => `<div class="kpi-card" style="border-left-color:${k.c}">
+    {v:total,    l:'Documenti totali', s:'archivio IT master',       c:'#3b82f6'},
+    {v:complete, l:'Completi',         s:'100% tutte le lingue',     c:'#16a34a'},
+    {v:missing,  l:'Con mancanze',     s:'almeno 1 lingua assente',  c:'#dc2626'},
+    {v:outdated, l:'Versione obsoleta',s:'traduzione superata',      c:'#7c3aed'},
+  ].map(k=>`<div class="kpi-card" style="border-left-color:${k.c}">
     <div class="kpi-value" style="color:${k.c}">${k.v}</div>
     <div class="kpi-label">${k.l}</div>
     <div class="kpi-sub">${k.s}</div>
@@ -701,13 +482,12 @@ function renderKPIs() {
 
 function renderLangGrid() {
   document.getElementById('lang-grid').innerHTML = LANGS.map(lang => {
-    const ts = allTranslations.filter(t => t.language===lang);
-    const total = ts.length;
-    const comp  = ts.filter(t=>t.status==='completed').length;
-    const inp   = ts.filter(t=>t.status==='in_progress').length;
-    const out   = ts.filter(t=>t.status==='outdated').length;
-    const miss  = ts.filter(t=>t.status==='missing').length;
-    const pct   = total>0 ? Math.round(comp/total*100) : 0;
+    const ts = allTranslations.filter(t=>t.language===lang);
+    const total=ts.length, comp=ts.filter(t=>t.status==='completed').length;
+    const inp=ts.filter(t=>t.status==='in_progress').length;
+    const out=ts.filter(t=>t.status==='outdated').length;
+    const miss=ts.filter(t=>t.status==='missing').length;
+    const pct = total>0?Math.round(comp/total*100):0;
     const c = pctColor(pct);
     return `<div class="lang-card">
       <div class="lang-card-header">
@@ -727,113 +507,108 @@ function renderLangGrid() {
 }
 
 function getFilteredDocs() {
-  const q   = document.getElementById('search-input')?.value.toLowerCase() || '';
-  const cat = document.getElementById('filter-cat')?.value || '';
-  const st  = document.getElementById('filter-status')?.value || '';
-  const srt = document.getElementById('sort-key')?.value || 'default';
-  
+  const q   = document.getElementById('search-input')?.value.toLowerCase()||'';
+  const cat = document.getElementById('filter-cat')?.value||'';
+  const st  = document.getElementById('filter-status')?.value||'';
+  const srt = document.getElementById('sort-key')?.value||'default';
   let docs = allDocs.filter(d => {
-    if (cat && d.category !== cat) return false;
+    if (cat && d.category!==cat) return false;
     if (q && !d.name.toLowerCase().includes(q) && !d.category.toLowerCase().includes(q)) return false;
-    if (st) {
-      const ts = allTranslations.filter(t => t.document_id===d.id);
-      if (!ts.some(t => t.status===st)) return false;
-    }
+    if (st && !allTranslations.some(t=>t.document_id===d.id&&t.status===st)) return false;
     return true;
   });
-  
-  if (srt==='name_asc')  docs = docs.slice().sort((a,b) => a.name.localeCompare(b.name,'it'));
-  else if (srt==='name_desc') docs = docs.slice().sort((a,b) => b.name.localeCompare(a.name,'it'));
-  else if (srt==='date_desc') docs = docs.slice().sort((a,b) => (b.description||'').localeCompare(a.description||''));
-  else if (srt==='date_asc')  docs = docs.slice().sort((a,b) => (a.description||'').localeCompare(b.description||''));
+  if (srt==='name_asc')  return docs.slice().sort((a,b)=>a.name.localeCompare(b.name,'it'));
+  if (srt==='name_desc') return docs.slice().sort((a,b)=>b.name.localeCompare(a.name,'it'));
+  if (srt==='date_desc') return docs.slice().sort((a,b)=>(b.description||'').localeCompare(a.description||''));
+  if (srt==='date_asc')  return docs.slice().sort((a,b)=>(a.description||'').localeCompare(b.description||''));
   return docs;
 }
 
 function renderTable() {
   const docs = getFilteredDocs();
-  
-  // Desktop table
-  const tbody = document.getElementById('docs-tbody');
-  if (tbody) tbody.innerHTML = docs.map(doc => {
+
+  // Desktop tbody
+  document.getElementById('docs-tbody').innerHTML = docs.map(doc => {
     const pct = calcDocPct(doc.id);
     const pc = pctColor(pct);
     const langCols = LANGS.map(l => {
       const t = getTranslation(doc.id, l);
       if (!t) return '<td>–</td>';
-      if (l==='IT') return `<td style="text-align:center">${badge('completed')}</td>`;
+      if (l==='IT') return `<td>${badge('completed')}</td>`;
       const s = t.status;
-      const sc = STATUS[s]||{};
-      return `<td style="text-align:center">
+      return `<td>
         <select class="status-sel ${s}" onchange="quickStatusChange('${t.id}','${doc.id}',this)">
           ${Object.entries(STATUS).map(([k,v])=>`<option value="${k}" ${s===k?'selected':''}>${v.icon} ${v.label}</option>`).join('')}
         </select>
       </td>`;
     }).join('');
     return `<tr>
-      <td><div style="font-weight:600;color:var(--dark);max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${doc.name}">${doc.name}</div>
-          ${doc.description?`<div style="font-size:11px;color:var(--text3)">${doc.description}</div>`:''}
+      <td>
+        <div style="font-weight:600;max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${doc.name}">${doc.name}</div>
+        ${doc.description?`<div style="font-size:11px;color:var(--text3)">${doc.description}</div>`:''}
       </td>
       <td style="font-size:12px;color:var(--text2)">${doc.category}</td>
       <td><span style="font-family:monospace;font-size:11px;background:#f1f5f9;padding:3px 8px;border-radius:5px;font-weight:700">${doc.version}</span></td>
       ${langCols}
-      <td style="text-align:center">
+      <td>
         <div style="font-size:11px;font-weight:700;color:${pc};margin-bottom:3px">${pct}%</div>
         ${progressBar(pct)}
       </td>
       <td>
         <div style="display:flex;gap:4px">
-          <button class="btn btn-gray btn-sm" onclick="openDocModal(${JSON.stringify(doc).replace(/"/g,'&quot;')})">✏️ Modifica</button>
+          <button class="btn btn-gray btn-sm" onclick='openDocModal(${JSON.stringify(doc)})'>✏️ Modifica</button>
           <button class="btn btn-ghost btn-sm" onclick="deleteDoc('${doc.id}')">🗑️</button>
         </div>
       </td>
     </tr>`;
   }).join('') || '<tr><td colspan="9" style="text-align:center;padding:40px;color:var(--text3)">Nessun documento trovato</td></tr>';
-  
+
   // Mobile cards
-  const mobile = document.getElementById('doc-cards-mobile');
-  if (mobile) mobile.innerHTML = docs.map(doc => {
+  document.getElementById('doc-cards-mobile').innerHTML = docs.map(doc => {
     const pct = calcDocPct(doc.id);
     const pc = pctColor(pct);
     const pills = LANGS.map(l => {
-      const t = getTranslation(doc.id, l);
-      const s = t?.status || 'missing';
+      const t = getTranslation(doc.id,l);
+      const s = t?.status||'missing';
       const sc = STATUS[s]||{};
       return `<span class="lang-pill" style="background:${sc.bg};color:${sc.color}">${LANG_FLAGS[l]} ${l} ${sc.icon}</span>`;
     }).join('');
     return `<div class="doc-card">
-      <div class="doc-card-header">
-        <div>
-          <div class="doc-card-name">${doc.name}</div>
-          <div class="doc-card-cat">${doc.category}</div>
-        </div>
+      <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start">
+        <div><div class="doc-card-name">${doc.name}</div><div class="doc-card-cat">${doc.category}</div></div>
         <span class="doc-card-ver">${doc.version}</span>
       </div>
       <div class="doc-card-langs">${pills}</div>
-      <div class="doc-card-footer">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
         <div class="progress-wrap">
           <div class="progress-label"><span>Completamento</span><span style="font-weight:700;color:${pc}">${pct}%</span></div>
           ${progressBar(pct)}
         </div>
-        <div class="doc-card-actions">
-          <button class="btn btn-gray btn-sm" onclick="openDocModal(${JSON.stringify(doc).replace(/"/g,'&quot;')})">✏️</button>
+        <div style="display:flex;gap:4px">
+          <button class="btn btn-gray btn-sm" onclick='openDocModal(${JSON.stringify(doc)})'>✏️</button>
           <button class="btn btn-ghost btn-sm" onclick="deleteDoc('${doc.id}')">🗑️</button>
         </div>
       </div>
     </div>`;
   }).join('') || '<div style="text-align:center;padding:40px;color:var(--text3)">Nessun documento trovato</div>';
-  
-  const footer = document.getElementById('table-footer');
-  if (footer) footer.textContent = `${docs.length} documenti su ${allDocs.length} totali`;
+
+  document.getElementById('table-footer').textContent = `${docs.length} documenti su ${allDocs.length} totali`;
 }
 
 function renderByLang() {
-  document.getElementById('bylang-content').innerHTML = LANGS.map(lang => {
-    const ts = allTranslations.filter(t => t.language===lang && t.status!=='completed');
-    const total = allTranslations.filter(t => t.language===lang).length;
-    const comp  = total - ts.length;
-    const pct   = total>0?Math.round(comp/total*100):0;
+  document.getElementById('bylang-content').innerHTML = buildByLangHTML();
+}
+function renderByLangPage() {
+  document.getElementById('bylang-page-content').innerHTML = buildByLangHTML();
+}
+function buildByLangHTML() {
+  return LANGS.map(lang => {
+    const ts  = allTranslations.filter(t=>t.language===lang && t.status!=='completed');
+    const tot = allTranslations.filter(t=>t.language===lang).length;
+    const comp = tot - ts.length;
+    const pct  = tot>0?Math.round(comp/tot*100):0;
     const c = pctColor(pct);
-    const rows = ts.slice(0,10).map(t => {
+    const rows = ts.slice(0,15).map(t => {
       const doc = allDocs.find(d=>d.id===t.document_id);
       if (!doc) return '';
       return `<tr>
@@ -844,46 +619,44 @@ function renderByLang() {
       </tr>`;
     }).join('');
     return `<div class="table-wrap" style="margin-bottom:16px">
-      <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px">
+      <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;flex-wrap:wrap">
         <span style="font-size:28px">${LANG_FLAGS[lang]}</span>
-        <div><div style="font-weight:800;font-size:15px">${LANG_NAMES[lang]}</div>
-          ${lang==='IT'?'<div style="font-size:12px;color:var(--text3)">Lingua master</div>':''}</div>
+        <div>
+          <div style="font-weight:800;font-size:15px">${LANG_NAMES[lang]}</div>
+          ${lang==='IT'?'<div style="font-size:12px;color:var(--text3)">Lingua master</div>':''}
+        </div>
         <div style="margin-left:auto;text-align:right">
-          <div style="font-size:20px;font-weight:800;color:${c}">${pct}%</div>
-          <div style="font-size:11px;color:var(--text3)">completamento</div>
+          <div style="font-size:22px;font-weight:800;color:${c}">${pct}%</div>
+          <div style="font-size:11px;color:var(--text3)">completamento · ${comp}/${tot}</div>
         </div>
       </div>
-      ${lang!=='IT' && ts.length>0 ? `<div class="table-scroll"><table><thead><tr><th>Documento</th><th>Categoria</th><th>Stato</th><th>Aggiornato</th></tr></thead><tbody>${rows}</tbody></table></div>` : ''}
-      ${lang==='IT' ? '<div style="padding:14px 20px;color:var(--green);font-weight:600;font-size:13px">✓ Lingua master — sempre completa</div>' : ''}
-      ${lang!=='IT' && ts.length===0 ? '<div style="padding:14px 20px;color:var(--green);font-weight:600;font-size:13px">✓ Tutte le traduzioni sono complete</div>' : ''}
+      ${lang!=='IT' && ts.length>0 ? `
+        <div class="table-scroll">
+          <table><thead><tr><th>Documento</th><th>Categoria</th><th>Stato</th><th>Aggiornato</th></tr></thead>
+          <tbody>${rows}</tbody></table>
+        </div>
+        ${ts.length>15?`<div style="padding:10px 16px;font-size:12px;color:var(--text3)">…e altri ${ts.length-15} documenti</div>`:''}
+      ` : ''}
+      ${lang==='IT'?'<div style="padding:14px 20px;color:var(--green);font-weight:600;font-size:13px">✓ Lingua master — sempre completa</div>':''}
+      ${lang!=='IT'&&ts.length===0?'<div style="padding:14px 20px;color:var(--green);font-weight:600;font-size:13px">✓ Tutte le traduzioni sono complete</div>':''}
     </div>`;
   }).join('');
 }
 
-// ── QUICK STATUS CHANGE ────────────────────────────────────
+// ── STATUS CHANGE ─────────────────────────────────────────
 async function quickStatusChange(trId, docId, sel) {
   const status = sel.value;
   sel.className = `status-sel ${status}`;
-  const {error} = await sb.from('translations').update({status, last_updated: new Date().toISOString()}).eq('id', trId);
-  if (error) { toast('Errore nel salvataggio'); return; }
+  await sb.from('translations').update({status, last_updated:new Date().toISOString()}).eq('id',trId);
   const t = allTranslations.find(t=>t.id===trId);
-  if (t) { t.status = status; t.last_updated = new Date().toISOString(); }
+  if (t) { t.status=status; t.last_updated=new Date().toISOString(); }
   renderKPIs(); renderLangGrid();
-  // update mobile cards progress
-  const doc = allDocs.find(d=>d.id===docId);
-  if (doc) {
-    const pct = calcDocPct(docId);
-    // re-render just that card is complex, full re-render mobile
-    const mobile = document.getElementById('doc-cards-mobile');
-    if (mobile && mobile.style.display!=='none') renderTable();
-  }
   toast('✓ Stato aggiornato');
 }
 
-// ── DOCUMENT CRUD ──────────────────────────────────────────
+// ── DOCUMENT CRUD ─────────────────────────────────────────
 function openDocModal(doc) {
   document.getElementById('doc-modal-error').style.display='none';
-  document.getElementById('doc-modal-warn').style.display='none';
   if (doc) {
     document.getElementById('doc-modal-title').textContent='Modifica documento';
     document.getElementById('doc-save-btn').textContent='Salva modifiche';
@@ -892,7 +665,6 @@ function openDocModal(doc) {
     document.getElementById('doc-cat').value=doc.category;
     document.getElementById('doc-ver').value=doc.version;
     document.getElementById('doc-desc').value=doc.description||'';
-    document.getElementById('doc-modal-warn').style.display='block';
   } else {
     document.getElementById('doc-modal-title').textContent='Nuovo documento';
     document.getElementById('doc-save-btn').textContent='Crea documento';
@@ -914,28 +686,25 @@ async function saveDoc() {
   const errEl = document.getElementById('doc-modal-error');
   if (!name||!cat||!ver) { errEl.textContent='Compila tutti i campi obbligatori'; errEl.style.display='block'; return; }
   const btn = document.getElementById('doc-save-btn');
-  btn.innerHTML='<span class="spinner"></span> Salvataggio…'; btn.disabled=true;
-  errEl.style.display='none';
-  
+  btn.textContent='Salvataggio…'; btn.disabled=true;
   let error;
   if (id) {
     ({error} = await sb.from('documents').update({name,category:cat,version:ver,description:desc,updated_at:new Date().toISOString()}).eq('id',id));
   } else {
     ({error} = await sb.from('documents').insert({name,category:cat,version:ver,description:desc}));
   }
-  btn.innerHTML=id?'Salva modifiche':'Crea documento'; btn.disabled=false;
+  btn.textContent=id?'Salva modifiche':'Crea documento'; btn.disabled=false;
   if (error) { errEl.textContent=error.message; errEl.style.display='block'; return; }
   closeDocModal();
   toast(id?'✓ Documento aggiornato':'✓ Documento creato');
-  await loadAdminData();
+  await loadData();
 }
 
 async function deleteDoc(id) {
   if (!confirm('Eliminare questo documento e tutte le sue traduzioni?')) return;
-  const {error} = await sb.from('documents').delete().eq('id',id);
-  if (error) { toast('Errore eliminazione'); return; }
+  await sb.from('documents').delete().eq('id',id);
   toast('✓ Documento eliminato');
-  await loadAdminData();
+  await loadData();
 }
 
 function clearFilters() {
@@ -946,169 +715,14 @@ function clearFilters() {
   renderTable();
 }
 
-// ── USERS ──────────────────────────────────────────────────
-async function loadUsers() {
-  const {data:profiles} = await sb.from('profiles').select('*').order('created_at',{ascending:false});
-  const ps = profiles||[];
-  const admins = ps.filter(p=>p.role==='admin').length;
-  const trs    = ps.filter(p=>p.role==='translator').length;
-  document.getElementById('users-kpi').innerHTML = [
-    {v:ps.length, l:'Utenti totali',  c:'#3b82f6'},
-    {v:admins,    l:'Amministratori', c:'#7c3aed'},
-    {v:trs,       l:'Traduttori',     c:'#16a34a'},
-  ].map(k=>`<div class="kpi-card" style="border-left-color:${k.c}">
-    <div class="kpi-value" style="color:${k.c}">${k.v}</div>
-    <div class="kpi-label">${k.l}</div>
-  </div>`).join('');
-  document.getElementById('users-tbody').innerHTML = ps.map(p=>`<tr>
-    <td style="font-weight:600">${p.full_name||'–'}</td>
-    <td style="font-family:monospace;font-size:12px;color:var(--text2)">${p.email}</td>
-    <td><span style="background:${p.role==='admin'?'#dbeafe':'#f1f5f9'};color:${p.role==='admin'?'#1d4ed8':'var(--text2)'};padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700">
-      ${p.role==='admin'?'👑 Admin':'🌍 Traduttore'}</span></td>
-    <td>${p.assigned_language?`${LANG_FLAGS[p.assigned_language]} ${p.assigned_language}`:'Tutte (admin)'}</td>
-    <td style="font-size:12px;color:var(--text3)">${fmtDate(p.created_at)}</td>
-  </tr>`).join('');
-}
-
-// ── TRANSLATOR ─────────────────────────────────────────────
-function renderTranslatorHeader() {
-  const lang = currentProfile?.assigned_language;
-  document.getElementById('tr-title').textContent = `Traduzioni ${LANG_NAMES[lang]||lang}`;
-  document.getElementById('tr-sub').textContent = `Lingua assegnata: ${lang}`;
-  const ts = allTranslations;
-  const total=ts.length, comp=ts.filter(t=>t.status==='completed').length;
-  const inp=ts.filter(t=>t.status==='in_progress').length;
-  const miss=ts.filter(t=>t.status==='missing').length;
-  const out=ts.filter(t=>t.status==='outdated').length;
-  const pct=total>0?Math.round(comp/total*100):0;
-  document.getElementById('tr-pct').textContent=pct+'%';
-  document.getElementById('tr-pct').style.color=pctColor(pct);
-  document.getElementById('tr-kpi').innerHTML=[
-    {v:total,l:'Totali',    c:'#3b82f6'},
-    {v:comp, l:'Completate',c:'#16a34a'},
-    {v:inp,  l:'In corso',  c:'#b45309'},
-    {v:miss, l:'Mancanti',  c:'#dc2626'},
-  ].map(k=>`<div class="kpi-card" style="border-left-color:${k.c}">
-    <div class="kpi-value" style="color:${k.c}">${k.v}</div>
-    <div class="kpi-label">${k.l}</div>
-  </div>`).join('');
-  // quick filters
-  document.getElementById('tr-quickfilters').innerHTML=[
-    {s:'missing',c:STATUS.missing},
-    {s:'outdated',c:STATUS.outdated},
-    {s:'in_progress',c:STATUS.in_progress},
-  ].filter(x=>ts.some(t=>t.status===x.s)).map(x=>{
-    const cnt=ts.filter(t=>t.status===x.s).length;
-    return `<button class="qf-btn" style="color:${x.c.color};border-color:${x.c.color};background:${x.c.bg}"
-      onclick="document.getElementById('tr-filter-status').value='${x.s}';renderTranslator()">
-      ${x.c.icon} ${x.c.label} <strong>${cnt}</strong>
-    </button>`;
-  }).join('');
-}
-
-function getTrFiltered() {
-  const q   = document.getElementById('tr-search')?.value.toLowerCase()||'';
-  const cat = document.getElementById('tr-filter-cat')?.value||'';
-  const st  = document.getElementById('tr-filter-status')?.value||'';
-  return allTranslations
-    .filter(t => {
-      const doc = allDocs.find(d=>d.id===t.document_id);
-      if (!doc) return false;
-      if (cat && doc.category!==cat) return false;
-      if (st && t.status!==st) return false;
-      if (q && !doc.name.toLowerCase().includes(q)) return false;
-      return true;
-    })
-    .sort((a,b) => {
-      const ord={outdated:0,missing:1,in_progress:2,completed:3};
-      return (ord[a.status]||9)-(ord[b.status]||9);
-    });
-}
-
-function renderTranslator() {
-  const rows = getTrFiltered();
-  const lang = currentProfile?.assigned_language;
-  
-  // Desktop table
-  const tbody = document.getElementById('tr-tbody');
-  if (tbody) tbody.innerHTML = rows.map(t => {
-    const doc = allDocs.find(d=>d.id===t.document_id);
-    if (!doc) return '';
-    const s = t.status;
-    const sc = STATUS[s]||{};
-    return `<tr style="${s==='missing'||s==='outdated'?'background:#fff5f5':''}">
-      <td>
-        <div style="font-weight:600;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${doc.name}</div>
-        ${doc.description?`<div style="font-size:11px;color:var(--text3)">${doc.description}</div>`:''}
-      </td>
-      <td style="font-size:12px;color:var(--text2)">${doc.category}</td>
-      <td><span style="font-family:monospace;font-size:11px;background:#f1f5f9;padding:3px 8px;border-radius:5px;font-weight:700">${doc.version}</span>
-        ${t.version&&t.version!==doc.version?`<div style="font-size:10px;color:var(--purple)">trad. su ${t.version}</div>`:''}</td>
-      <td>
-        <select class="status-sel ${s}" onchange="quickTrStatusChange('${t.id}',this)">
-          ${Object.entries(STATUS).map(([k,v])=>`<option value="${k}" ${s===k?'selected':''}>${v.icon} ${v.label}</option>`).join('')}
-        </select>
-      </td>
-      <td style="font-size:12px;color:var(--text3);white-space:nowrap">${fmtDate(t.last_updated)}</td>
-      <td style="max-width:160px"><span style="font-size:12px;color:var(--text2);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.notes||'<em style="color:var(--text3)">–</em>'}</span></td>
-      <td><button class="btn btn-gray btn-sm" onclick="openTrModal('${t.id}')">✏️ Apri</button></td>
-    </tr>`;
-  }).join('') || '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text3)">Nessuna traduzione trovata</td></tr>';
-  
-  // Mobile cards
-  const mobile = document.getElementById('tr-cards-mobile');
-  if (mobile) mobile.innerHTML = rows.map(t => {
-    const doc = allDocs.find(d=>d.id===t.document_id);
-    if (!doc) return '';
-    const s = t.status;
-    const sc = STATUS[s]||{};
-    return `<div class="tr-card ${s}">
-      <div style="display:flex;justify-content:space-between;gap:8px;margin-bottom:8px">
-        <div>
-          <div style="font-weight:700;font-size:14px;color:var(--dark)">${doc.name}</div>
-          <div style="font-size:11px;color:var(--text3)">${doc.category}</div>
-        </div>
-        <span style="font-family:monospace;font-size:11px;background:#f1f5f9;padding:3px 8px;border-radius:5px;font-weight:700;flex-shrink:0">${doc.version}</span>
-      </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
-        <select class="status-sel ${s}" style="flex:1" onchange="quickTrStatusChange('${t.id}',this)">
-          ${Object.entries(STATUS).map(([k,v])=>`<option value="${k}" ${s===k?'selected':''}>${v.icon} ${v.label}</option>`).join('')}
-        </select>
-        <button class="btn btn-gray btn-sm" onclick="openTrModal('${t.id}')">✏️</button>
-      </div>
-      ${t.notes?`<div style="margin-top:8px;font-size:11px;color:var(--text2);font-style:italic">💬 ${t.notes}</div>`:''}
-    </div>`;
-  }).join('');
-  
-  const footer = document.getElementById('tr-footer');
-  if (footer) footer.textContent = `${rows.length} documenti su ${allTranslations.length} totali`;
-}
-
-async function quickTrStatusChange(trId, sel) {
-  const status = sel.value;
-  sel.className = `status-sel ${status}`;
-  await sb.from('translations').update({status, last_updated:new Date().toISOString()}).eq('id',trId);
-  const t = allTranslations.find(t=>t.id===trId);
-  if (t) { t.status=status; t.last_updated=new Date().toISOString(); }
-  renderTranslatorHeader();
-  toast('✓ Stato aggiornato');
-}
-
-function clearTrFilters() {
-  document.getElementById('tr-search').value='';
-  document.getElementById('tr-filter-cat').value='';
-  document.getElementById('tr-filter-status').value='';
-  renderTranslator();
-}
-
-// ── TR DETAIL MODAL ────────────────────────────────────────
+// ── TRANSLATION DETAIL MODAL ──────────────────────────────
 function openTrModal(trId) {
   const t = allTranslations.find(x=>x.id===trId);
   const doc = allDocs.find(d=>d.id===t?.document_id);
   if (!t||!doc) return;
   currentTrRow = t;
   document.getElementById('tr-modal-doc-info').innerHTML=`
-    <div style="font-weight:700;font-size:14px;color:var(--dark);margin-bottom:6px">${doc.name}</div>
+    <div style="font-weight:700;font-size:14px;margin-bottom:6px">${doc.name}</div>
     <div style="display:flex;gap:10px;font-size:12px;color:var(--text2);flex-wrap:wrap">
       <span>📁 ${doc.category}</span>
       <span style="font-family:monospace;background:#f1f5f9;padding:2px 8px;border-radius:5px;font-weight:700">${doc.version}</span>
@@ -1123,33 +737,26 @@ function openTrModal(trId) {
   if (t.version && t.version!==doc.version) {
     vw.textContent=`↻ Traduzione basata su versione ${t.version}, documento ora alla ${doc.version}.`;
     vw.style.display='block';
-  } else {
-    vw.style.display='none';
-  }
-  document.getElementById('tr-modal-notes').value = t.notes||'';
-  document.getElementById('tr-modal-updated').textContent = `Aggiornato: ${new Date(t.last_updated).toLocaleString('it-IT')}`;
+  } else { vw.style.display='none'; }
+  document.getElementById('tr-modal-notes').value=t.notes||'';
+  document.getElementById('tr-modal-updated').textContent=`Aggiornato: ${new Date(t.last_updated).toLocaleString('it-IT')}`;
   document.getElementById('tr-modal').classList.add('open');
 }
 
 function selectTrStatus(s) {
   if (!currentTrRow) return;
-  const old = currentTrRow.status;
-  // update UI
+  currentTrRow.status = s;
   Object.keys(STATUS).forEach(k => {
     const el = document.getElementById('sc-'+k);
     if (!el) return;
     const cfg = STATUS[k];
-    el.style.borderColor = k===s ? cfg.color : 'var(--border)';
-    el.style.background  = k===s ? cfg.bg    : 'white';
+    el.style.borderColor = k===s?cfg.color:'var(--border)';
+    el.style.background  = k===s?cfg.bg:'white';
   });
-  // update in memory
-  currentTrRow.status = s;
-  // save immediately
-  sb.from('translations').update({status:s, last_updated:new Date().toISOString()}).eq('id',currentTrRow.id);
+  sb.from('translations').update({status:s,last_updated:new Date().toISOString()}).eq('id',currentTrRow.id);
   const t = allTranslations.find(x=>x.id===currentTrRow.id);
   if(t) {t.status=s; t.last_updated=new Date().toISOString();}
-  if (currentProfile?.role==='admin') { renderKPIs(); renderLangGrid(); renderTable(); }
-  else { renderTranslatorHeader(); renderTranslator(); }
+  renderKPIs(); renderLangGrid(); renderTable();
   toast('✓ Stato aggiornato');
 }
 
@@ -1157,48 +764,31 @@ async function saveTrModal() {
   if (!currentTrRow) return;
   const notes = document.getElementById('tr-modal-notes').value;
   const btn = document.getElementById('tr-save-btn');
-  btn.innerHTML='<span class="spinner"></span> Salvataggio…'; btn.disabled=true;
-  const {error} = await sb.from('translations').update({notes, last_updated:new Date().toISOString()}).eq('id',currentTrRow.id);
-  btn.innerHTML='Salva note'; btn.disabled=false;
-  if (error) { toast('Errore nel salvataggio'); return; }
+  btn.textContent='Salvataggio…'; btn.disabled=true;
+  await sb.from('translations').update({notes,last_updated:new Date().toISOString()}).eq('id',currentTrRow.id);
+  btn.textContent='Salva note'; btn.disabled=false;
   const t = allTranslations.find(x=>x.id===currentTrRow.id);
-  if(t) {t.notes=notes;}
-  if (currentProfile?.role==='admin') renderTable();
-  else renderTranslator();
+  if(t) t.notes=notes;
+  renderTable();
   closeTrModal();
   toast('✓ Note salvate');
 }
+function closeTrModal() { document.getElementById('tr-modal').classList.remove('open'); currentTrRow=null; }
 
-function closeTrModal() {
-  document.getElementById('tr-modal').classList.remove('open');
-  currentTrRow=null;
-}
-
-// ── MOBILE DRAWER ──────────────────────────────────────────
+// ── MOBILE ────────────────────────────────────────────────
 function toggleDrawer() {
-  const drawer  = document.getElementById('mob-drawer');
+  const drawer = document.getElementById('mob-drawer');
   const overlay = document.getElementById('mob-overlay');
   const open = drawer.classList.toggle('open');
-  overlay.style.display = open ? 'block' : 'none';
+  overlay.style.display = open?'block':'none';
 }
 function closeDrawer() {
   document.getElementById('mob-drawer').classList.remove('open');
   document.getElementById('mob-overlay').style.display='none';
 }
 
-// ── STARTUP ────────────────────────────────────────────────
-sb.auth.onAuthStateChange(async (event, session) => {
-  if (session?.user && document.getElementById('auth-screen').style.display!=='none') {
-    await initApp();
-  }
-});
-
-(async () => {
-  const { data:{ session } } = await sb.auth.getSession();
-  if (session?.user) {
-    await initApp();
-  }
-})();
+// ── START ─────────────────────────────────────────────────
+init();
 </script>
 </body>
 </html>
