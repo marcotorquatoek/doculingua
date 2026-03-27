@@ -249,10 +249,12 @@ tbody tr:hover td{background:#f8fafc}
               <option value="completed">✓ Completata</option>
             </select>
             <select id="sort-key" onchange="renderTable()">
-              <option value="default">📋 Ordine originale</option>
+              <option value="default">📋 Ordine originale (Excel)</option>
+              <option value="cat_asc">📁 Categoria A→Z</option>
+              <option value="cat_desc">📁 Categoria Z→A</option>
               <option value="name_asc">🔤 Nome A→Z</option>
               <option value="name_desc">🔤 Nome Z→A</option>
-              <option value="date_desc">📅 Data recente</option>
+              <option value="date_desc">📅 Data più recente</option>
               <option value="date_asc">📅 Data meno recente</option>
             </select>
             <button class="clear-btn" onclick="clearFilters()">✕ Azzera</button>
@@ -429,7 +431,7 @@ async function init() {
 
 async function loadData() {
   const [{data:docs}, {data:translations}] = await Promise.all([
-    sb.from('documents').select('*').order('sort_order', {ascending:true, nullsFirst:false}).order('name'),
+    sb.from('documents').select('*').order('sort_order', {ascending:true, nullsFirst:false}),
     sb.from('translations').select('*')
   ]);
   allDocs = docs || [];
@@ -521,7 +523,9 @@ function getFilteredDocs() {
   if (srt==='name_desc') return docs.slice().sort((a,b)=>b.name.localeCompare(a.name,'it'));
   if (srt==='date_desc') return docs.slice().sort((a,b)=>(b.description||'').localeCompare(a.description||''));
   if (srt==='date_asc')  return docs.slice().sort((a,b)=>(a.description||'').localeCompare(b.description||''));
-  return docs;
+  if (srt==='cat_asc')   return docs.slice().sort((a,b)=>a.category.localeCompare(b.category,'it')||a.name.localeCompare(b.name,'it'));
+  if (srt==='cat_desc')  return docs.slice().sort((a,b)=>b.category.localeCompare(a.category,'it')||a.name.localeCompare(b.name,'it'));
+  return docs.slice().sort((a,b)=>(a.sort_order??999)-(b.sort_order??999));
 }
 
 function renderTable() {
