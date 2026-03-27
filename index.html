@@ -2,25 +2,30 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DocuLingua v1.1</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="DocuLingua">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%231e3a8a'/%3E%3Crect x='18' y='25' width='64' height='8' rx='4' fill='white'/%3E%3Crect x='18' y='40' width='45' height='8' rx='4' fill='rgba(255,255,255,0.6)'/%3E%3Ccircle cx='72' cy='68' r='18' fill='%233b82f6'/%3E%3Cpath d='M64 68 L70 74 L82 62' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E">
+<title>DocuLingua v1.2</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
   --bg:#f1f5f9;--white:#fff;--dark:#0f172a;--brand:#2563eb;--brand2:#1d4ed8;
   --green:#16a34a;--yellow:#b45309;--red:#dc2626;--purple:#7c3aed;--orange:#ea580c;--gray:#94a3b8;
   --border:#e2e8f0;--text:#0f172a;--text2:#475569;--text3:#94a3b8;
   --green-bg:#dcfce7;--yellow-bg:#fef3c7;--red-bg:#fee2e2;--purple-bg:#ede9fe;--orange-bg:#ffedd5;
 }
-body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
 
 /* LAYOUT */
 #app{height:100vh;display:flex;flex-direction:column;overflow:hidden}
-.layout{display:flex;flex:1;overflow:hidden}
+.layout{display:flex;flex:1;overflow:hidden;min-height:0}
 .sidebar{width:220px;background:var(--dark);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
 .sidebar-logo{padding:18px 20px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:10px}
-.s-icon{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#1e3a8a,#3b82f6);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:14px;flex-shrink:0}
+.s-icon{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#1e3a8a,#3b82f6);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .sidebar-logo-text span{color:#fff;font-weight:800;font-size:15px;display:block}
 .sidebar-logo-text small{color:rgba(255,255,255,.3);font-size:10px}
 .sidebar-section{padding:12px 20px 4px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.25)}
@@ -29,7 +34,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .nav-btn:hover{color:rgba(255,255,255,.8);background:rgba(255,255,255,.05)}
 .nav-btn.active{background:var(--brand);color:#fff}
 
-/* MOBILE */
+/* MOBILE TOPBAR */
 .mobile-topbar{display:none;background:var(--dark);padding:12px 16px;align-items:center;justify-content:space-between;flex-shrink:0}
 .m-logo{display:flex;align-items:center;gap:8px;color:#fff;font-weight:800;font-size:14px}
 .hamburger{background:none;border:none;color:rgba(255,255,255,.7);cursor:pointer;padding:6px}
@@ -38,39 +43,39 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .mobile-drawer.open{transform:translateX(0)}
 
 /* MAIN */
-.main{flex:1;overflow-y:auto;background:var(--bg)}
-.page{display:none;padding:24px}
+.main{flex:1;overflow-y:auto;overflow-x:hidden;background:var(--bg);min-width:0}
+.page{display:none;padding:20px}
 .page.active{display:block}
-.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;gap:12px;flex-wrap:wrap}
-.page-title{font-size:22px;font-weight:800;color:var(--dark)}
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px;gap:10px;flex-wrap:wrap}
+.page-title{font-size:20px;font-weight:800;color:var(--dark)}
 .page-sub{font-size:13px;color:var(--text3);margin-top:3px}
 
-/* KPI GRID — fixed 4 cols */
-.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
-.kpi-card{background:var(--white);border-radius:12px;padding:16px 18px;box-shadow:0 1px 3px rgba(0,0,0,.07);border-left:4px solid;min-width:0}
-.kpi-value{font-size:26px;font-weight:800;line-height:1.1;word-break:break-all}
-.kpi-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-top:6px;color:var(--text);line-height:1.3}
-.kpi-sub{font-size:11px;color:var(--text3);margin-top:2px;line-height:1.3}
+/* KPI */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.kpi-card{background:var(--white);border-radius:12px;padding:14px 16px;box-shadow:0 1px 3px rgba(0,0,0,.07);border-left:4px solid;min-width:0}
+.kpi-value{font-size:24px;font-weight:800;line-height:1.1}
+.kpi-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-top:6px;line-height:1.3}
+.kpi-sub{font-size:10px;color:var(--text3);margin-top:2px;line-height:1.3}
 
 /* LANG GRID */
-.lang-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
-.lang-card{background:var(--white);border-radius:12px;padding:14px 16px;box-shadow:0 1px 3px rgba(0,0,0,.07);min-width:0}
-.lang-head{display:flex;align-items:center;gap:8px;margin-bottom:10px}
-.lang-pct{font-size:18px;font-weight:800;margin-left:auto;white-space:nowrap}
-.lang-bar-wrap{background:#f1f5f9;border-radius:99px;height:5px;overflow:hidden;margin-bottom:8px}
+.lang-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.lang-card{background:var(--white);border-radius:12px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,.07);min-width:0}
+.lang-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.lang-pct{font-size:17px;font-weight:800;margin-left:auto;white-space:nowrap}
+.lang-bar-wrap{background:#f1f5f9;border-radius:99px;height:5px;overflow:hidden;margin-bottom:6px}
 .lang-bar{height:100%;border-radius:99px;transition:.4s}
-.lang-stats{display:flex;gap:8px;flex-wrap:wrap;font-size:11px;font-weight:600}
+.lang-stats{display:flex;gap:6px;flex-wrap:wrap;font-size:11px;font-weight:600}
 
 /* FILTERS */
-.filters-bar{background:var(--white);border-radius:12px;padding:12px 14px;box-shadow:0 1px 3px rgba(0,0,0,.06);margin-bottom:14px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.filters-bar input,.filters-bar select{padding:7px 11px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;outline:none;background:var(--white);color:var(--text)}
-.filters-bar input{flex:1;min-width:150px}
+.filters-bar{background:var(--white);border-radius:12px;padding:12px 14px;box-shadow:0 1px 3px rgba(0,0,0,.06);margin-bottom:12px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.filters-bar input,.filters-bar select{padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;outline:none;background:var(--white);color:var(--text);-webkit-appearance:none}
+.filters-bar input{flex:1;min-width:140px}
 .filters-bar input:focus,.filters-bar select:focus{border-color:var(--brand)}
-.clear-btn{background:none;border:none;color:var(--brand);font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}
+.clear-btn{background:none;border:none;color:var(--brand);font-size:12px;font-weight:700;cursor:pointer}
 
 /* TABLE */
 .table-wrap{background:var(--white);border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.06);overflow:hidden}
-.table-scroll{overflow-x:auto}
+.table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
 table{width:100%;border-collapse:collapse}
 thead th{padding:9px 12px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);background:#f8fafc;border-bottom:2px solid var(--border);white-space:nowrap;text-align:left}
 tbody td{padding:10px 12px;font-size:13px;border-bottom:1px solid #f8fafc;vertical-align:middle}
@@ -85,7 +90,7 @@ tbody tr:hover td{background:#f8fafc}
 .badge.needs_update{background:var(--orange-bg);color:var(--orange)}
 .badge.outdated{background:var(--purple-bg);color:var(--purple)}
 .badge.missing{background:var(--red-bg);color:var(--red)}
-.status-sel{border:none;border-radius:99px;padding:4px 9px;font-size:11px;font-weight:700;cursor:pointer;outline:none}
+.status-sel{border:none;border-radius:99px;padding:4px 9px;font-size:11px;font-weight:700;cursor:pointer;outline:none;-webkit-appearance:none}
 .status-sel.completed{background:var(--green-bg);color:var(--green)}
 .status-sel.in_progress{background:var(--yellow-bg);color:var(--yellow)}
 .status-sel.needs_update{background:var(--orange-bg);color:var(--orange)}
@@ -100,7 +105,7 @@ tbody tr:hover td{background:#f8fafc}
 .rb-3m{background:#d1fae5;color:#047857}
 .rb-6m{background:#e0f2fe;color:#0369a1}
 
-/* CHANGELOG SIDEBAR ITEM */
+/* CHANGELOG */
 .cl-item{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;gap:10px}
 .cl-item:last-child{border-bottom:none}
 .cl-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:5px}
@@ -108,34 +113,35 @@ tbody tr:hover td{background:#f8fafc}
 .cl-notes{font-size:12px;color:var(--text2);margin-top:4px;font-style:italic}
 
 /* BUTTONS */
-.btn{display:inline-flex;align-items:center;gap:5px;padding:8px 14px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;border:none;transition:.15s;white-space:nowrap}
-.btn-sm{padding:4px 9px;font-size:11px;border-radius:7px}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:8px 14px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;border:none;transition:.15s;white-space:nowrap;touch-action:manipulation}
+.btn-sm{padding:5px 10px;font-size:11px;border-radius:7px}
 .btn-blue{background:var(--brand);color:#fff}.btn-blue:hover{background:var(--brand2)}
 .btn-gray{background:#f1f5f9;color:var(--text2)}.btn-gray:hover{background:var(--border)}
 .btn-ghost{background:transparent;color:var(--text3)}.btn-ghost:hover{background:#f1f5f9}
 .btn-orange{background:var(--orange-bg);color:var(--orange)}.btn-orange:hover{background:#fed7aa}
+.btn-green{background:var(--green-bg);color:var(--green)}
 
 /* MODAL */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:center;justify-content:center;padding:16px}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:center;justify-content:center;padding:16px;-webkit-overflow-scrolling:touch}
 .modal-overlay.open{display:flex}
-.modal{background:var(--white);border-radius:16px;width:100%;max-width:560px;box-shadow:0 25px 50px rgba(0,0,0,.3);max-height:92vh;overflow-y:auto}
-.modal-header{padding:18px 22px 14px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.modal{background:var(--white);border-radius:16px;width:100%;max-width:560px;box-shadow:0 25px 50px rgba(0,0,0,.3);max-height:92vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.modal-header{padding:18px 22px 14px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:8px;position:sticky;top:0;background:var(--white);z-index:1}
 .modal-title{font-size:16px;font-weight:800}
-.modal-close{background:none;border:none;font-size:22px;color:var(--text3);cursor:pointer;padding:2px 8px;border-radius:6px;flex-shrink:0}.modal-close:hover{background:var(--bg)}
+.modal-close{background:none;border:none;font-size:22px;color:var(--text3);cursor:pointer;padding:2px 8px;border-radius:6px;flex-shrink:0;touch-action:manipulation}.modal-close:hover{background:var(--bg)}
 .modal-body{padding:18px 22px}
-.modal-footer{padding:14px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+.modal-footer{padding:14px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;position:sticky;bottom:0;background:var(--white)}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .ff{margin-bottom:13px}
 .ff label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);margin-bottom:5px}
-.ff input,.ff select,.ff textarea{width:100%;padding:8px 11px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;outline:none;background:var(--white);color:var(--text);font-family:inherit}
+.ff input,.ff select,.ff textarea{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:16px;outline:none;background:var(--white);color:var(--text);font-family:inherit;-webkit-appearance:none}
 .ff input:focus,.ff select:focus,.ff textarea:focus{border-color:var(--brand)}
-.ff textarea{resize:vertical;min-height:70px}
+.ff textarea{resize:vertical;min-height:70px;font-size:16px}
 .err{background:#fee2e2;border:1px solid #fca5a5;color:#dc2626;font-size:12px;padding:9px 12px;border-radius:8px;margin-top:8px}
 .info{background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8;font-size:12px;padding:9px 12px;border-radius:8px;margin-bottom:12px}
 
 /* TABS */
 .tabs{display:flex;gap:2px;border-bottom:2px solid var(--border);margin-bottom:14px}
-.tab{padding:9px 14px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--text3);border-bottom:2px solid transparent;margin-bottom:-2px;transition:.15s}
+.tab{padding:9px 14px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--text3);border-bottom:2px solid transparent;margin-bottom:-2px;transition:.15s;touch-action:manipulation}
 .tab.active{color:var(--brand);border-bottom-color:var(--brand)}
 .tab-pane{display:none}.tab-pane.active{display:block}
 
@@ -143,16 +149,28 @@ tbody tr:hover td{background:#f8fafc}
 .m-cards{display:none;flex-direction:column;gap:10px}
 .m-card{background:var(--white);border-radius:12px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
 .lang-pill{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:99px;font-size:11px;font-weight:700}
+
+/* MOBILE LANG STATUS SHEET */
+.sheet-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;align-items:flex-end;justify-content:center}
+.sheet-overlay.open{display:flex}
+.sheet{background:var(--white);border-radius:16px 16px 0 0;width:100%;max-width:500px;padding:20px;max-height:85vh;overflow-y:auto}
+.sheet-handle{width:36px;height:4px;background:#e2e8f0;border-radius:99px;margin:0 auto 16px}
+.sheet-lang-btn{width:100%;padding:14px 16px;border:2px solid var(--border);border-radius:10px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;background:var(--white);font-size:14px;font-weight:600;touch-action:manipulation}
+.sheet-lang-btn.active{border-color:var(--brand);background:#eff6ff}
+
+/* PROGRESS */
 .pb-bg{background:#f1f5f9;border-radius:99px;height:4px;overflow:hidden}
 .pb-fill{height:100%;border-radius:99px}
+
+/* MULTILINGUE BADGE */
+.ml-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:800;background:#ede9fe;color:#7c3aed;margin-left:4px}
 
 /* TOAST */
 #toast{position:fixed;bottom:20px;right:20px;background:var(--dark);color:#fff;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;z-index:999;opacity:0;transform:translateY(6px);transition:.2s;pointer-events:none}
 #toast.show{opacity:1;transform:translateY(0)}
 
-/* LOADING */
 #loading{position:fixed;inset:0;background:var(--dark);display:flex;align-items:center;justify-content:center;z-index:999;flex-direction:column;gap:14px}
-.spinner{width:30px;height:30px;border:3px solid rgba(255,255,255,.15);border-top-color:#3b82f6;border-radius:50%;animation:spin .7s linear infinite}
+.spinner{width:28px;height:28px;border:3px solid rgba(255,255,255,.15);border-top-color:#3b82f6;border-radius:50%;animation:spin .7s linear infinite}
 .sp-sm{width:13px;height:13px;border:2px solid rgba(0,0,0,.15);border-top-color:var(--brand);border-radius:50%;animation:spin .7s linear infinite;display:inline-block;vertical-align:middle}
 @keyframes spin{to{transform:rotate(360deg)}}
 
@@ -178,18 +196,29 @@ tbody tr:hover td{background:#f8fafc}
 <body>
 
 <div id="loading">
-  <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#1e3a8a,#3b82f6);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:20px;color:#fff">D</div>
+  <svg width="52" height="52" viewBox="0 0 52 52">
+    <rect width="52" height="52" rx="13" fill="#1e3a8a"/>
+    <rect x="10" y="14" width="32" height="5" rx="2.5" fill="white"/>
+    <rect x="10" y="23" width="22" height="5" rx="2.5" fill="rgba(255,255,255,0.5)"/>
+    <circle cx="37" cy="37" r="10" fill="#3b82f6"/>
+    <path d="M32 37 L36 41 L43 33" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  </svg>
   <div class="spinner"></div>
   <div style="color:rgba(255,255,255,.4);font-size:12px">Caricamento…</div>
 </div>
 
 <div id="app" style="display:none">
-
   <!-- MOBILE TOPBAR -->
   <div class="mobile-topbar">
     <div class="m-logo">
-      <div style="width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,#1e3a8a,#3b82f6);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;color:#fff">D</div>
-      DocuLingua <span style="font-size:10px;opacity:.4;margin-left:3px">v1.1</span>
+      <svg width="26" height="26" viewBox="0 0 52 52">
+        <rect width="52" height="52" rx="13" fill="#1e3a8a"/>
+        <rect x="10" y="14" width="32" height="5" rx="2.5" fill="white"/>
+        <rect x="10" y="23" width="22" height="5" rx="2.5" fill="rgba(255,255,255,0.5)"/>
+        <circle cx="37" cy="37" r="10" fill="#3b82f6"/>
+        <path d="M32 37 L36 41 L43 33" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      </svg>
+      DocuLingua <span style="font-size:10px;opacity:.4;margin-left:2px">v1.2</span>
     </div>
     <button class="hamburger" onclick="toggleDrawer()">
       <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M3 6h18M3 12h18M3 18h18"/></svg>
@@ -199,20 +228,25 @@ tbody tr:hover td{background:#f8fafc}
   <div class="mobile-overlay" id="mob-overlay" onclick="toggleDrawer()"></div>
   <div class="mobile-drawer" id="mob-drawer">
     <div style="padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between">
-      <div style="display:flex;align-items:center;gap:8px"><div class="s-icon">D</div><span style="color:#fff;font-weight:800">DocuLingua</span></div>
-      <button onclick="toggleDrawer()" style="background:none;border:none;color:rgba(255,255,255,.4);cursor:pointer;font-size:22px">×</button>
+      <div style="display:flex;align-items:center;gap:8px">
+        <svg width="28" height="28" viewBox="0 0 52 52"><rect width="52" height="52" rx="13" fill="#1e3a8a"/><rect x="10" y="14" width="32" height="5" rx="2.5" fill="white"/><rect x="10" y="23" width="22" height="5" rx="2.5" fill="rgba(255,255,255,0.5)"/><circle cx="37" cy="37" r="10" fill="#3b82f6"/><path d="M32 37 L36 41 L43 33" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        <span style="color:#fff;font-weight:800">DocuLingua</span>
+      </div>
+      <button onclick="toggleDrawer()" style="background:none;border:none;color:rgba(255,255,255,.4);cursor:pointer;font-size:22px;touch-action:manipulation">×</button>
     </div>
     <div id="mob-nav" style="padding:6px 8px"></div>
   </div>
 
   <div class="layout">
-    <!-- SIDEBAR -->
+    <!-- SIDEBAR DESKTOP -->
     <div class="sidebar">
       <div class="sidebar-logo">
-        <div class="s-icon">D</div>
+        <div class="s-icon">
+          <svg width="22" height="22" viewBox="0 0 52 52"><rect width="52" height="52" rx="13" fill="transparent"/><rect x="8" y="12" width="36" height="6" rx="3" fill="white"/><rect x="8" y="22" width="26" height="6" rx="3" fill="rgba(255,255,255,0.55)"/><circle cx="37" cy="38" r="11" fill="#3b82f6"/><path d="M31 38 L36 43 L44 32" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        </div>
         <div class="sidebar-logo-text">
           <span>DocuLingua</span>
-          <small>v1.1</small>
+          <small>v1.2</small>
         </div>
       </div>
       <div class="sidebar-section">Principale</div>
@@ -235,61 +269,49 @@ tbody tr:hover td{background:#f8fafc}
         </div>
         <div class="kpi-grid" id="kpi-grid"></div>
         <div class="lang-grid" id="lang-grid"></div>
-        <div class="tabs">
-          <button class="tab active" onclick="switchTab('tp-docs','tp-bylang',this)">📋 Documenti</button>
-          <button class="tab" onclick="switchTab('tp-bylang','tp-docs',this)">🌍 Per lingua</button>
+        <div class="filters-bar">
+          <input type="text" id="search-input" placeholder="🔍 Cerca documento…" oninput="renderTable()">
+          <select id="filter-cat" onchange="renderTable()"><option value="">Tutte le categorie</option></select>
+          <select id="filter-status" onchange="renderTable()">
+            <option value="">Tutti gli stati</option>
+            <option value="missing">✗ Mancante</option>
+            <option value="in_progress">⏳ In corso</option>
+            <option value="needs_update">🔄 Da aggiornare</option>
+            <option value="outdated">↻ Obsoleta</option>
+            <option value="completed">✓ Completata</option>
+          </select>
+          <select id="sort-key" onchange="renderTable()">
+            <option value="date_desc">📅 Data più recente</option>
+            <option value="date_asc">📅 Data meno recente</option>
+            <option value="cat_asc">📁 Categoria A→Z</option>
+            <option value="cat_desc">📁 Categoria Z→A</option>
+            <option value="name_asc">🔤 Nome A→Z</option>
+            <option value="name_desc">🔤 Nome Z→A</option>
+            <option value="default">📋 Ordine originale</option>
+          </select>
+          <button class="clear-btn" onclick="clearFilters()">✕ Azzera</button>
         </div>
-        <div class="tab-pane active" id="tp-docs">
-          <div class="filters-bar">
-            <input type="text" id="search-input" placeholder="🔍 Cerca documento…" oninput="renderTable()">
-            <select id="filter-cat" onchange="renderTable()"><option value="">Tutte le categorie</option></select>
-            <select id="filter-status" onchange="renderTable()">
-              <option value="">Tutti gli stati</option>
-              <option value="missing">✗ Mancante</option>
-              <option value="in_progress">⏳ In corso</option>
-              <option value="needs_update">🔄 Da aggiornare</option>
-              <option value="outdated">↻ Obsoleta</option>
-              <option value="completed">✓ Completata</option>
-            </select>
-            <select id="sort-key" onchange="renderTable()">
-              <option value="date_desc">📅 Data più recente</option>
-              <option value="date_asc">📅 Data meno recente</option>
-              <option value="cat_asc">📁 Categoria A→Z</option>
-              <option value="cat_desc">📁 Categoria Z→A</option>
-              <option value="name_asc">🔤 Nome A→Z</option>
-              <option value="name_desc">🔤 Nome Z→A</option>
-              <option value="default">📋 Ordine originale</option>
-            </select>
-            <button class="clear-btn" onclick="clearFilters()">✕ Azzera</button>
+        <div class="table-wrap">
+          <div class="table-scroll">
+            <table>
+              <thead><tr>
+                <th>Documento</th><th>Categoria</th><th>Ver.</th>
+                <th>🇮🇹 IT</th><th style="min-width:180px">📋 Ultimo aggiornamento</th>
+                <th>🇬🇧 EN</th><th>🇫🇷 FR</th><th>🇩🇪 DE</th>
+                <th>%</th><th>Azioni</th>
+              </tr></thead>
+              <tbody id="docs-tbody"></tbody>
+            </table>
           </div>
-          <div class="table-wrap">
-            <div class="table-scroll">
-              <table>
-                <thead><tr>
-                  <th>Documento</th><th>Categoria</th><th>Ver.</th>
-                  <th>🇮🇹 IT</th><th style="min-width:180px">📋 Ultimo aggiornamento</th>
-                  <th>🇬🇧 EN</th><th>🇫🇷 FR</th><th>🇩🇪 DE</th>
-                  <th>%</th><th>Azioni</th>
-                </tr></thead>
-                <tbody id="docs-tbody"></tbody>
-              </table>
-            </div>
-            <div class="m-cards" id="m-cards"></div>
-            <div class="table-footer" id="table-footer"></div>
-          </div>
-        </div>
-        <div class="tab-pane" id="tp-bylang">
-          <div id="bylang-inline"></div>
+          <div class="m-cards" id="m-cards"></div>
+          <div class="table-footer" id="table-footer"></div>
         </div>
       </div>
 
-      <!-- STORICO MODIFICHE -->
+      <!-- STORICO -->
       <div class="page" id="page-storico">
         <div class="page-header">
-          <div>
-            <div class="page-title">📋 Storico modifiche</div>
-            <div class="page-sub">Tutti gli aggiornamenti tracciati con note</div>
-          </div>
+          <div><div class="page-title">📋 Storico modifiche</div><div class="page-sub">Tutti gli aggiornamenti tracciati</div></div>
         </div>
         <div class="filters-bar">
           <input type="text" id="cl-search" placeholder="🔍 Cerca documento o nota…" oninput="renderStorico()">
@@ -301,10 +323,7 @@ tbody tr:hover td{background:#f8fafc}
       <!-- PER LINGUA -->
       <div class="page" id="page-bylang">
         <div class="page-header">
-          <div>
-            <div class="page-title">🌍 Stato per lingua</div>
-            <div class="page-sub">Documenti da tradurre/aggiornare per ogni lingua</div>
-          </div>
+          <div><div class="page-title">🌍 Stato per lingua</div><div class="page-sub">Documenti da tradurre per ogni lingua</div></div>
         </div>
         <div class="filters-bar">
           <input type="text" id="bl-search" placeholder="🔍 Cerca documento…" oninput="renderByLangPage()">
@@ -323,20 +342,16 @@ tbody tr:hover td{background:#f8fafc}
       <!-- RICHIEDI FILE -->
       <div class="page" id="page-request">
         <div class="page-header">
-          <div>
-            <div class="page-title">📨 Richiedi file editabile</div>
-            <div class="page-sub">Richiedi la versione editabile italiana di un documento</div>
-          </div>
+          <div><div class="page-title">📨 Richiedi file editabile</div><div class="page-sub">Richiedi la versione editabile italiana</div></div>
         </div>
-        <div style="background:var(--white);border-radius:16px;padding:24px;box-shadow:0 1px 3px rgba(0,0,0,.06);max-width:580px">
-          <div class="info">La richiesta verrà inviata via email a <strong>marco.torquato@edilkamin.com</strong></div>
+        <div style="background:var(--white);border-radius:16px;padding:22px;box-shadow:0 1px 3px rgba(0,0,0,.06);max-width:560px">
+          <div class="info">La richiesta verrà inviata a <strong>marco.torquato@edilkamin.com</strong></div>
           <div class="ff"><label>Documento richiesto *</label><select id="req-doc"><option value="">— Seleziona —</option></select></div>
-          <div class="ff"><label>Il tuo nome *</label><input type="text" id="req-name" placeholder="es. Marie Dupont"></div>
-          <div class="ff"><label>La tua email *</label><input type="email" id="req-email" placeholder="es. marie@azienda.com"></div>
+          <div class="ff"><label>Il tuo nome *</label><input type="text" id="req-name" placeholder="es. Marie Dupont" autocomplete="name"></div>
           <div class="ff"><label>Note aggiuntive</label><textarea id="req-notes" rows="3" placeholder="Motivazione, urgenza, formato…"></textarea></div>
           <div id="req-error" class="err" style="display:none"></div>
           <div id="req-ok" style="display:none;background:#dcfce7;border:1px solid #86efac;color:#15803d;font-size:13px;padding:10px 14px;border-radius:8px;margin-top:8px">✓ Email aperta! Invia dal tuo client di posta.</div>
-          <button class="btn btn-blue" style="margin-top:10px;width:100%" onclick="sendRequest()">📨 Invia richiesta</button>
+          <button class="btn btn-blue" style="margin-top:10px;width:100%;justify-content:center" onclick="sendRequest()">📨 Apri email</button>
         </div>
       </div>
 
@@ -353,12 +368,19 @@ tbody tr:hover td{background:#f8fafc}
     </div>
     <div class="modal-body">
       <input type="hidden" id="doc-id">
-      <div class="ff"><label>Nome documento *</label><input type="text" id="doc-name" placeholder="es. Manuale Caldaia EK200"></div>
+      <div class="ff"><label>Nome documento *</label><input type="text" id="doc-name" placeholder="es. Manuale Caldaia EK200" autocomplete="off"></div>
       <div class="form-row">
         <div class="ff"><label>Categoria *</label><select id="doc-cat"></select></div>
-        <div class="ff"><label>Versione *</label><input type="text" id="doc-ver" placeholder="v1"></div>
+        <div class="ff"><label>Versione *</label><input type="text" id="doc-ver" placeholder="v1" autocomplete="off"></div>
       </div>
       <div class="ff"><label>Data documento</label><input type="date" id="doc-desc"></div>
+      <div class="ff" style="margin-bottom:6px">
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13px;text-transform:none;letter-spacing:0;font-weight:600">
+          <input type="checkbox" id="doc-multilingual" style="width:18px;height:18px;cursor:pointer;accent-color:var(--purple)">
+          <span>🌐 Documento multilingue</span>
+        </label>
+        <div style="font-size:11px;color:var(--text3);margin-top:4px;margin-left:28px">Il documento contiene già tutte le traduzioni integrate — tutte le lingue verranno impostate come Completata</div>
+      </div>
       <div id="doc-err" class="err" style="display:none"></div>
     </div>
     <div class="modal-footer">
@@ -380,9 +402,9 @@ tbody tr:hover td{background:#f8fafc}
     </div>
     <div class="modal-body">
       <input type="hidden" id="upd-doc-id">
-      <div class="info">Le traduzioni <strong>non Mancanti</strong> diventeranno automaticamente «Da aggiornare 🔄».</div>
+      <div class="info">Le traduzioni <strong>non Mancanti</strong> diventeranno «Da aggiornare 🔄».</div>
       <div class="form-row">
-        <div class="ff"><label>Nuova versione *</label><input type="text" id="upd-ver" placeholder="es. v2"></div>
+        <div class="ff"><label>Nuova versione *</label><input type="text" id="upd-ver" placeholder="es. v2" autocomplete="off"></div>
         <div class="ff"><label>Data aggiornamento *</label><input type="date" id="upd-date" value="2026-03-27"></div>
       </div>
       <div class="ff"><label>Changelog — cosa è cambiato *</label><textarea id="upd-changelog" rows="4" placeholder="Descrivi le modifiche di questa versione…"></textarea></div>
@@ -423,12 +445,23 @@ tbody tr:hover td{background:#f8fafc}
   </div>
 </div>
 
+<!-- MOBILE LANG SHEET -->
+<div class="sheet-overlay" id="lang-sheet" onclick="closeLangSheet(event)">
+  <div class="sheet" id="lang-sheet-body" onclick="event.stopPropagation()">
+    <div class="sheet-handle"></div>
+    <div id="sheet-doc-title" style="font-weight:800;font-size:15px;margin-bottom:4px"></div>
+    <div id="sheet-doc-cat" style="font-size:12px;color:var(--text3);margin-bottom:16px"></div>
+    <div id="sheet-langs"></div>
+    <button class="btn btn-gray" style="width:100%;justify-content:center;margin-top:8px" onclick="closeLangSheet()">Chiudi</button>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
 const SUPABASE_URL='https://smhuniliucxtderrcfjc.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtaHVuaWxpdWN4dGRlcnJjZmpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MDU1MjAsImV4cCI6MjA5MDE4MTUyMH0.gHaZxhf569rw00H7mZfJglxfpKpEAZTbUtegsXUhJCc';
-const APP_VER='v1.1';
+const APP_VER='v1.2';
 const {createClient}=supabase;
 const sb=createClient(SUPABASE_URL,SUPABASE_KEY);
 
@@ -444,15 +477,14 @@ const STATUS={
 };
 const CATS=["Allarmi", "Area Riservata", "Bollettini Tecnici - Modifiche prodotti", "Caldaie EK", "Camini a legna", "Circolari Vecchie", "Comandi remoti", "Componenti", "Corsi", "Documentazione tecnica", "Domoklima", "Dropbox", "Elettronica", "Parametri e Banche Dati", "Recapiti/Procedure"];
 
-let allDocs=[], allTr=[], allCL=[], curTr=null;
+let allDocs=[], allTr=[], allCL=[], curTr=null, sheetDocId=null;
 
 // ── UTILS ──────────────────────────────────────────────────
 function toast(m,d=2500){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d);}
 
 function recBadge(dateStr){
   if(!dateStr)return'';
-  const d=new Date(dateStr), now=new Date();
-  const days=(now-d)/(86400000);
+  const d=new Date(dateStr),now=new Date(),days=(now-d)/86400000;
   if(days<1) return'<span class="rb rb-today">OGGI</span>';
   if(days<=7) return'<span class="rb rb-week">QUESTA SETTIMANA</span>';
   if(days<=31) return'<span class="rb rb-1m">Ultimo mese</span>';
@@ -461,10 +493,7 @@ function recBadge(dateStr){
   return'';
 }
 
-function badge(s){
-  const st=STATUS[s]||{l:s,i:'–',c:'var(--gray)',bg:'#f1f5f9'};
-  return`<span class="badge ${s}">${st.i} ${st.l}</span>`;
-}
+function badge(s){const st=STATUS[s]||{l:s,i:'–',c:'var(--gray)',bg:'#f1f5f9'};return`<span class="badge ${s}">${st.i} ${st.l}</span>`;}
 function pctC(p){return p===100?'var(--green)':p>=60?'var(--brand)':p>=30?'var(--yellow)':'var(--red)';}
 function pb(pct){const c=pctC(pct);return`<div class="pb-bg"><div class="pb-fill" style="width:${pct}%;background:${c}"></div></div>`;}
 function calcPct(docId){
@@ -473,14 +502,14 @@ function calcPct(docId){
 }
 function getTr(docId,lang){return allTr.find(t=>t.document_id===docId&&t.language===lang);}
 function fmt(d){if(!d)return'–';return new Date(d).toLocaleDateString('it-IT');}
-function lastCL(docId){return allCL.find(c=>c.document_id===docId);} // already sorted desc
+function lastCL(docId){return allCL.find(c=>c.document_id===docId);}
 
 // ── INIT ───────────────────────────────────────────────────
 async function init(){
   CATS.forEach(c=>{
     ['filter-cat','doc-cat','cl-cat','bl-cat'].forEach(id=>{
       const el=document.getElementById(id);
-      if(el) el.innerHTML+=`<option value="${c}">${c}</option>`;
+      if(el)el.innerHTML+=`<option value="${c}">${c}</option>`;
     });
   });
 
@@ -509,7 +538,7 @@ async function loadData(){
   ]);
   allDocs=docs||[]; allTr=tr||[]; allCL=cl||[];
   const sel=document.getElementById('req-doc');
-  sel.innerHTML='<option value="">— Seleziona documento —</option>';
+  sel.innerHTML='<option value="">— Seleziona —</option>';
   allDocs.forEach(d=>{sel.innerHTML+=`<option value="${d.id}">${d.name} (${d.category})</option>`;});
   renderDashboard();
 }
@@ -525,27 +554,20 @@ function showPage(name){
   closeDrawer();
 }
 
-function switchTab(a,b,btn){
-  document.getElementById(a).classList.add('active');
-  document.getElementById(b).classList.remove('active');
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  btn.classList.add('active');
-  if(a==='tp-bylang')renderByLangInline();
-}
-
 // ── DASHBOARD ──────────────────────────────────────────────
 function renderDashboard(){renderKPIs();renderLangGrid();renderTable();}
 
 function renderKPIs(){
+  const active=allDocs.filter(d=>!d.multilingual);
   const total=allDocs.length;
   const complete=allDocs.filter(d=>calcPct(d.id)===100).length;
-  const withMissing=allDocs.filter(d=>allTr.some(t=>t.document_id===d.id&&t.status==='missing')).length;
-  const needsUpd=allDocs.filter(d=>allTr.some(t=>t.document_id===d.id&&t.status==='needs_update')).length;
+  const withMiss=active.filter(d=>allTr.some(t=>t.document_id===d.id&&t.status==='missing')).length;
+  const needsUpd=active.filter(d=>allTr.some(t=>t.document_id===d.id&&t.status==='needs_update')).length;
   document.getElementById('kpi-grid').innerHTML=[
-    {v:total,    l:'Documenti totali', s:'archivio IT master',   c:'#3b82f6'},
-    {v:complete, l:'Completi',         s:'100% tutte le lingue', c:'#16a34a'},
-    {v:withMissing, l:'Con mancanze',  s:'1+ lingua assente',    c:'#dc2626'},
-    {v:needsUpd, l:'Da aggiornare',    s:'versione aggiornata',  c:'#ea580c'},
+    {v:total,    l:'Documenti totali',s:'archivio IT master',  c:'#3b82f6'},
+    {v:complete, l:'Completi',        s:'100% tutte le lingue',c:'#16a34a'},
+    {v:withMiss, l:'Con mancanze',    s:'1+ lingua assente',   c:'#dc2626'},
+    {v:needsUpd, l:'Da aggiornare',   s:'versione aggiornata', c:'#ea580c'},
   ].map(k=>`<div class="kpi-card" style="border-left-color:${k.c}">
     <div class="kpi-value" style="color:${k.c}">${k.v}</div>
     <div class="kpi-label">${k.l}</div>
@@ -556,8 +578,7 @@ function renderKPIs(){
 function renderLangGrid(){
   document.getElementById('lang-grid').innerHTML=LANGS.map(lang=>{
     const ts=allTr.filter(t=>t.language===lang);
-    const total=ts.length;
-    const comp=ts.filter(t=>t.status==='completed').length;
+    const total=ts.length,comp=ts.filter(t=>t.status==='completed').length;
     const inp=ts.filter(t=>t.status==='in_progress').length;
     const upd=ts.filter(t=>t.status==='needs_update').length;
     const miss=ts.filter(t=>t.status==='missing').length;
@@ -567,17 +588,17 @@ function renderLangGrid(){
       <div class="lang-head">
         <span style="font-size:20px">${FLAGS[lang]}</span>
         <div style="min-width:0">
-          <div style="font-weight:800;font-size:13px">${lang}</div>
-          <div style="font-size:10px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${LNAMES[lang]}</div>
+          <div style="font-weight:800;font-size:12px">${lang}</div>
+          <div style="font-size:10px;color:var(--text3)">${LNAMES[lang]}</div>
         </div>
         <div class="lang-pct" style="color:${c}">${pct}%</div>
       </div>
       <div class="lang-bar-wrap"><div class="lang-bar" style="width:${pct}%;background:${c}"></div></div>
       <div class="lang-stats">
-        ${comp?`<span style="color:var(--green)">✓ ${comp}</span>`:''}
-        ${inp?`<span style="color:var(--yellow)">⏳ ${inp}</span>`:''}
-        ${upd?`<span style="color:var(--orange)">🔄 ${upd}</span>`:''}
-        ${miss?`<span style="color:var(--red)">✗ ${miss}</span>`:''}
+        ${comp?`<span style="color:var(--green)">✓${comp}</span>`:''}
+        ${inp?`<span style="color:var(--yellow)">⏳${inp}</span>`:''}
+        ${upd?`<span style="color:var(--orange)">🔄${upd}</span>`:''}
+        ${miss?`<span style="color:var(--red)">✗${miss}</span>`:''}
       </div>
     </div>`;
   }).join('');
@@ -607,9 +628,9 @@ function clCell(docId){
   const cl=lastCL(docId);
   if(!cl)return'<span style="color:var(--text3);font-size:11px">–</span>';
   const rb=recBadge(cl.date||cl.created_at);
-  return`<div style="max-width:200px">
-    <div style="font-size:11px;font-weight:700;color:var(--text)">${cl.version} · ${cl.date||''}</div>
-    <div style="font-size:11px;color:var(--text2);margin-top:2px;white-space:normal;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${cl.notes}</div>
+  return`<div>
+    <div style="font-size:11px;font-weight:700">${cl.version} · ${cl.date||''}</div>
+    <div style="font-size:11px;color:var(--text2);margin-top:2px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;max-width:180px">${cl.notes}</div>
     ${rb}
   </div>`;
 }
@@ -620,6 +641,7 @@ function renderTable(){
     const pct=calcPct(doc.id);
     const pc=pctC(pct);
     const rb=recBadge(doc.description);
+    const mlBadge=doc.multilingual?'<span class="ml-badge">🌐 Multilingue</span>':'';
     const langCols=['EN','FR','DE'].map(l=>{
       const t=getTr(doc.id,l);
       if(!t)return'<td>–</td>';
@@ -632,7 +654,7 @@ function renderTable(){
     }).join('');
     return`<tr>
       <td>
-        <div style="font-weight:600;max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${doc.name}">${doc.name}</div>
+        <div style="font-weight:600;max-width:230px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${doc.name}">${doc.name}${mlBadge}</div>
         <div style="font-size:11px;color:var(--text3);margin-top:2px">${doc.description||''} ${rb}</div>
       </td>
       <td style="font-size:12px;color:var(--text2)">${doc.category}</td>
@@ -645,7 +667,7 @@ function renderTable(){
         ${pb(pct)}
       </td>
       <td>
-        <div style="display:flex;gap:3px;flex-wrap:nowrap">
+        <div style="display:flex;gap:3px">
           <button class="btn btn-gray btn-sm" onclick='openDocModal(${JSON.stringify(doc)})'>✏️</button>
           <button class="btn btn-orange btn-sm" onclick='openUpdModal(${JSON.stringify(doc)})'>🔄</button>
           <button class="btn btn-ghost btn-sm" onclick="delDoc('${doc.id}')">🗑️</button>
@@ -654,11 +676,13 @@ function renderTable(){
     </tr>`;
   }).join('')||'<tr><td colspan="10" style="text-align:center;padding:36px;color:var(--text3)">Nessun documento trovato</td></tr>';
 
+  // MOBILE CARDS
   document.getElementById('m-cards').innerHTML=docs.map(doc=>{
     const pct=calcPct(doc.id);
     const pc=pctC(pct);
     const rb=recBadge(doc.description);
     const cl=lastCL(doc.id);
+    const mlBadge=doc.multilingual?'<span class="ml-badge">🌐</span>':'';
     const pills=LANGS.map(l=>{
       const t=getTr(doc.id,l);
       const s=t?.status||'missing';
@@ -667,22 +691,23 @@ function renderTable(){
     }).join('');
     return`<div class="m-card">
       <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;margin-bottom:6px">
-        <div style="min-width:0"><div style="font-weight:700;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${doc.name}</div>
+        <div style="min-width:0">
+          <div style="font-weight:700;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${doc.name} ${mlBadge}</div>
           <div style="font-size:11px;color:var(--text3)">${doc.category} · ${doc.description||''} ${rb}</div>
         </div>
         <span style="font-family:monospace;font-size:11px;background:#f1f5f9;padding:2px 7px;border-radius:5px;font-weight:700;flex-shrink:0">${doc.version}</span>
       </div>
-      ${cl?`<div style="background:var(--orange-bg);border-radius:8px;padding:8px 10px;margin-bottom:8px;font-size:11px"><strong style="color:var(--orange)">📋 ${cl.version}</strong> <span style="color:var(--text2)">${cl.notes}</span></div>`:''}
+      ${cl?`<div style="background:var(--orange-bg);border-radius:8px;padding:7px 10px;margin-bottom:8px;font-size:11px;line-height:1.4"><strong style="color:var(--orange)">📋 ${cl.version}:</strong> <span style="color:var(--text2)">${cl.notes.length>80?cl.notes.slice(0,80)+'…':cl.notes}</span></div>`:''}
       <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px">${pills}</div>
       <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
         <div style="flex:1">
           <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px;color:var(--text3)"><span>Completamento</span><span style="font-weight:700;color:${pc}">${pct}%</span></div>
           ${pb(pct)}
         </div>
-        <div style="display:flex;gap:3px">
-          <button class="btn btn-gray btn-sm" onclick='openDocModal(${JSON.stringify(doc)})'>✏️</button>
+        <div style="display:flex;gap:4px;flex-shrink:0">
+          <button class="btn btn-blue btn-sm" onclick="openLangSheet('${doc.id}')" style="font-size:13px">🏳️ Lingue</button>
           <button class="btn btn-orange btn-sm" onclick='openUpdModal(${JSON.stringify(doc)})'>🔄</button>
-          <button class="btn btn-ghost btn-sm" onclick="delDoc('${doc.id}')">🗑️</button>
+          <button class="btn btn-gray btn-sm" onclick='openDocModal(${JSON.stringify(doc)})'>✏️</button>
         </div>
       </div>
     </div>`;
@@ -699,6 +724,67 @@ function clearFilters(){
   renderTable();
 }
 
+// ── MOBILE LANG SHEET ──────────────────────────────────────
+function openLangSheet(docId){
+  sheetDocId=docId;
+  const doc=allDocs.find(d=>d.id===docId);
+  if(!doc)return;
+  document.getElementById('sheet-doc-title').textContent=doc.name;
+  document.getElementById('sheet-doc-cat').textContent=doc.category+' · '+doc.version;
+  renderSheetLangs();
+  document.getElementById('lang-sheet').classList.add('open');
+}
+
+function renderSheetLangs(){
+  const doc=allDocs.find(d=>d.id===sheetDocId);
+  if(!doc)return;
+  document.getElementById('sheet-langs').innerHTML=LANGS.map(lang=>{
+    const t=getTr(doc.id,lang);
+    const s=t?.status||'missing';
+    const sc=STATUS[s]||{};
+    const isIT=lang==='IT';
+    return`<div style="margin-bottom:10px">
+      <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:6px">${FLAGS[lang]} ${LNAMES[lang]}</div>
+      ${isIT?`<div class="sheet-lang-btn active" style="cursor:default;border-color:var(--green);background:var(--green-bg);color:var(--green)">✓ Completata (lingua master)</div>`:
+      `<div style="display:flex;flex-wrap:wrap;gap:6px">
+        ${Object.entries(STATUS).map(([k,v])=>`
+          <button onclick="sheetSetStatus('${t?.id||''}','${doc.id}','${lang}','${k}')"
+            style="flex:1;min-width:calc(50% - 3px);padding:10px 6px;border:2px solid ${s===k?v.c:'var(--border)'};border-radius:8px;background:${s===k?v.bg:'white'};color:${v.c};font-size:12px;font-weight:700;cursor:pointer;touch-action:manipulation;text-align:center">
+            ${v.i} ${v.l}
+          </button>`).join('')}
+      </div>`}
+    </div>`;
+  }).join('');
+}
+
+async function sheetSetStatus(trId,docId,lang,status){
+  if(!trId){toast('Traduzione non trovata');return;}
+  await sb.from('translations').update({status,last_updated:new Date().toISOString()}).eq('id',trId);
+  const t=allTr.find(x=>x.id===trId);
+  if(t){t.status=status;t.last_updated=new Date().toISOString();}
+  renderSheetLangs();
+  renderKPIs();renderLangGrid();renderTable();
+  toast(`✓ ${FLAGS[lang]} ${lang} → ${STATUS[status]?.l}`);
+}
+
+function closeLangSheet(e){
+  if(!e||e.target===document.getElementById('lang-sheet')){
+    document.getElementById('lang-sheet').classList.remove('open');
+    sheetDocId=null;
+  }
+}
+
+// ── STATUS CHANGE DESKTOP ──────────────────────────────────
+async function qSC(trId,docId,sel){
+  const status=sel.value;
+  sel.className=`status-sel ${status}`;
+  await sb.from('translations').update({status,last_updated:new Date().toISOString()}).eq('id',trId);
+  const t=allTr.find(t=>t.id===trId);
+  if(t){t.status=status;t.last_updated=new Date().toISOString();}
+  renderKPIs();renderLangGrid();
+  toast('✓ Stato aggiornato');
+}
+
 // ── STORICO ────────────────────────────────────────────────
 function renderStorico(){
   const q=(document.getElementById('cl-search')?.value||'').toLowerCase();
@@ -711,7 +797,7 @@ function renderStorico(){
     return true;
   });
   const wrap=document.getElementById('storico-wrap');
-  if(!items.length){wrap.innerHTML='<div style="padding:40px;text-align:center;color:var(--text3)">Nessuna modifica registrata</div>';return;}
+  if(!items.length){wrap.innerHTML='<div style="padding:40px;text-align:center;color:var(--text3)">Nessuna modifica registrata ancora.<br><small>Usa il pulsante 🔄 su un documento per registrare un aggiornamento.</small></div>';return;}
   wrap.innerHTML=`<div>${items.map(cl=>{
     const doc=allDocs.find(d=>d.id===cl.document_id);
     const rb=recBadge(cl.date||cl.created_at);
@@ -731,23 +817,17 @@ function renderStorico(){
 }
 
 // ── PER LINGUA ─────────────────────────────────────────────
-function renderByLangInline(){document.getElementById('bylang-inline').innerHTML=buildByLangHTML();}
-function renderByLangPage(){document.getElementById('bylang-page').innerHTML=buildByLangHTML();}
-
-function buildByLangHTML(){
+function renderByLangPage(){
   const q=(document.getElementById('bl-search')?.value||'').toLowerCase();
   const cat=document.getElementById('bl-cat')?.value||'';
   const fst=document.getElementById('bl-status')?.value||'';
 
-  return['EN','FR','DE'].map(lang=>{
-    const allLangTr=allTr.filter(t=>t.language===lang);
-    const total=allLangTr.length;
-    const comp=allLangTr.filter(t=>t.status==='completed').length;
+  document.getElementById('bylang-page').innerHTML=['EN','FR','DE'].map(lang=>{
+    const allLT=allTr.filter(t=>t.language===lang);
+    const total=allLT.length,comp=allLT.filter(t=>t.status==='completed').length;
     const pct=total>0?Math.round(comp/total*100):0;
     const c=pctC(pct);
-
-    // filtered non-complete rows
-    const rows=allLangTr.filter(t=>{
+    const rows=allLT.filter(t=>{
       if(t.status==='completed')return false;
       if(fst&&t.status!==fst)return false;
       const doc=allDocs.find(d=>d.id===t.document_id);
@@ -756,152 +836,76 @@ function buildByLangHTML(){
       if(q&&!doc.name.toLowerCase().includes(q))return false;
       return true;
     });
-
     const tableRows=rows.map(t=>{
       const doc=allDocs.find(d=>d.id===t.document_id);
       if(!doc)return'';
       const cl=lastCL(doc.id);
       return`<tr>
-        <td style="font-weight:600;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${doc.name}">${doc.name}</td>
+        <td style="font-weight:600;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${doc.name}">${doc.name}</td>
         <td style="font-size:12px;color:var(--text2)">${doc.category}</td>
         <td>${badge(t.status)}</td>
-        <td>${cl?`<div style="font-size:11px"><strong>${cl.version}</strong> · ${cl.date||''}<br><span style="color:var(--text2)">${cl.notes.length>60?cl.notes.slice(0,60)+'…':cl.notes}</span></div>`:'–'}</td>
-        <td style="font-size:11px;color:var(--text3)">${fmt(t.last_updated)}</td>
+        <td>${cl?`<div style="font-size:11px"><strong>${cl.version}</strong> · ${cl.date||''}<br><span style="color:var(--text2);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;max-width:160px">${cl.notes}</span></div>`:'–'}</td>
+        <td style="font-size:11px;color:var(--text3);white-space:nowrap">${fmt(t.last_updated)}</td>
         <td><button class="btn btn-gray btn-sm" onclick="openTrModal('${t.id}')">✏️ Apri</button></td>
       </tr>`;
     }).join('');
 
-    return`<div class="table-wrap" style="margin-bottom:16px">
-      <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+    // Mobile list for bylang
+    const mRows=rows.map(t=>{
+      const doc=allDocs.find(d=>d.id===t.document_id);
+      if(!doc)return'';
+      const cl=lastCL(doc.id);
+      return`<div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:flex-start">
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:700;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${doc.name}</div>
+          <div style="font-size:11px;color:var(--text3)">${doc.category}</div>
+          ${cl?`<div style="font-size:11px;color:var(--text2);margin-top:3px">📋 ${cl.version}: ${cl.notes.length>50?cl.notes.slice(0,50)+'…':cl.notes}</div>`:''}
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">
+          ${badge(t.status)}
+          <button class="btn btn-gray btn-sm" onclick="openTrModal('${t.id}')">✏️</button>
+        </div>
+      </div>`;
+    }).join('');
+
+    return`<div class="table-wrap" style="margin-bottom:14px">
+      <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-wrap:wrap">
         <span style="font-size:24px">${FLAGS[lang]}</span>
         <div>
           <div style="font-weight:800;font-size:15px">${LNAMES[lang]}</div>
           <div style="font-size:12px;color:var(--text3)">${comp}/${total} completate</div>
         </div>
         <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
-          <div style="text-align:right">
-            <div style="font-size:20px;font-weight:800;color:${c}">${pct}%</div>
-          </div>
-          <div style="width:48px;height:48px;position:relative;flex-shrink:0">
-            <svg viewBox="0 0 48 48" style="transform:rotate(-90deg);width:48px;height:48px">
-              <circle cx="24" cy="24" r="18" fill="none" stroke="#e2e8f0" stroke-width="6"/>
-              <circle cx="24" cy="24" r="18" fill="none" stroke="${c}" stroke-width="6"
-                stroke-dasharray="${(pct/100)*113} 113" stroke-linecap="round"/>
-            </svg>
-          </div>
+          <div style="font-size:20px;font-weight:800;color:${c}">${pct}%</div>
+          <svg viewBox="0 0 48 48" style="width:44px;height:44px;transform:rotate(-90deg);flex-shrink:0">
+            <circle cx="24" cy="24" r="18" fill="none" stroke="#e2e8f0" stroke-width="6"/>
+            <circle cx="24" cy="24" r="18" fill="none" stroke="${c}" stroke-width="6"
+              stroke-dasharray="${(pct/100)*113} 113" stroke-linecap="round"/>
+          </svg>
         </div>
       </div>
       ${rows.length>0?`
-        <div class="table-scroll">
-          <table><thead><tr>
-            <th>Documento</th><th>Categoria</th><th>Stato</th><th>📋 Ultimo changelog</th><th>Aggiornato</th><th></th>
-          </tr></thead>
-          <tbody>${tableRows}</tbody></table>
-        </div>
+        <div class="table-scroll"><table><thead><tr>
+          <th>Documento</th><th>Categoria</th><th>Stato</th><th>📋 Ultimo changelog</th><th>Aggiornato</th><th></th>
+        </tr></thead><tbody>${tableRows}</tbody></table></div>
+        <div style="display:none" id="bl-mob-${lang}">${mRows}</div>
         <div class="table-footer">${rows.length} documenti da lavorare</div>
-      `:'<div style="padding:14px 18px;color:var(--green);font-weight:600;font-size:13px">✓ Tutte le traduzioni sono aggiornate</div>'}
+      `:'<div style="padding:14px 16px;color:var(--green);font-weight:600;font-size:13px">✓ Tutte le traduzioni sono aggiornate</div>'}
     </div>`;
   }).join('');
-}
 
-// ── STATUS CHANGE ──────────────────────────────────────────
-async function qSC(trId,docId,sel){
-  const status=sel.value;
-  sel.className=`status-sel ${status}`;
-  await sb.from('translations').update({status,last_updated:new Date().toISOString()}).eq('id',trId);
-  const t=allTr.find(t=>t.id===trId);
-  if(t){t.status=status;t.last_updated=new Date().toISOString();}
-  renderKPIs();renderLangGrid();
-  toast('✓ Stato aggiornato');
-}
-
-// ── DOCUMENT CRUD ──────────────────────────────────────────
-function openDocModal(doc){
-  document.getElementById('doc-err').style.display='none';
-  if(doc){
-    document.getElementById('doc-modal-title').textContent='Modifica documento';
-    document.getElementById('doc-save-btn').textContent='Salva modifiche';
-    document.getElementById('doc-id').value=doc.id;
-    document.getElementById('doc-name').value=doc.name;
-    document.getElementById('doc-cat').value=doc.category;
-    document.getElementById('doc-ver').value=doc.version;
-    document.getElementById('doc-desc').value=doc.description||'';
-  }else{
-    document.getElementById('doc-modal-title').textContent='Nuovo documento';
-    document.getElementById('doc-save-btn').textContent='Crea documento';
-    document.getElementById('doc-id').value='';
-    document.getElementById('doc-name').value='';
-    document.getElementById('doc-ver').value='v1';
-    document.getElementById('doc-desc').value='2026-03-27';
-  }
-  document.getElementById('doc-modal').classList.add('open');
-}
-function closeDocModal(){document.getElementById('doc-modal').classList.remove('open');}
-
-async function saveDoc(){
-  const id=document.getElementById('doc-id').value;
-  const name=document.getElementById('doc-name').value.trim();
-  const cat=document.getElementById('doc-cat').value;
-  const ver=document.getElementById('doc-ver').value.trim();
-  const desc=document.getElementById('doc-desc').value;
-  const errEl=document.getElementById('doc-err');
-  if(!name||!cat||!ver){errEl.textContent='Compila tutti i campi obbligatori';errEl.style.display='block';return;}
-  const btn=document.getElementById('doc-save-btn');
-  btn.innerHTML='<span class="sp-sm"></span> Salvataggio…';btn.disabled=true;
-  let error;
-  if(id){({error}=await sb.from('documents').update({name,category:cat,version:ver,description:desc,updated_at:new Date().toISOString()}).eq('id',id));}
-  else{({error}=await sb.from('documents').insert({name,category:cat,version:ver,description:desc}));}
-  btn.textContent=id?'Salva modifiche':'Crea documento';btn.disabled=false;
-  if(error){errEl.textContent=error.message;errEl.style.display='block';return;}
-  closeDocModal();
-  toast(id?'✓ Documento aggiornato':'✓ Documento creato');
-  await loadData();
-}
-
-async function delDoc(id){
-  if(!confirm('Eliminare questo documento e tutte le sue traduzioni?'))return;
-  await sb.from('documents').delete().eq('id',id);
-  toast('✓ Eliminato');
-  await loadData();
-}
-
-// ── AGGIORNA ───────────────────────────────────────────────
-function openUpdModal(doc){
-  document.getElementById('upd-err').style.display='none';
-  document.getElementById('upd-doc-id').value=doc.id;
-  document.getElementById('upd-doc-name').textContent=doc.name+' ('+doc.version+')';
-  document.getElementById('upd-ver').value='';
-  document.getElementById('upd-date').value='2026-03-27';
-  document.getElementById('upd-changelog').value='';
-  document.getElementById('upd-modal').classList.add('open');
-}
-function closeUpdModal(){document.getElementById('upd-modal').classList.remove('open');}
-
-async function saveUpdate(){
-  const docId=document.getElementById('upd-doc-id').value;
-  const ver=document.getElementById('upd-ver').value.trim();
-  const date=document.getElementById('upd-date').value;
-  const notes=document.getElementById('upd-changelog').value.trim();
-  const errEl=document.getElementById('upd-err');
-  if(!ver||!notes){errEl.textContent='Inserisci versione e changelog';errEl.style.display='block';return;}
-  const btn=document.getElementById('upd-save-btn');
-  btn.innerHTML='<span class="sp-sm"></span> Aggiornamento…';btn.disabled=true;
-  errEl.style.display='none';
-
-  const {error:e1}=await sb.from('documents').update({version:ver,description:date,updated_at:new Date().toISOString()}).eq('id',docId);
-  if(e1){errEl.textContent=e1.message;errEl.style.display='block';btn.textContent='🔄 Aggiorna';btn.disabled=false;return;}
-
-  await sb.from('doc_changelogs').insert({document_id:docId,version:ver,date,notes,created_at:new Date().toISOString()});
-
-  const toUpd=allTr.filter(t=>t.document_id===docId&&t.language!=='IT'&&t.status!=='missing');
-  for(const t of toUpd){
-    await sb.from('translations').update({status:'needs_update',last_updated:new Date().toISOString()}).eq('id',t.id);
-  }
-
-  btn.textContent='🔄 Aggiorna';btn.disabled=false;
-  closeUpdModal();
-  toast('✓ Documento aggiornato — traduzioni segnalate');
-  await loadData();
+  // Show mobile version of bylang rows
+  setTimeout(()=>{
+    ['EN','FR','DE'].forEach(lang=>{
+      const mobEl=document.getElementById('bl-mob-'+lang);
+      if(!mobEl)return;
+      const tableWrap=mobEl.previousElementSibling;
+      if(window.innerWidth<=768&&tableWrap){
+        tableWrap.style.display='none';
+        mobEl.style.display='block';
+      }
+    });
+  },50);
 }
 
 // ── TR DETAIL MODAL ────────────────────────────────────────
@@ -919,7 +923,7 @@ function openTrModal(trId){
     </div>`;
   document.getElementById('tr-status-grid').innerHTML=Object.entries(STATUS).map(([s,cfg])=>`
     <button class="btn btn-sm" id="sc-${s}"
-      style="color:${cfg.c};border:2px solid ${t.status===s?cfg.c:'var(--border)'};background:${t.status===s?cfg.bg:'white'}"
+      style="color:${cfg.c};border:2px solid ${t.status===s?cfg.c:'var(--border)'};background:${t.status===s?cfg.bg:'white'};touch-action:manipulation"
       onclick="selTrStatus('${s}')">
       ${cfg.i} ${cfg.l}
     </button>`).join('');
@@ -969,35 +973,143 @@ async function saveTrModal(){
   btn.textContent='Salva note';btn.disabled=false;
   const t=allTr.find(x=>x.id===curTr.id);
   if(t)t.notes=notes;
-  renderTable();
-  closeTrModal();
-  toast('✓ Note salvate');
+  renderTable();closeTrModal();toast('✓ Note salvate');
 }
 function closeTrModal(){document.getElementById('tr-modal').classList.remove('open');curTr=null;}
 
+// ── DOC CRUD ───────────────────────────────────────────────
+function openDocModal(doc){
+  document.getElementById('doc-err').style.display='none';
+  const ml=document.getElementById('doc-multilingual');
+  if(doc){
+    document.getElementById('doc-modal-title').textContent='Modifica documento';
+    document.getElementById('doc-save-btn').textContent='Salva modifiche';
+    document.getElementById('doc-id').value=doc.id;
+    document.getElementById('doc-name').value=doc.name;
+    document.getElementById('doc-cat').value=doc.category;
+    document.getElementById('doc-ver').value=doc.version;
+    document.getElementById('doc-desc').value=doc.description||'';
+    ml.checked=!!doc.multilingual;
+  }else{
+    document.getElementById('doc-modal-title').textContent='Nuovo documento';
+    document.getElementById('doc-save-btn').textContent='Crea documento';
+    document.getElementById('doc-id').value='';
+    document.getElementById('doc-name').value='';
+    document.getElementById('doc-ver').value='v1';
+    document.getElementById('doc-desc').value='2026-03-27';
+    ml.checked=false;
+  }
+  document.getElementById('doc-modal').classList.add('open');
+}
+function closeDocModal(){document.getElementById('doc-modal').classList.remove('open');}
+
+async function saveDoc(){
+  const id=document.getElementById('doc-id').value;
+  const name=document.getElementById('doc-name').value.trim();
+  const cat=document.getElementById('doc-cat').value;
+  const ver=document.getElementById('doc-ver').value.trim();
+  const desc=document.getElementById('doc-desc').value;
+  const multilingual=document.getElementById('doc-multilingual').checked;
+  const errEl=document.getElementById('doc-err');
+  if(!name||!cat||!ver){errEl.textContent='Compila tutti i campi obbligatori';errEl.style.display='block';return;}
+  const btn=document.getElementById('doc-save-btn');
+  btn.innerHTML='<span class="sp-sm"></span> Salvataggio…';btn.disabled=true;
+  let error;
+  if(id){
+    ({error}=await sb.from('documents').update({name,category:cat,version:ver,description:desc,multilingual,updated_at:new Date().toISOString()}).eq('id',id));
+    // if multilingual, set all translations to completed
+    if(!error&&multilingual){
+      const trs=allTr.filter(t=>t.document_id===id);
+      for(const t of trs){
+        await sb.from('translations').update({status:'completed',last_updated:new Date().toISOString()}).eq('id',t.id);
+      }
+    }
+  }else{
+    ({error}=await sb.from('documents').insert({name,category:cat,version:ver,description:desc,multilingual}));
+  }
+  btn.textContent=id?'Salva modifiche':'Crea documento';btn.disabled=false;
+  if(error){errEl.textContent=error.message;errEl.style.display='block';return;}
+  closeDocModal();
+  toast(id?'✓ Documento aggiornato':'✓ Documento creato');
+  await loadData();
+}
+
+async function delDoc(id){
+  if(!confirm('Eliminare questo documento?'))return;
+  await sb.from('documents').delete().eq('id',id);
+  toast('✓ Eliminato');
+  await loadData();
+}
+
+// ── AGGIORNA ───────────────────────────────────────────────
+function openUpdModal(doc){
+  document.getElementById('upd-err').style.display='none';
+  document.getElementById('upd-doc-id').value=doc.id;
+  document.getElementById('upd-doc-name').textContent=doc.name+' ('+doc.version+')';
+  document.getElementById('upd-ver').value='';
+  document.getElementById('upd-date').value='2026-03-27';
+  document.getElementById('upd-changelog').value='';
+  document.getElementById('upd-modal').classList.add('open');
+}
+function closeUpdModal(){document.getElementById('upd-modal').classList.remove('open');}
+
+async function saveUpdate(){
+  const docId=document.getElementById('upd-doc-id').value;
+  const ver=document.getElementById('upd-ver').value.trim();
+  const date=document.getElementById('upd-date').value;
+  const notes=document.getElementById('upd-changelog').value.trim();
+  const errEl=document.getElementById('upd-err');
+  if(!ver||!notes){errEl.textContent='Inserisci versione e changelog';errEl.style.display='block';return;}
+  const btn=document.getElementById('upd-save-btn');
+  btn.innerHTML='<span class="sp-sm"></span> Aggiornamento…';btn.disabled=true;
+  errEl.style.display='none';
+
+  const {error:e1}=await sb.from('documents').update({version:ver,description:date,updated_at:new Date().toISOString()}).eq('id',docId);
+  if(e1){errEl.textContent=e1.message;errEl.style.display='block';btn.textContent='🔄 Aggiorna';btn.disabled=false;return;}
+
+  // Save changelog
+  const {error:e2}=await sb.from('doc_changelogs').insert({document_id:docId,version:ver,date,notes,created_at:new Date().toISOString()});
+  if(e2)console.error('Changelog error:',e2);
+
+  // Mark non-missing as needs_update (skip if multilingual)
+  const theDoc=allDocs.find(d=>d.id===docId);
+  if(!theDoc?.multilingual){
+    const toUpd=allTr.filter(t=>t.document_id===docId&&t.language!=='IT'&&t.status!=='missing');
+    for(const t of toUpd){
+      await sb.from('translations').update({status:'needs_update',last_updated:new Date().toISOString()}).eq('id',t.id);
+    }
+  }
+
+  btn.textContent='🔄 Aggiorna';btn.disabled=false;
+  closeUpdModal();
+  toast('✓ Aggiornamento registrato!');
+  await loadData();
+}
+
 // ── RICHIEDI FILE ──────────────────────────────────────────
-async function sendRequest(){
+function sendRequest(){
   const docId=document.getElementById('req-doc').value;
   const name=document.getElementById('req-name').value.trim();
-  const email=document.getElementById('req-email').value.trim();
   const notes=document.getElementById('req-notes').value.trim();
   const errEl=document.getElementById('req-error');
   const okEl=document.getElementById('req-ok');
   errEl.style.display='none';okEl.style.display='none';
-  if(!docId||!name||!email){errEl.textContent='Compila tutti i campi obbligatori';errEl.style.display='block';return;}
+  if(!docId||!name){errEl.textContent='Seleziona documento e inserisci il tuo nome';errEl.style.display='block';return;}
   const doc=allDocs.find(d=>d.id===docId);
   const subj=encodeURIComponent(`Richiesta file editabile: ${doc?.name}`);
   const body=encodeURIComponent(
-    `Ciao Marco,\n\n${name} (${email}) richiede il file editabile (versione italiana) del seguente documento:\n\n`+
-    `Documento: ${doc?.name}\nCategoria: ${doc?.category}\nVersione: ${doc?.version}\nData: ${doc?.description||'–'}\n\n`+
+    `Ciao Marco,\n\n${name} richiede il file editabile italiano di:\n\n`+
+    `Documento: ${doc?.name}\nCategoria: ${doc?.category}\nVersione: ${doc?.version}\n\n`+
     `${notes?`Note: ${notes}\n\n`:''}Grazie,\nDocuLingua ${APP_VER}`
   );
-  window.location.href=`mailto:marco.torquato@edilkamin.com?subject=${subj}&body=${body}`;
+  window.open(`mailto:marco.torquato@edilkamin.com?subject=${subj}&body=${body}`);
   okEl.style.display='block';
-  ['req-doc','req-name','req-email','req-notes'].forEach(id=>{document.getElementById(id).value='';});
+  document.getElementById('req-doc').value='';
+  document.getElementById('req-name').value='';
+  document.getElementById('req-notes').value='';
 }
 
-// ── MOBILE ─────────────────────────────────────────────────
+// ── MOBILE NAV ─────────────────────────────────────────────
 function toggleDrawer(){
   const d=document.getElementById('mob-drawer'),o=document.getElementById('mob-overlay');
   const open=d.classList.toggle('open');
