@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DocuLingua v1.0</title>
+<title>DocuLingua v1.1</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -14,27 +14,25 @@
   --green-bg:#dcfce7;--yellow-bg:#fef3c7;--red-bg:#fee2e2;--purple-bg:#ede9fe;--orange-bg:#ffedd5;
 }
 body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-*{box-sizing:border-box}
 
 /* LAYOUT */
-#app{height:100vh;overflow:hidden;display:flex;flex-direction:column}
+#app{height:100vh;display:flex;flex-direction:column;overflow:hidden}
 .layout{display:flex;flex:1;overflow:hidden}
 .sidebar{width:220px;background:var(--dark);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
 .sidebar-logo{padding:18px 20px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:10px}
 .s-icon{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#1e3a8a,#3b82f6);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:14px;flex-shrink:0}
-.sidebar-logo-text{flex:1}
 .sidebar-logo-text span{color:#fff;font-weight:800;font-size:15px;display:block}
 .sidebar-logo-text small{color:rgba(255,255,255,.3);font-size:10px}
-.sidebar-role{padding:14px 20px 6px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.3)}
-.sidebar-nav{flex:1;padding:8px}
-.nav-btn{width:100%;display:flex;align-items:center;gap:10px;padding:10px 12px;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;text-align:left;color:rgba(255,255,255,.5);background:transparent;transition:.15s;margin-bottom:2px}
+.sidebar-section{padding:12px 20px 4px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.25)}
+.sidebar-nav{padding:6px 8px}
+.nav-btn{width:100%;display:flex;align-items:center;gap:10px;padding:9px 12px;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;text-align:left;color:rgba(255,255,255,.5);background:transparent;transition:.15s;margin-bottom:2px}
 .nav-btn:hover{color:rgba(255,255,255,.8);background:rgba(255,255,255,.05)}
 .nav-btn.active{background:var(--brand);color:#fff}
 
 /* MOBILE */
 .mobile-topbar{display:none;background:var(--dark);padding:12px 16px;align-items:center;justify-content:space-between;flex-shrink:0}
 .m-logo{display:flex;align-items:center;gap:8px;color:#fff;font-weight:800;font-size:14px}
-.hamburger{background:none;border:none;color:rgba(255,255,255,.7);cursor:pointer;padding:6px;border-radius:6px}
+.hamburger{background:none;border:none;color:rgba(255,255,255,.7);cursor:pointer;padding:6px}
 .mobile-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200}
 .mobile-drawer{position:fixed;top:0;left:0;bottom:0;width:240px;background:var(--dark);z-index:201;display:flex;flex-direction:column;transform:translateX(-100%);transition:.25s}
 .mobile-drawer.open{transform:translateX(0)}
@@ -43,132 +41,136 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .main{flex:1;overflow-y:auto;background:var(--bg)}
 .page{display:none;padding:24px}
 .page.active{display:block}
-.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;gap:12px;flex-wrap:wrap}
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;gap:12px;flex-wrap:wrap}
 .page-title{font-size:22px;font-weight:800;color:var(--dark)}
 .page-sub{font-size:13px;color:var(--text3);margin-top:3px}
 
-/* KPI */
-.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
-.kpi-card{background:var(--white);border-radius:12px;padding:18px 20px;box-shadow:0 1px 3px rgba(0,0,0,.06);border-left:4px solid}
-.kpi-value{font-size:28px;font-weight:800;line-height:1}
-.kpi-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-top:8px}
-.kpi-sub{font-size:11px;color:var(--text3);margin-top:2px}
+/* KPI GRID — fixed 4 cols */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.kpi-card{background:var(--white);border-radius:12px;padding:16px 18px;box-shadow:0 1px 3px rgba(0,0,0,.07);border-left:4px solid;min-width:0}
+.kpi-value{font-size:26px;font-weight:800;line-height:1.1;word-break:break-all}
+.kpi-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-top:6px;color:var(--text);line-height:1.3}
+.kpi-sub{font-size:11px;color:var(--text3);margin-top:2px;line-height:1.3}
 
 /* LANG GRID */
-.lang-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
-.lang-card{background:var(--white);border-radius:12px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
-.lang-card-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
-.lang-pct{font-size:20px;font-weight:800;margin-left:auto}
-.lang-bar-wrap{background:#f1f5f9;border-radius:99px;height:6px;overflow:hidden}
+.lang-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.lang-card{background:var(--white);border-radius:12px;padding:14px 16px;box-shadow:0 1px 3px rgba(0,0,0,.07);min-width:0}
+.lang-head{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.lang-pct{font-size:18px;font-weight:800;margin-left:auto;white-space:nowrap}
+.lang-bar-wrap{background:#f1f5f9;border-radius:99px;height:5px;overflow:hidden;margin-bottom:8px}
 .lang-bar{height:100%;border-radius:99px;transition:.4s}
-.lang-stats-row{display:flex;gap:8px;flex-wrap:wrap;font-size:11px;margin-top:6px}
+.lang-stats{display:flex;gap:8px;flex-wrap:wrap;font-size:11px;font-weight:600}
 
 /* FILTERS */
-.filters-bar{background:var(--white);border-radius:12px;padding:14px 16px;box-shadow:0 1px 3px rgba(0,0,0,.06);margin-bottom:16px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-.filters-bar input,.filters-bar select{padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;outline:none;background:var(--white);color:var(--text)}
-.filters-bar input{flex:1;min-width:160px}
+.filters-bar{background:var(--white);border-radius:12px;padding:12px 14px;box-shadow:0 1px 3px rgba(0,0,0,.06);margin-bottom:14px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.filters-bar input,.filters-bar select{padding:7px 11px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;outline:none;background:var(--white);color:var(--text)}
+.filters-bar input{flex:1;min-width:150px}
 .filters-bar input:focus,.filters-bar select:focus{border-color:var(--brand)}
-.clear-btn{background:none;border:none;color:var(--brand);font-size:12px;font-weight:700;cursor:pointer}
+.clear-btn{background:none;border:none;color:var(--brand);font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}
 
 /* TABLE */
 .table-wrap{background:var(--white);border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.06);overflow:hidden}
 .table-scroll{overflow-x:auto}
 table{width:100%;border-collapse:collapse}
-thead th{padding:10px 14px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);background:#f8fafc;border-bottom:2px solid var(--border);white-space:nowrap;text-align:left}
-tbody td{padding:10px 14px;font-size:13px;border-bottom:1px solid #f8fafc;vertical-align:middle}
+thead th{padding:9px 12px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);background:#f8fafc;border-bottom:2px solid var(--border);white-space:nowrap;text-align:left}
+tbody td{padding:10px 12px;font-size:13px;border-bottom:1px solid #f8fafc;vertical-align:middle}
 tbody tr:last-child td{border-bottom:none}
 tbody tr:hover td{background:#f8fafc}
-.table-footer{padding:10px 14px;border-top:1px solid var(--border);font-size:12px;color:var(--text3)}
+.table-footer{padding:9px 14px;border-top:1px solid var(--border);font-size:12px;color:var(--text3)}
 
-/* BADGES */
-.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;white-space:nowrap}
+/* STATUS */
+.badge{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:99px;font-size:11px;font-weight:700;white-space:nowrap}
 .badge.completed{background:var(--green-bg);color:var(--green)}
 .badge.in_progress{background:var(--yellow-bg);color:var(--yellow)}
+.badge.needs_update{background:var(--orange-bg);color:var(--orange)}
 .badge.outdated{background:var(--purple-bg);color:var(--purple)}
 .badge.missing{background:var(--red-bg);color:var(--red)}
-.badge.needs_update{background:var(--orange-bg);color:var(--orange)}
-
-/* RECENCY BADGES */
-.recency-badge{display:inline-block;padding:2px 7px;border-radius:99px;font-size:10px;font-weight:700;white-space:nowrap;margin-left:4px}
-.recency-1m{background:#dcfce7;color:#15803d}
-.recency-3m{background:#d1fae5;color:#047857}
-.recency-6m{background:#e0f2fe;color:#0369a1}
-
-/* STATUS SELECT */
-.status-sel{border:none;border-radius:99px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;outline:none}
+.status-sel{border:none;border-radius:99px;padding:4px 9px;font-size:11px;font-weight:700;cursor:pointer;outline:none}
 .status-sel.completed{background:var(--green-bg);color:var(--green)}
 .status-sel.in_progress{background:var(--yellow-bg);color:var(--yellow)}
+.status-sel.needs_update{background:var(--orange-bg);color:var(--orange)}
 .status-sel.outdated{background:var(--purple-bg);color:var(--purple)}
 .status-sel.missing{background:var(--red-bg);color:var(--red)}
-.status-sel.needs_update{background:var(--orange-bg);color:var(--orange)}
+
+/* RECENCY */
+.rb{display:inline-block;padding:1px 7px;border-radius:99px;font-size:10px;font-weight:800;white-space:nowrap;margin-left:3px;vertical-align:middle}
+.rb-today{background:#fef08a;color:#854d0e}
+.rb-week{background:#fed7aa;color:#9a3412}
+.rb-1m{background:#dcfce7;color:#15803d}
+.rb-3m{background:#d1fae5;color:#047857}
+.rb-6m{background:#e0f2fe;color:#0369a1}
+
+/* CHANGELOG SIDEBAR ITEM */
+.cl-item{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;gap:10px}
+.cl-item:last-child{border-bottom:none}
+.cl-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.cl-meta{font-size:11px;color:var(--text3);margin-top:3px}
+.cl-notes{font-size:12px;color:var(--text2);margin-top:4px;font-style:italic}
 
 /* BUTTONS */
-.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;border:none;transition:.15s}
-.btn-sm{padding:5px 10px;font-size:11px;border-radius:7px}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:8px 14px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;border:none;transition:.15s;white-space:nowrap}
+.btn-sm{padding:4px 9px;font-size:11px;border-radius:7px}
 .btn-blue{background:var(--brand);color:#fff}.btn-blue:hover{background:var(--brand2)}
 .btn-gray{background:#f1f5f9;color:var(--text2)}.btn-gray:hover{background:var(--border)}
 .btn-ghost{background:transparent;color:var(--text3)}.btn-ghost:hover{background:#f1f5f9}
 .btn-orange{background:var(--orange-bg);color:var(--orange)}.btn-orange:hover{background:#fed7aa}
-.btn-green{background:var(--green-bg);color:var(--green)}.btn-green:hover{background:#bbf7d0}
 
 /* MODAL */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:center;justify-content:center;padding:16px}
 .modal-overlay.open{display:flex}
-.modal{background:var(--white);border-radius:16px;width:100%;max-width:560px;box-shadow:0 25px 50px rgba(0,0,0,.3);max-height:90vh;overflow-y:auto}
-.modal-header{padding:20px 24px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal{background:var(--white);border-radius:16px;width:100%;max-width:560px;box-shadow:0 25px 50px rgba(0,0,0,.3);max-height:92vh;overflow-y:auto}
+.modal-header{padding:18px 22px 14px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
 .modal-title{font-size:16px;font-weight:800}
-.modal-close{background:none;border:none;font-size:22px;color:var(--text3);cursor:pointer;padding:4px 8px;border-radius:6px}.modal-close:hover{background:var(--bg)}
-.modal-body{padding:20px 24px}
-.modal-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+.modal-close{background:none;border:none;font-size:22px;color:var(--text3);cursor:pointer;padding:2px 8px;border-radius:6px;flex-shrink:0}.modal-close:hover{background:var(--bg)}
+.modal-body{padding:18px 22px}
+.modal-footer{padding:14px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.form-field{margin-bottom:14px}
-.form-field label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);margin-bottom:6px}
-.form-field input,.form-field select,.form-field textarea{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;outline:none;background:var(--white);color:var(--text);font-family:inherit}
-.form-field input:focus,.form-field select:focus,.form-field textarea:focus{border-color:var(--brand)}
-.form-field textarea{resize:vertical;min-height:80px}
-.error-msg{background:#fee2e2;border:1px solid #fca5a5;color:#dc2626;font-size:12px;padding:10px 14px;border-radius:8px;margin-top:8px}
-.info-msg{background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8;font-size:12px;padding:10px 14px;border-radius:8px;margin-bottom:12px}
+.ff{margin-bottom:13px}
+.ff label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);margin-bottom:5px}
+.ff input,.ff select,.ff textarea{width:100%;padding:8px 11px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;outline:none;background:var(--white);color:var(--text);font-family:inherit}
+.ff input:focus,.ff select:focus,.ff textarea:focus{border-color:var(--brand)}
+.ff textarea{resize:vertical;min-height:70px}
+.err{background:#fee2e2;border:1px solid #fca5a5;color:#dc2626;font-size:12px;padding:9px 12px;border-radius:8px;margin-top:8px}
+.info{background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8;font-size:12px;padding:9px 12px;border-radius:8px;margin-bottom:12px}
 
 /* TABS */
-.tabs{display:flex;gap:2px;border-bottom:2px solid var(--border);margin-bottom:16px}
-.tab{padding:10px 16px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--text3);border-bottom:2px solid transparent;margin-bottom:-2px;transition:.15s}
+.tabs{display:flex;gap:2px;border-bottom:2px solid var(--border);margin-bottom:14px}
+.tab{padding:9px 14px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--text3);border-bottom:2px solid transparent;margin-bottom:-2px;transition:.15s}
 .tab.active{color:var(--brand);border-bottom-color:var(--brand)}
-.tab-content{display:none}.tab-content.active{display:block}
-
-/* CHANGELOG LIST */
-.changelog-item{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;gap:12px;align-items:flex-start}
-.changelog-item:last-child{border-bottom:none}
-.changelog-dot{width:8px;height:8px;border-radius:50%;background:var(--brand);flex-shrink:0;margin-top:5px}
-.changelog-meta{font-size:11px;color:var(--text3);margin-top:3px}
+.tab-pane{display:none}.tab-pane.active{display:block}
 
 /* MOBILE CARDS */
-.doc-cards{display:none;flex-direction:column;gap:12px}
-.doc-card{background:var(--white);border-radius:12px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
-.lang-pill{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:99px;font-size:11px;font-weight:700}
-.progress-bar-bg{background:#f1f5f9;border-radius:99px;height:5px;overflow:hidden}
-.progress-bar-fill{height:100%;border-radius:99px}
+.m-cards{display:none;flex-direction:column;gap:10px}
+.m-card{background:var(--white);border-radius:12px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.lang-pill{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:99px;font-size:11px;font-weight:700}
+.pb-bg{background:#f1f5f9;border-radius:99px;height:4px;overflow:hidden}
+.pb-fill{height:100%;border-radius:99px}
 
 /* TOAST */
-#toast{position:fixed;bottom:24px;right:24px;background:var(--dark);color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:999;opacity:0;transform:translateY(8px);transition:.25s;pointer-events:none}
+#toast{position:fixed;bottom:20px;right:20px;background:var(--dark);color:#fff;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;z-index:999;opacity:0;transform:translateY(6px);transition:.2s;pointer-events:none}
 #toast.show{opacity:1;transform:translateY(0)}
 
 /* LOADING */
-#loading{position:fixed;inset:0;background:var(--dark);display:flex;align-items:center;justify-content:center;z-index:999;flex-direction:column;gap:16px}
-.spinner{width:32px;height:32px;border:3px solid rgba(255,255,255,.2);border-top-color:#3b82f6;border-radius:50%;animation:spin .7s linear infinite}
-.spinner-sm{width:14px;height:14px;border:2px solid rgba(0,0,0,.2);border-top-color:var(--brand);border-radius:50%;animation:spin .7s linear infinite;display:inline-block;vertical-align:middle}
+#loading{position:fixed;inset:0;background:var(--dark);display:flex;align-items:center;justify-content:center;z-index:999;flex-direction:column;gap:14px}
+.spinner{width:30px;height:30px;border:3px solid rgba(255,255,255,.15);border-top-color:#3b82f6;border-radius:50%;animation:spin .7s linear infinite}
+.sp-sm{width:13px;height:13px;border:2px solid rgba(0,0,0,.15);border-top-color:var(--brand);border-radius:50%;animation:spin .7s linear infinite;display:inline-block;vertical-align:middle}
 @keyframes spin{to{transform:rotate(360deg)}}
 
+@media(max-width:900px){
+  .kpi-grid{grid-template-columns:1fr 1fr}
+  .lang-grid{grid-template-columns:1fr 1fr}
+}
 @media(max-width:768px){
   .sidebar{display:none}
   .mobile-topbar{display:flex}
-  .kpi-grid{grid-template-columns:1fr 1fr}
-  .lang-grid{grid-template-columns:1fr 1fr}
   .table-wrap .table-scroll table{display:none}
-  .doc-cards{display:flex}
-  .page{padding:16px}
+  .m-cards{display:flex}
+  .page{padding:14px}
   .page-title{font-size:18px}
 }
 @media(max-width:480px){
+  .kpi-grid{grid-template-columns:1fr 1fr}
+  .lang-grid{grid-template-columns:1fr 1fr}
   .form-row{grid-template-columns:1fr}
 }
 </style>
@@ -178,29 +180,29 @@ tbody tr:hover td{background:#f8fafc}
 <div id="loading">
   <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#1e3a8a,#3b82f6);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:20px;color:#fff">D</div>
   <div class="spinner"></div>
-  <div style="color:rgba(255,255,255,.4);font-size:13px">Caricamento…</div>
+  <div style="color:rgba(255,255,255,.4);font-size:12px">Caricamento…</div>
 </div>
 
-<div id="app" style="display:none;flex-direction:column;height:100vh;overflow:hidden">
+<div id="app" style="display:none">
 
   <!-- MOBILE TOPBAR -->
   <div class="mobile-topbar">
     <div class="m-logo">
       <div style="width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,#1e3a8a,#3b82f6);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;color:#fff">D</div>
-      DocuLingua <span style="font-size:10px;opacity:.5;margin-left:4px">v1.0</span>
+      DocuLingua <span style="font-size:10px;opacity:.4;margin-left:3px">v1.1</span>
     </div>
     <button class="hamburger" onclick="toggleDrawer()">
-      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M3 6h18M3 12h18M3 18h18"/></svg>
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M3 6h18M3 12h18M3 18h18"/></svg>
     </button>
   </div>
 
   <div class="mobile-overlay" id="mob-overlay" onclick="toggleDrawer()"></div>
   <div class="mobile-drawer" id="mob-drawer">
-    <div style="padding:16px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between">
+    <div style="padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between">
       <div style="display:flex;align-items:center;gap:8px"><div class="s-icon">D</div><span style="color:#fff;font-weight:800">DocuLingua</span></div>
       <button onclick="toggleDrawer()" style="background:none;border:none;color:rgba(255,255,255,.4);cursor:pointer;font-size:22px">×</button>
     </div>
-    <div class="sidebar-nav" id="mob-nav"></div>
+    <div id="mob-nav" style="padding:6px 8px"></div>
   </div>
 
   <div class="layout">
@@ -210,11 +212,13 @@ tbody tr:hover td{background:#f8fafc}
         <div class="s-icon">D</div>
         <div class="sidebar-logo-text">
           <span>DocuLingua</span>
-          <small>v1.0</small>
+          <small>v1.1</small>
         </div>
       </div>
-      <div class="sidebar-role">Gestione Traduzioni</div>
+      <div class="sidebar-section">Principale</div>
       <div class="sidebar-nav" id="desktop-nav"></div>
+      <div class="sidebar-section">Strumenti</div>
+      <div class="sidebar-nav" id="desktop-nav2"></div>
     </div>
 
     <!-- MAIN -->
@@ -232,15 +236,13 @@ tbody tr:hover td{background:#f8fafc}
         <div class="kpi-grid" id="kpi-grid"></div>
         <div class="lang-grid" id="lang-grid"></div>
         <div class="tabs">
-          <button class="tab active" onclick="switchTab('tab-docs','tab-bylang',this)">📋 Documenti</button>
-          <button class="tab" onclick="switchTab('tab-bylang','tab-docs',this)">🌍 Per lingua</button>
+          <button class="tab active" onclick="switchTab('tp-docs','tp-bylang',this)">📋 Documenti</button>
+          <button class="tab" onclick="switchTab('tp-bylang','tp-docs',this)">🌍 Per lingua</button>
         </div>
-        <div class="tab-content active" id="tab-docs">
+        <div class="tab-pane active" id="tp-docs">
           <div class="filters-bar">
             <input type="text" id="search-input" placeholder="🔍 Cerca documento…" oninput="renderTable()">
-            <select id="filter-cat" onchange="renderTable()">
-              <option value="">Tutte le categorie</option>
-            </select>
+            <select id="filter-cat" onchange="renderTable()"><option value="">Tutte le categorie</option></select>
             <select id="filter-status" onchange="renderTable()">
               <option value="">Tutti gli stati</option>
               <option value="missing">✗ Mancante</option>
@@ -265,59 +267,76 @@ tbody tr:hover td{background:#f8fafc}
               <table>
                 <thead><tr>
                   <th>Documento</th><th>Categoria</th><th>Ver.</th>
-                  <th>🇮🇹 IT</th><th>🇬🇧 EN</th><th>🇫🇷 FR</th><th>🇩🇪 DE</th>
+                  <th>🇮🇹 IT</th><th style="min-width:180px">📋 Ultimo aggiornamento</th>
+                  <th>🇬🇧 EN</th><th>🇫🇷 FR</th><th>🇩🇪 DE</th>
                   <th>%</th><th>Azioni</th>
                 </tr></thead>
                 <tbody id="docs-tbody"></tbody>
               </table>
             </div>
-            <div class="doc-cards" id="doc-cards-mobile"></div>
+            <div class="m-cards" id="m-cards"></div>
             <div class="table-footer" id="table-footer"></div>
           </div>
         </div>
-        <div class="tab-content" id="tab-bylang">
-          <div id="bylang-content"></div>
+        <div class="tab-pane" id="tp-bylang">
+          <div id="bylang-inline"></div>
         </div>
       </div>
 
-      <!-- PER LINGUA PAGE -->
+      <!-- STORICO MODIFICHE -->
+      <div class="page" id="page-storico">
+        <div class="page-header">
+          <div>
+            <div class="page-title">📋 Storico modifiche</div>
+            <div class="page-sub">Tutti gli aggiornamenti tracciati con note</div>
+          </div>
+        </div>
+        <div class="filters-bar">
+          <input type="text" id="cl-search" placeholder="🔍 Cerca documento o nota…" oninput="renderStorico()">
+          <select id="cl-cat" onchange="renderStorico()"><option value="">Tutte le categorie</option></select>
+        </div>
+        <div class="table-wrap" id="storico-wrap"></div>
+      </div>
+
+      <!-- PER LINGUA -->
       <div class="page" id="page-bylang">
         <div class="page-header">
-          <div><div class="page-title">Stato per lingua</div><div class="page-sub">Documenti da tradurre per ogni lingua</div></div>
+          <div>
+            <div class="page-title">🌍 Stato per lingua</div>
+            <div class="page-sub">Documenti da tradurre/aggiornare per ogni lingua</div>
+          </div>
         </div>
-        <div id="bylang-page-content"></div>
+        <div class="filters-bar">
+          <input type="text" id="bl-search" placeholder="🔍 Cerca documento…" oninput="renderByLangPage()">
+          <select id="bl-cat" onchange="renderByLangPage()"><option value="">Tutte le categorie</option></select>
+          <select id="bl-status" onchange="renderByLangPage()">
+            <option value="">Tutti gli stati (escluso Completata)</option>
+            <option value="missing">✗ Mancante</option>
+            <option value="in_progress">⏳ In corso</option>
+            <option value="needs_update">🔄 Da aggiornare</option>
+            <option value="outdated">↻ Obsoleta</option>
+          </select>
+        </div>
+        <div id="bylang-page"></div>
       </div>
 
       <!-- RICHIEDI FILE -->
       <div class="page" id="page-request">
         <div class="page-header">
-          <div><div class="page-title">📨 Richiedi file editabile</div><div class="page-sub">Richiedi la versione editabile italiana di un documento</div></div>
+          <div>
+            <div class="page-title">📨 Richiedi file editabile</div>
+            <div class="page-sub">Richiedi la versione editabile italiana di un documento</div>
+          </div>
         </div>
-        <div style="background:var(--white);border-radius:16px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,.06);max-width:600px">
-          <div class="info-msg">La richiesta verrà inviata via email a <strong>marco.torquato@edilkamin.com</strong></div>
-          <div class="form-field">
-            <label>Documento richiesto *</label>
-            <select id="req-doc">
-              <option value="">— Seleziona documento —</option>
-            </select>
-          </div>
-          <div class="form-field">
-            <label>Il tuo nome *</label>
-            <input type="text" id="req-name" placeholder="es. Marie Dupont">
-          </div>
-          <div class="form-field">
-            <label>La tua email *</label>
-            <input type="email" id="req-email" placeholder="es. marie@azienda.com">
-          </div>
-          <div class="form-field">
-            <label>Note aggiuntive</label>
-            <textarea id="req-notes" rows="3" placeholder="Motivazione della richiesta, urgenza, formato preferito…"></textarea>
-          </div>
-          <div id="req-error" class="error-msg" style="display:none"></div>
-          <div id="req-success" style="display:none;background:#dcfce7;border:1px solid #86efac;color:#15803d;font-size:13px;padding:12px 16px;border-radius:8px;margin-top:8px">
-            ✓ Richiesta inviata! Marco riceverà la tua email a breve.
-          </div>
-          <button class="btn btn-blue" style="margin-top:8px;width:100%" onclick="sendRequest()">📨 Invia richiesta</button>
+        <div style="background:var(--white);border-radius:16px;padding:24px;box-shadow:0 1px 3px rgba(0,0,0,.06);max-width:580px">
+          <div class="info">La richiesta verrà inviata via email a <strong>marco.torquato@edilkamin.com</strong></div>
+          <div class="ff"><label>Documento richiesto *</label><select id="req-doc"><option value="">— Seleziona —</option></select></div>
+          <div class="ff"><label>Il tuo nome *</label><input type="text" id="req-name" placeholder="es. Marie Dupont"></div>
+          <div class="ff"><label>La tua email *</label><input type="email" id="req-email" placeholder="es. marie@azienda.com"></div>
+          <div class="ff"><label>Note aggiuntive</label><textarea id="req-notes" rows="3" placeholder="Motivazione, urgenza, formato…"></textarea></div>
+          <div id="req-error" class="err" style="display:none"></div>
+          <div id="req-ok" style="display:none;background:#dcfce7;border:1px solid #86efac;color:#15803d;font-size:13px;padding:10px 14px;border-radius:8px;margin-top:8px">✓ Email aperta! Invia dal tuo client di posta.</div>
+          <button class="btn btn-blue" style="margin-top:10px;width:100%" onclick="sendRequest()">📨 Invia richiesta</button>
         </div>
       </div>
 
@@ -325,7 +344,7 @@ tbody tr:hover td{background:#f8fafc}
   </div>
 </div>
 
-<!-- DOCUMENT MODAL -->
+<!-- DOC MODAL -->
 <div class="modal-overlay" id="doc-modal">
   <div class="modal">
     <div class="modal-header">
@@ -334,25 +353,13 @@ tbody tr:hover td{background:#f8fafc}
     </div>
     <div class="modal-body">
       <input type="hidden" id="doc-id">
-      <div class="form-field">
-        <label>Nome documento *</label>
-        <input type="text" id="doc-name" placeholder="es. Manuale installazione Caldaia EK200">
-      </div>
+      <div class="ff"><label>Nome documento *</label><input type="text" id="doc-name" placeholder="es. Manuale Caldaia EK200"></div>
       <div class="form-row">
-        <div class="form-field">
-          <label>Categoria *</label>
-          <select id="doc-cat"></select>
-        </div>
-        <div class="form-field">
-          <label>Versione *</label>
-          <input type="text" id="doc-ver" placeholder="v1">
-        </div>
+        <div class="ff"><label>Categoria *</label><select id="doc-cat"></select></div>
+        <div class="ff"><label>Versione *</label><input type="text" id="doc-ver" placeholder="v1"></div>
       </div>
-      <div class="form-field">
-        <label>Data documento</label>
-        <input type="date" id="doc-desc">
-      </div>
-      <div id="doc-modal-error" class="error-msg" style="display:none"></div>
+      <div class="ff"><label>Data documento</label><input type="date" id="doc-desc"></div>
+      <div id="doc-err" class="err" style="display:none"></div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-gray" onclick="closeDocModal()">Annulla</button>
@@ -362,64 +369,51 @@ tbody tr:hover td{background:#f8fafc}
 </div>
 
 <!-- AGGIORNA MODAL -->
-<div class="modal-overlay" id="update-modal">
+<div class="modal-overlay" id="upd-modal">
   <div class="modal">
     <div class="modal-header">
       <div>
         <div class="modal-title">🔄 Aggiorna documento</div>
-        <div id="update-doc-name" style="font-size:12px;color:var(--text3);margin-top:4px"></div>
+        <div id="upd-doc-name" style="font-size:12px;color:var(--text3);margin-top:3px"></div>
       </div>
-      <button class="modal-close" onclick="closeUpdateModal()">×</button>
+      <button class="modal-close" onclick="closeUpdModal()">×</button>
     </div>
     <div class="modal-body">
-      <input type="hidden" id="update-doc-id">
-      <div class="info-msg">Le traduzioni esistenti (non Mancanti) verranno automaticamente impostate come «Da aggiornare».</div>
+      <input type="hidden" id="upd-doc-id">
+      <div class="info">Le traduzioni <strong>non Mancanti</strong> diventeranno automaticamente «Da aggiornare 🔄».</div>
       <div class="form-row">
-        <div class="form-field">
-          <label>Nuova versione *</label>
-          <input type="text" id="update-ver" placeholder="es. v2">
-        </div>
-        <div class="form-field">
-          <label>Data aggiornamento *</label>
-          <input type="date" id="update-date" value="2026-03-27">
-        </div>
+        <div class="ff"><label>Nuova versione *</label><input type="text" id="upd-ver" placeholder="es. v2"></div>
+        <div class="ff"><label>Data aggiornamento *</label><input type="date" id="upd-date" value="2026-03-27"></div>
       </div>
-      <div class="form-field">
-        <label>Changelog — Modifiche effettuate *</label>
-        <textarea id="update-changelog" rows="4" placeholder="Descrivi le modifiche apportate in questa versione…"></textarea>
-      </div>
-      <div id="update-error" class="error-msg" style="display:none"></div>
+      <div class="ff"><label>Changelog — cosa è cambiato *</label><textarea id="upd-changelog" rows="4" placeholder="Descrivi le modifiche di questa versione…"></textarea></div>
+      <div id="upd-err" class="err" style="display:none"></div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-gray" onclick="closeUpdateModal()">Annulla</button>
-      <button class="btn btn-orange" id="update-save-btn" onclick="saveUpdate()">🔄 Aggiorna</button>
+      <button class="btn btn-gray" onclick="closeUpdModal()">Annulla</button>
+      <button class="btn btn-orange" id="upd-save-btn" onclick="saveUpdate()">🔄 Aggiorna</button>
     </div>
   </div>
 </div>
 
-<!-- TRANSLATION DETAIL MODAL -->
+<!-- TR DETAIL MODAL -->
 <div class="modal-overlay" id="tr-modal">
-  <div class="modal" style="max-width:580px">
+  <div class="modal" style="max-width:600px">
     <div class="modal-header">
       <div class="modal-title">Dettaglio traduzione</div>
       <button class="modal-close" onclick="closeTrModal()">×</button>
     </div>
     <div class="modal-body">
-      <div id="tr-modal-doc-info" style="background:#f8fafc;border-radius:10px;padding:14px;margin-bottom:16px"></div>
-      <div class="form-field">
+      <div id="tr-doc-info" style="background:#f8fafc;border-radius:10px;padding:12px;margin-bottom:14px"></div>
+      <div class="ff">
         <label>Stato traduzione</label>
-        <div style="display:flex;flex-wrap:wrap;gap:8px" id="tr-modal-status-grid"></div>
+        <div style="display:flex;flex-wrap:wrap;gap:7px" id="tr-status-grid"></div>
       </div>
-      <div id="tr-modal-version-warn" style="display:none;background:var(--orange-bg);border:1px solid #fed7aa;color:var(--orange);font-size:12px;padding:10px 14px;border-radius:8px;margin-bottom:12px"></div>
-      <div class="form-field">
-        <label>Note interne</label>
-        <textarea id="tr-modal-notes" rows="3" placeholder="Aggiungi note, riferimenti, problemi…"></textarea>
-      </div>
-      <div id="tr-modal-updated" style="font-size:11px;color:var(--text3);margin-bottom:8px"></div>
-      <!-- CHANGELOG DOC -->
-      <div id="tr-modal-changelog-wrap" style="display:none">
+      <div id="tr-needs-warn" style="display:none;background:var(--orange-bg);border:1px solid #fed7aa;color:var(--orange);font-size:12px;padding:9px 12px;border-radius:8px;margin-bottom:12px"></div>
+      <div class="ff"><label>Note interne</label><textarea id="tr-notes" rows="3" placeholder="Note, riferimenti, problemi…"></textarea></div>
+      <div id="tr-updated" style="font-size:11px;color:var(--text3);margin-bottom:12px"></div>
+      <div id="tr-cl-wrap" style="display:none">
         <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);margin-bottom:8px">📋 Storico aggiornamenti documento</div>
-        <div id="tr-modal-changelog" style="background:#f8fafc;border-radius:8px;overflow:hidden;max-height:180px;overflow-y:auto"></div>
+        <div id="tr-cl" style="background:#f8fafc;border-radius:8px;overflow:hidden;max-height:200px;overflow-y:auto"></div>
       </div>
     </div>
     <div class="modal-footer">
@@ -432,83 +426,91 @@ tbody tr:hover td{background:#f8fafc}
 <div id="toast"></div>
 
 <script>
-const SUPABASE_URL = 'https://smhuniliucxtderrcfjc.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtaHVuaWxpdWN4dGRlcnJjZmpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MDU1MjAsImV4cCI6MjA5MDE4MTUyMH0.gHaZxhf569rw00H7mZfJglxfpKpEAZTbUtegsXUhJCc';
-const APP_VERSION  = 'v1.0';
-const { createClient } = supabase;
-const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+const SUPABASE_URL='https://smhuniliucxtderrcfjc.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtaHVuaWxpdWN4dGRlcnJjZmpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MDU1MjAsImV4cCI6MjA5MDE4MTUyMH0.gHaZxhf569rw00H7mZfJglxfpKpEAZTbUtegsXUhJCc';
+const APP_VER='v1.1';
+const {createClient}=supabase;
+const sb=createClient(SUPABASE_URL,SUPABASE_KEY);
 
-const LANGS = ['IT','EN','FR','DE'];
-const LANG_FLAGS = {IT:'🇮🇹',EN:'🇬🇧',FR:'🇫🇷',DE:'🇩🇪'};
-const LANG_NAMES = {IT:'Italiano',EN:'English',FR:'Français',DE:'Deutsch'};
-const STATUS = {
-  completed:    {label:'Completata',    icon:'✓',  color:'var(--green)',  bg:'var(--green-bg)'},
-  in_progress:  {label:'In corso',      icon:'⏳',  color:'var(--yellow)', bg:'var(--yellow-bg)'},
-  needs_update: {label:'Da aggiornare', icon:'🔄',  color:'var(--orange)', bg:'var(--orange-bg)'},
-  outdated:     {label:'Obsoleta',      icon:'↻',  color:'var(--purple)', bg:'var(--purple-bg)'},
-  missing:      {label:'Mancante',      icon:'✗',  color:'var(--red)',    bg:'var(--red-bg)'},
+const LANGS=['IT','EN','FR','DE'];
+const FLAGS={IT:'🇮🇹',EN:'🇬🇧',FR:'🇫🇷',DE:'🇩🇪'};
+const LNAMES={IT:'Italiano',EN:'English',FR:'Français',DE:'Deutsch'};
+const STATUS={
+  completed:   {l:'Completata',   i:'✓', c:'var(--green)',  bg:'var(--green-bg)'},
+  in_progress: {l:'In corso',     i:'⏳', c:'var(--yellow)', bg:'var(--yellow-bg)'},
+  needs_update:{l:'Da aggiornare',i:'🔄', c:'var(--orange)', bg:'var(--orange-bg)'},
+  outdated:    {l:'Obsoleta',     i:'↻', c:'var(--purple)', bg:'var(--purple-bg)'},
+  missing:     {l:'Mancante',     i:'✗', c:'var(--red)',    bg:'var(--red-bg)'},
 };
-const CATEGORIES = ["Allarmi", "Area Riservata", "Bollettini Tecnici - Modifiche prodotti", "Caldaie EK", "Camini a legna", "Circolari Vecchie", "Comandi remoti", "Componenti", "Corsi", "Documentazione tecnica", "Domoklima", "Dropbox", "Elettronica", "Parametri e Banche Dati", "Recapiti/Procedure"];
+const CATS=["Allarmi", "Area Riservata", "Bollettini Tecnici - Modifiche prodotti", "Caldaie EK", "Camini a legna", "Circolari Vecchie", "Comandi remoti", "Componenti", "Corsi", "Documentazione tecnica", "Domoklima", "Dropbox", "Elettronica", "Parametri e Banche Dati", "Recapiti/Procedure"];
 
-let allDocs = [];
-let allTranslations = [];
-let allChangelogs = [];
-let currentTrRow = null;
+let allDocs=[], allTr=[], allCL=[], curTr=null;
 
 // ── UTILS ──────────────────────────────────────────────────
-function toast(msg,dur=2500){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),dur);}
-function badge(status){const s=STATUS[status]||{label:status,icon:'–',color:'var(--gray)',bg:'#f1f5f9'};return `<span class="badge ${status}">${s.icon} ${s.label}</span>`;}
-function pctColor(p){return p===100?'var(--green)':p>=60?'var(--brand)':p>=30?'var(--yellow)':'var(--red)';}
-function progressBar(pct){const c=pctColor(pct);return `<div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${pct}%;background:${c}"></div></div>`;}
-function calcDocPct(docId){const ts=allTranslations.filter(t=>t.document_id===docId);if(!ts.length)return 0;return Math.round(ts.filter(t=>t.status==='completed').length/ts.length*100);}
-function getTranslation(docId,lang){return allTranslations.find(t=>t.document_id===docId&&t.language===lang);}
-function fmtDate(d){if(!d)return'–';return new Date(d).toLocaleDateString('it-IT');}
+function toast(m,d=2500){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d);}
 
-function recencyBadge(dateStr){
-  if(!dateStr) return '';
-  const d = new Date(dateStr);
-  const now = new Date();
-  const days = (now-d)/(1000*60*60*24);
-  if(days<=31)  return '<span class="recency-badge recency-1m">🟢 Ultimo mese</span>';
-  if(days<=92)  return '<span class="recency-badge recency-3m">🔵 Ultimi 3 mesi</span>';
-  if(days<=183) return '<span class="recency-badge recency-6m">⚪ Ultimi 6 mesi</span>';
-  return '';
+function recBadge(dateStr){
+  if(!dateStr)return'';
+  const d=new Date(dateStr), now=new Date();
+  const days=(now-d)/(86400000);
+  if(days<1) return'<span class="rb rb-today">OGGI</span>';
+  if(days<=7) return'<span class="rb rb-week">QUESTA SETTIMANA</span>';
+  if(days<=31) return'<span class="rb rb-1m">Ultimo mese</span>';
+  if(days<=92) return'<span class="rb rb-3m">Ultimi 3 mesi</span>';
+  if(days<=183)return'<span class="rb rb-6m">Ultimi 6 mesi</span>';
+  return'';
 }
+
+function badge(s){
+  const st=STATUS[s]||{l:s,i:'–',c:'var(--gray)',bg:'#f1f5f9'};
+  return`<span class="badge ${s}">${st.i} ${st.l}</span>`;
+}
+function pctC(p){return p===100?'var(--green)':p>=60?'var(--brand)':p>=30?'var(--yellow)':'var(--red)';}
+function pb(pct){const c=pctC(pct);return`<div class="pb-bg"><div class="pb-fill" style="width:${pct}%;background:${c}"></div></div>`;}
+function calcPct(docId){
+  const ts=allTr.filter(t=>t.document_id===docId);
+  return ts.length?Math.round(ts.filter(t=>t.status==='completed').length/ts.length*100):0;
+}
+function getTr(docId,lang){return allTr.find(t=>t.document_id===docId&&t.language===lang);}
+function fmt(d){if(!d)return'–';return new Date(d).toLocaleDateString('it-IT');}
+function lastCL(docId){return allCL.find(c=>c.document_id===docId);} // already sorted desc
 
 // ── INIT ───────────────────────────────────────────────────
 async function init(){
-  CATEGORIES.forEach(c=>{
-    document.getElementById('filter-cat').innerHTML+=`<option value="${c}">${c}</option>`;
-    document.getElementById('doc-cat').innerHTML+=`<option value="${c}">${c}</option>`;
+  CATS.forEach(c=>{
+    ['filter-cat','doc-cat','cl-cat','bl-cat'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el) el.innerHTML+=`<option value="${c}">${c}</option>`;
+    });
   });
 
-  const navHtml=`
+  const nav1=`
     <button class="nav-btn active" id="nav-dashboard" onclick="showPage('dashboard')">◈ Dashboard</button>
     <button class="nav-btn" id="nav-bylang" onclick="showPage('bylang')">🌍 Per lingua</button>
-    <button class="nav-btn" id="nav-request" onclick="showPage('request')">📨 Richiedi file</button>`;
-  document.getElementById('desktop-nav').innerHTML=navHtml;
-  document.getElementById('mob-nav').innerHTML=navHtml;
+    <button class="nav-btn" id="nav-storico" onclick="showPage('storico')">📋 Storico modifiche</button>`;
+  const nav2=`<button class="nav-btn" id="nav-request" onclick="showPage('request')">📨 Richiedi file</button>`;
+  document.getElementById('desktop-nav').innerHTML=nav1;
+  document.getElementById('desktop-nav2').innerHTML=nav2;
+  document.getElementById('mob-nav').innerHTML=nav1+nav2;
 
   await loadData();
   document.getElementById('loading').style.display='none';
   document.getElementById('app').style.display='flex';
+  document.getElementById('app').style.flexDirection='column';
+  document.getElementById('app').style.height='100vh';
+  document.getElementById('app').style.overflow='hidden';
 }
 
 async function loadData(){
-  const [{data:docs},{data:translations},{data:changelogs}] = await Promise.all([
+  const [{data:docs},{data:tr},{data:cl}]=await Promise.all([
     sb.from('documents').select('*').order('sort_order',{ascending:true,nullsFirst:false}),
     sb.from('translations').select('*'),
     sb.from('doc_changelogs').select('*').order('created_at',{ascending:false})
   ]);
-  allDocs = docs||[];
-  allTranslations = translations||[];
-  allChangelogs = changelogs||[];
-
-  // populate request doc select
-  const sel = document.getElementById('req-doc');
+  allDocs=docs||[]; allTr=tr||[]; allCL=cl||[];
+  const sel=document.getElementById('req-doc');
   sel.innerHTML='<option value="">— Seleziona documento —</option>';
   allDocs.forEach(d=>{sel.innerHTML+=`<option value="${d.id}">${d.name} (${d.category})</option>`;});
-
   renderDashboard();
 }
 
@@ -517,17 +519,18 @@ function showPage(name){
   document.getElementById('page-'+name).classList.add('active');
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   const nb=document.getElementById('nav-'+name);
-  if(nb) nb.classList.add('active');
-  if(name==='bylang') renderByLangPage();
+  if(nb)nb.classList.add('active');
+  if(name==='storico')renderStorico();
+  if(name==='bylang')renderByLangPage();
   closeDrawer();
 }
 
-function switchTab(showId,hideId,btn){
-  document.getElementById(showId).classList.add('active');
-  document.getElementById(hideId).classList.remove('active');
+function switchTab(a,b,btn){
+  document.getElementById(a).classList.add('active');
+  document.getElementById(b).classList.remove('active');
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   btn.classList.add('active');
-  if(showId==='tab-bylang') renderByLang();
+  if(a==='tp-bylang')renderByLangInline();
 }
 
 // ── DASHBOARD ──────────────────────────────────────────────
@@ -535,14 +538,14 @@ function renderDashboard(){renderKPIs();renderLangGrid();renderTable();}
 
 function renderKPIs(){
   const total=allDocs.length;
-  const complete=allDocs.filter(d=>calcDocPct(d.id)===100).length;
-  const missing=allDocs.filter(d=>allTranslations.some(t=>t.document_id===d.id&&t.status==='missing')).length;
-  const needsUpd=allDocs.filter(d=>allTranslations.some(t=>t.document_id===d.id&&t.status==='needs_update')).length;
+  const complete=allDocs.filter(d=>calcPct(d.id)===100).length;
+  const withMissing=allDocs.filter(d=>allTr.some(t=>t.document_id===d.id&&t.status==='missing')).length;
+  const needsUpd=allDocs.filter(d=>allTr.some(t=>t.document_id===d.id&&t.status==='needs_update')).length;
   document.getElementById('kpi-grid').innerHTML=[
-    {v:total,   l:'Documenti totali',s:'archivio IT master',    c:'#3b82f6'},
-    {v:complete,l:'Completi',        s:'100% tutte le lingue',  c:'#16a34a'},
-    {v:missing, l:'Con mancanze',    s:'1+ lingua assente',     c:'#dc2626'},
-    {v:needsUpd,l:'Da aggiornare',   s:'documento aggiornato',  c:'#ea580c'},
+    {v:total,    l:'Documenti totali', s:'archivio IT master',   c:'#3b82f6'},
+    {v:complete, l:'Completi',         s:'100% tutte le lingue', c:'#16a34a'},
+    {v:withMissing, l:'Con mancanze',  s:'1+ lingua assente',    c:'#dc2626'},
+    {v:needsUpd, l:'Da aggiornare',    s:'versione aggiornata',  c:'#ea580c'},
   ].map(k=>`<div class="kpi-card" style="border-left-color:${k.c}">
     <div class="kpi-value" style="color:${k.c}">${k.v}</div>
     <div class="kpi-label">${k.l}</div>
@@ -552,31 +555,35 @@ function renderKPIs(){
 
 function renderLangGrid(){
   document.getElementById('lang-grid').innerHTML=LANGS.map(lang=>{
-    const ts=allTranslations.filter(t=>t.language===lang);
-    const total=ts.length,comp=ts.filter(t=>t.status==='completed').length;
+    const ts=allTr.filter(t=>t.language===lang);
+    const total=ts.length;
+    const comp=ts.filter(t=>t.status==='completed').length;
     const inp=ts.filter(t=>t.status==='in_progress').length;
     const upd=ts.filter(t=>t.status==='needs_update').length;
     const miss=ts.filter(t=>t.status==='missing').length;
     const pct=total>0?Math.round(comp/total*100):0;
-    const c=pctColor(pct);
-    return `<div class="lang-card">
-      <div class="lang-card-header">
-        <span class="lang-flag" style="font-size:22px">${LANG_FLAGS[lang]}</span>
-        <div><div style="font-weight:800;font-size:13px">${lang}</div><div style="font-size:11px;color:var(--text3)">${LANG_NAMES[lang]}</div></div>
+    const c=pctC(pct);
+    return`<div class="lang-card">
+      <div class="lang-head">
+        <span style="font-size:20px">${FLAGS[lang]}</span>
+        <div style="min-width:0">
+          <div style="font-weight:800;font-size:13px">${lang}</div>
+          <div style="font-size:10px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${LNAMES[lang]}</div>
+        </div>
         <div class="lang-pct" style="color:${c}">${pct}%</div>
       </div>
       <div class="lang-bar-wrap"><div class="lang-bar" style="width:${pct}%;background:${c}"></div></div>
-      <div class="lang-stats-row">
-        ${comp?`<span style="color:var(--green)">✓${comp}</span>`:''}
-        ${inp?`<span style="color:var(--yellow)">⏳${inp}</span>`:''}
-        ${upd?`<span style="color:var(--orange)">🔄${upd}</span>`:''}
-        ${miss?`<span style="color:var(--red)">✗${miss}</span>`:''}
+      <div class="lang-stats">
+        ${comp?`<span style="color:var(--green)">✓ ${comp}</span>`:''}
+        ${inp?`<span style="color:var(--yellow)">⏳ ${inp}</span>`:''}
+        ${upd?`<span style="color:var(--orange)">🔄 ${upd}</span>`:''}
+        ${miss?`<span style="color:var(--red)">✗ ${miss}</span>`:''}
       </div>
     </div>`;
   }).join('');
 }
 
-function getFilteredDocs(){
+function getFiltered(){
   const q=document.getElementById('search-input')?.value.toLowerCase()||'';
   const cat=document.getElementById('filter-cat')?.value||'';
   const st=document.getElementById('filter-status')?.value||'';
@@ -584,7 +591,7 @@ function getFilteredDocs(){
   let docs=allDocs.filter(d=>{
     if(cat&&d.category!==cat)return false;
     if(q&&!d.name.toLowerCase().includes(q)&&!d.category.toLowerCase().includes(q))return false;
-    if(st&&!allTranslations.some(t=>t.document_id===d.id&&t.status===st))return false;
+    if(st&&!allTr.some(t=>t.document_id===d.id&&t.status===st))return false;
     return true;
   });
   if(srt==='name_asc')  return docs.slice().sort((a,b)=>a.name.localeCompare(b.name,'it'));
@@ -593,128 +600,216 @@ function getFilteredDocs(){
   if(srt==='cat_asc')   return docs.slice().sort((a,b)=>a.category.localeCompare(b.category,'it')||a.name.localeCompare(b.name,'it'));
   if(srt==='cat_desc')  return docs.slice().sort((a,b)=>b.category.localeCompare(a.category,'it')||a.name.localeCompare(b.name,'it'));
   if(srt==='default')   return docs.slice().sort((a,b)=>(a.sort_order??999)-(b.sort_order??999));
-  // date_desc (default)
   return docs.slice().sort((a,b)=>(b.description||'0').localeCompare(a.description||'0'));
 }
 
-function renderTable(){
-  const docs=getFilteredDocs();
+function clCell(docId){
+  const cl=lastCL(docId);
+  if(!cl)return'<span style="color:var(--text3);font-size:11px">–</span>';
+  const rb=recBadge(cl.date||cl.created_at);
+  return`<div style="max-width:200px">
+    <div style="font-size:11px;font-weight:700;color:var(--text)">${cl.version} · ${cl.date||''}</div>
+    <div style="font-size:11px;color:var(--text2);margin-top:2px;white-space:normal;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${cl.notes}</div>
+    ${rb}
+  </div>`;
+}
 
+function renderTable(){
+  const docs=getFiltered();
   document.getElementById('docs-tbody').innerHTML=docs.map(doc=>{
-    const pct=calcDocPct(doc.id);
-    const pc=pctColor(pct);
-    const rb=recencyBadge(doc.description);
-    const langCols=LANGS.map(l=>{
-      const t=getTranslation(doc.id,l);
+    const pct=calcPct(doc.id);
+    const pc=pctC(pct);
+    const rb=recBadge(doc.description);
+    const langCols=['EN','FR','DE'].map(l=>{
+      const t=getTr(doc.id,l);
       if(!t)return'<td>–</td>';
-      if(l==='IT')return`<td>${badge('completed')}</td>`;
       const s=t.status;
       return`<td>
-        <select class="status-sel ${s}" onchange="quickStatusChange('${t.id}','${doc.id}',this)">
-          ${Object.entries(STATUS).map(([k,v])=>`<option value="${k}" ${s===k?'selected':''}>${v.icon} ${v.label}</option>`).join('')}
+        <select class="status-sel ${s}" onchange="qSC('${t.id}','${doc.id}',this)">
+          ${Object.entries(STATUS).map(([k,v])=>`<option value="${k}" ${s===k?'selected':''}>${v.i} ${v.l}</option>`).join('')}
         </select>
       </td>`;
     }).join('');
     return`<tr>
       <td>
-        <div style="font-weight:600;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${doc.name}">${doc.name}</div>
-        <div style="display:flex;align-items:center;gap:4px;margin-top:3px">
-          ${doc.description?`<span style="font-size:11px;color:var(--text3)">${doc.description}</span>`:''}
-          ${rb}
-        </div>
+        <div style="font-weight:600;max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${doc.name}">${doc.name}</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px">${doc.description||''} ${rb}</div>
       </td>
       <td style="font-size:12px;color:var(--text2)">${doc.category}</td>
-      <td><span style="font-family:monospace;font-size:11px;background:#f1f5f9;padding:3px 8px;border-radius:5px;font-weight:700">${doc.version}</span></td>
+      <td><span style="font-family:monospace;font-size:11px;background:#f1f5f9;padding:2px 7px;border-radius:5px;font-weight:700">${doc.version}</span></td>
+      <td>${badge('completed')}</td>
+      <td>${clCell(doc.id)}</td>
       ${langCols}
       <td>
-        <div style="font-size:11px;font-weight:700;color:${pc};margin-bottom:3px">${pct}%</div>
-        ${progressBar(pct)}
+        <div style="font-size:11px;font-weight:700;color:${pc};margin-bottom:2px">${pct}%</div>
+        ${pb(pct)}
       </td>
       <td>
-        <div style="display:flex;gap:4px;flex-wrap:wrap">
+        <div style="display:flex;gap:3px;flex-wrap:nowrap">
           <button class="btn btn-gray btn-sm" onclick='openDocModal(${JSON.stringify(doc)})'>✏️</button>
-          <button class="btn btn-orange btn-sm" onclick='openUpdateModal(${JSON.stringify(doc)})'>🔄 Aggiorna</button>
-          <button class="btn btn-ghost btn-sm" onclick="deleteDoc('${doc.id}')">🗑️</button>
+          <button class="btn btn-orange btn-sm" onclick='openUpdModal(${JSON.stringify(doc)})'>🔄</button>
+          <button class="btn btn-ghost btn-sm" onclick="delDoc('${doc.id}')">🗑️</button>
         </div>
       </td>
     </tr>`;
-  }).join('')||'<tr><td colspan="9" style="text-align:center;padding:40px;color:var(--text3)">Nessun documento trovato</td></tr>';
+  }).join('')||'<tr><td colspan="10" style="text-align:center;padding:36px;color:var(--text3)">Nessun documento trovato</td></tr>';
 
-  // Mobile cards
-  document.getElementById('doc-cards-mobile').innerHTML=docs.map(doc=>{
-    const pct=calcDocPct(doc.id);
-    const pc=pctColor(pct);
-    const rb=recencyBadge(doc.description);
+  document.getElementById('m-cards').innerHTML=docs.map(doc=>{
+    const pct=calcPct(doc.id);
+    const pc=pctC(pct);
+    const rb=recBadge(doc.description);
+    const cl=lastCL(doc.id);
     const pills=LANGS.map(l=>{
-      const t=getTranslation(doc.id,l);
+      const t=getTr(doc.id,l);
       const s=t?.status||'missing';
       const sc=STATUS[s]||{};
-      return`<span class="lang-pill" style="background:${sc.bg};color:${sc.color}">${LANG_FLAGS[l]} ${l} ${sc.icon}</span>`;
+      return`<span class="lang-pill" style="background:${sc.bg};color:${sc.c}">${FLAGS[l]} ${l} ${sc.i}</span>`;
     }).join('');
-    return`<div class="doc-card">
-      <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;margin-bottom:4px">
-        <div><div style="font-weight:700;font-size:14px;color:var(--dark)">${doc.name}</div>
+    return`<div class="m-card">
+      <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;margin-bottom:6px">
+        <div style="min-width:0"><div style="font-weight:700;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${doc.name}</div>
           <div style="font-size:11px;color:var(--text3)">${doc.category} · ${doc.description||''} ${rb}</div>
         </div>
-        <span style="font-family:monospace;font-size:11px;background:#f1f5f9;padding:3px 8px;border-radius:5px;font-weight:700;flex-shrink:0">${doc.version}</span>
+        <span style="font-family:monospace;font-size:11px;background:#f1f5f9;padding:2px 7px;border-radius:5px;font-weight:700;flex-shrink:0">${doc.version}</span>
       </div>
-      <div style="display:flex;flex-wrap:wrap;gap:6px;margin:10px 0">${pills}</div>
+      ${cl?`<div style="background:var(--orange-bg);border-radius:8px;padding:8px 10px;margin-bottom:8px;font-size:11px"><strong style="color:var(--orange)">📋 ${cl.version}</strong> <span style="color:var(--text2)">${cl.notes}</span></div>`:''}
+      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px">${pills}</div>
       <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
         <div style="flex:1">
-          <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px;color:var(--text3)">
-            <span>Completamento</span><span style="font-weight:700;color:${pc}">${pct}%</span>
-          </div>
-          ${progressBar(pct)}
+          <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px;color:var(--text3)"><span>Completamento</span><span style="font-weight:700;color:${pc}">${pct}%</span></div>
+          ${pb(pct)}
         </div>
-        <div style="display:flex;gap:4px">
+        <div style="display:flex;gap:3px">
           <button class="btn btn-gray btn-sm" onclick='openDocModal(${JSON.stringify(doc)})'>✏️</button>
-          <button class="btn btn-orange btn-sm" onclick='openUpdateModal(${JSON.stringify(doc)})'>🔄</button>
-          <button class="btn btn-ghost btn-sm" onclick="deleteDoc('${doc.id}')">🗑️</button>
+          <button class="btn btn-orange btn-sm" onclick='openUpdModal(${JSON.stringify(doc)})'>🔄</button>
+          <button class="btn btn-ghost btn-sm" onclick="delDoc('${doc.id}')">🗑️</button>
         </div>
       </div>
     </div>`;
-  }).join('')||'<div style="text-align:center;padding:40px;color:var(--text3)">Nessun documento trovato</div>';
+  }).join('');
 
   document.getElementById('table-footer').textContent=`${docs.length} documenti su ${allDocs.length} totali`;
 }
 
-function renderByLang(){document.getElementById('bylang-content').innerHTML=buildByLangHTML();}
-function renderByLangPage(){document.getElementById('bylang-page-content').innerHTML=buildByLangHTML();}
+function clearFilters(){
+  document.getElementById('search-input').value='';
+  document.getElementById('filter-cat').value='';
+  document.getElementById('filter-status').value='';
+  document.getElementById('sort-key').value='date_desc';
+  renderTable();
+}
+
+// ── STORICO ────────────────────────────────────────────────
+function renderStorico(){
+  const q=(document.getElementById('cl-search')?.value||'').toLowerCase();
+  const cat=document.getElementById('cl-cat')?.value||'';
+  const items=allCL.filter(cl=>{
+    const doc=allDocs.find(d=>d.id===cl.document_id);
+    if(!doc)return false;
+    if(cat&&doc.category!==cat)return false;
+    if(q&&!doc.name.toLowerCase().includes(q)&&!(cl.notes||'').toLowerCase().includes(q))return false;
+    return true;
+  });
+  const wrap=document.getElementById('storico-wrap');
+  if(!items.length){wrap.innerHTML='<div style="padding:40px;text-align:center;color:var(--text3)">Nessuna modifica registrata</div>';return;}
+  wrap.innerHTML=`<div>${items.map(cl=>{
+    const doc=allDocs.find(d=>d.id===cl.document_id);
+    const rb=recBadge(cl.date||cl.created_at);
+    return`<div class="cl-item">
+      <div class="cl-dot" style="background:var(--brand)"></div>
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+          <span style="font-weight:700;font-size:13px">${doc?.name||'–'}</span>
+          <span style="font-family:monospace;font-size:11px;background:#f1f5f9;padding:1px 6px;border-radius:4px;font-weight:700">${cl.version}</span>
+          ${rb}
+        </div>
+        <div class="cl-meta">${doc?.category||''} · ${cl.date||''} · Registrato: ${fmt(cl.created_at)}</div>
+        <div class="cl-notes">${cl.notes}</div>
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+// ── PER LINGUA ─────────────────────────────────────────────
+function renderByLangInline(){document.getElementById('bylang-inline').innerHTML=buildByLangHTML();}
+function renderByLangPage(){document.getElementById('bylang-page').innerHTML=buildByLangHTML();}
+
 function buildByLangHTML(){
-  return LANGS.map(lang=>{
-    const ts=allTranslations.filter(t=>t.language===lang&&t.status!=='completed');
-    const tot=allTranslations.filter(t=>t.language===lang).length;
-    const comp=tot-ts.length;
-    const pct=tot>0?Math.round(comp/tot*100):0;
-    const c=pctColor(pct);
-    const rows=ts.slice(0,15).map(t=>{
+  const q=(document.getElementById('bl-search')?.value||'').toLowerCase();
+  const cat=document.getElementById('bl-cat')?.value||'';
+  const fst=document.getElementById('bl-status')?.value||'';
+
+  return['EN','FR','DE'].map(lang=>{
+    const allLangTr=allTr.filter(t=>t.language===lang);
+    const total=allLangTr.length;
+    const comp=allLangTr.filter(t=>t.status==='completed').length;
+    const pct=total>0?Math.round(comp/total*100):0;
+    const c=pctC(pct);
+
+    // filtered non-complete rows
+    const rows=allLangTr.filter(t=>{
+      if(t.status==='completed')return false;
+      if(fst&&t.status!==fst)return false;
+      const doc=allDocs.find(d=>d.id===t.document_id);
+      if(!doc)return false;
+      if(cat&&doc.category!==cat)return false;
+      if(q&&!doc.name.toLowerCase().includes(q))return false;
+      return true;
+    });
+
+    const tableRows=rows.map(t=>{
       const doc=allDocs.find(d=>d.id===t.document_id);
       if(!doc)return'';
-      return`<tr><td style="font-weight:600">${doc.name}</td><td style="font-size:12px;color:var(--text2)">${doc.category}</td><td>${badge(t.status)}</td><td style="font-size:12px;color:var(--text3)">${fmtDate(t.last_updated)}</td></tr>`;
+      const cl=lastCL(doc.id);
+      return`<tr>
+        <td style="font-weight:600;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${doc.name}">${doc.name}</td>
+        <td style="font-size:12px;color:var(--text2)">${doc.category}</td>
+        <td>${badge(t.status)}</td>
+        <td>${cl?`<div style="font-size:11px"><strong>${cl.version}</strong> · ${cl.date||''}<br><span style="color:var(--text2)">${cl.notes.length>60?cl.notes.slice(0,60)+'…':cl.notes}</span></div>`:'–'}</td>
+        <td style="font-size:11px;color:var(--text3)">${fmt(t.last_updated)}</td>
+        <td><button class="btn btn-gray btn-sm" onclick="openTrModal('${t.id}')">✏️ Apri</button></td>
+      </tr>`;
     }).join('');
+
     return`<div class="table-wrap" style="margin-bottom:16px">
-      <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;flex-wrap:wrap">
-        <span style="font-size:26px">${LANG_FLAGS[lang]}</span>
-        <div><div style="font-weight:800;font-size:15px">${LANG_NAMES[lang]}</div>
-          ${lang==='IT'?'<div style="font-size:12px;color:var(--text3)">Lingua master</div>':''}</div>
-        <div style="margin-left:auto;text-align:right">
-          <div style="font-size:22px;font-weight:800;color:${c}">${pct}%</div>
-          <div style="font-size:11px;color:var(--text3)">${comp}/${tot} completate</div>
+      <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <span style="font-size:24px">${FLAGS[lang]}</span>
+        <div>
+          <div style="font-weight:800;font-size:15px">${LNAMES[lang]}</div>
+          <div style="font-size:12px;color:var(--text3)">${comp}/${total} completate</div>
+        </div>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
+          <div style="text-align:right">
+            <div style="font-size:20px;font-weight:800;color:${c}">${pct}%</div>
+          </div>
+          <div style="width:48px;height:48px;position:relative;flex-shrink:0">
+            <svg viewBox="0 0 48 48" style="transform:rotate(-90deg);width:48px;height:48px">
+              <circle cx="24" cy="24" r="18" fill="none" stroke="#e2e8f0" stroke-width="6"/>
+              <circle cx="24" cy="24" r="18" fill="none" stroke="${c}" stroke-width="6"
+                stroke-dasharray="${(pct/100)*113} 113" stroke-linecap="round"/>
+            </svg>
+          </div>
         </div>
       </div>
-      ${lang!=='IT'&&ts.length>0?`<div class="table-scroll"><table><thead><tr><th>Documento</th><th>Categoria</th><th>Stato</th><th>Aggiornato</th></tr></thead><tbody>${rows}</tbody></table></div>${ts.length>15?`<div style="padding:10px 16px;font-size:12px;color:var(--text3)">…e altri ${ts.length-15} documenti</div>`:''}`:''}
-      ${lang==='IT'?'<div style="padding:14px 20px;color:var(--green);font-weight:600;font-size:13px">✓ Lingua master — sempre completa</div>':''}
-      ${lang!=='IT'&&ts.length===0?'<div style="padding:14px 20px;color:var(--green);font-weight:600;font-size:13px">✓ Tutte le traduzioni sono complete</div>':''}
+      ${rows.length>0?`
+        <div class="table-scroll">
+          <table><thead><tr>
+            <th>Documento</th><th>Categoria</th><th>Stato</th><th>📋 Ultimo changelog</th><th>Aggiornato</th><th></th>
+          </tr></thead>
+          <tbody>${tableRows}</tbody></table>
+        </div>
+        <div class="table-footer">${rows.length} documenti da lavorare</div>
+      `:'<div style="padding:14px 18px;color:var(--green);font-weight:600;font-size:13px">✓ Tutte le traduzioni sono aggiornate</div>'}
     </div>`;
   }).join('');
 }
 
 // ── STATUS CHANGE ──────────────────────────────────────────
-async function quickStatusChange(trId,docId,sel){
+async function qSC(trId,docId,sel){
   const status=sel.value;
   sel.className=`status-sel ${status}`;
   await sb.from('translations').update({status,last_updated:new Date().toISOString()}).eq('id',trId);
-  const t=allTranslations.find(t=>t.id===trId);
+  const t=allTr.find(t=>t.id===trId);
   if(t){t.status=status;t.last_updated=new Date().toISOString();}
   renderKPIs();renderLangGrid();
   toast('✓ Stato aggiornato');
@@ -722,7 +817,7 @@ async function quickStatusChange(trId,docId,sel){
 
 // ── DOCUMENT CRUD ──────────────────────────────────────────
 function openDocModal(doc){
-  document.getElementById('doc-modal-error').style.display='none';
+  document.getElementById('doc-err').style.display='none';
   if(doc){
     document.getElementById('doc-modal-title').textContent='Modifica documento';
     document.getElementById('doc-save-btn').textContent='Salva modifiche';
@@ -748,11 +843,11 @@ async function saveDoc(){
   const name=document.getElementById('doc-name').value.trim();
   const cat=document.getElementById('doc-cat').value;
   const ver=document.getElementById('doc-ver').value.trim();
-  const desc=document.getElementById('doc-desc').value.trim();
-  const errEl=document.getElementById('doc-modal-error');
+  const desc=document.getElementById('doc-desc').value;
+  const errEl=document.getElementById('doc-err');
   if(!name||!cat||!ver){errEl.textContent='Compila tutti i campi obbligatori';errEl.style.display='block';return;}
   const btn=document.getElementById('doc-save-btn');
-  btn.innerHTML='<span class="spinner-sm"></span> Salvataggio…';btn.disabled=true;
+  btn.innerHTML='<span class="sp-sm"></span> Salvataggio…';btn.disabled=true;
   let error;
   if(id){({error}=await sb.from('documents').update({name,category:cat,version:ver,description:desc,updated_at:new Date().toISOString()}).eq('id',id));}
   else{({error}=await sb.from('documents').insert({name,category:cat,version:ver,description:desc}));}
@@ -763,144 +858,122 @@ async function saveDoc(){
   await loadData();
 }
 
-async function deleteDoc(id){
+async function delDoc(id){
   if(!confirm('Eliminare questo documento e tutte le sue traduzioni?'))return;
   await sb.from('documents').delete().eq('id',id);
-  toast('✓ Documento eliminato');
+  toast('✓ Eliminato');
   await loadData();
 }
 
-function clearFilters(){
-  document.getElementById('search-input').value='';
-  document.getElementById('filter-cat').value='';
-  document.getElementById('filter-status').value='';
-  document.getElementById('sort-key').value='date_desc';
-  renderTable();
+// ── AGGIORNA ───────────────────────────────────────────────
+function openUpdModal(doc){
+  document.getElementById('upd-err').style.display='none';
+  document.getElementById('upd-doc-id').value=doc.id;
+  document.getElementById('upd-doc-name').textContent=doc.name+' ('+doc.version+')';
+  document.getElementById('upd-ver').value='';
+  document.getElementById('upd-date').value='2026-03-27';
+  document.getElementById('upd-changelog').value='';
+  document.getElementById('upd-modal').classList.add('open');
 }
-
-// ── AGGIORNA DOCUMENTO ─────────────────────────────────────
-function openUpdateModal(doc){
-  document.getElementById('update-error').style.display='none';
-  document.getElementById('update-doc-id').value=doc.id;
-  document.getElementById('update-doc-name').textContent=doc.name;
-  document.getElementById('update-ver').value='';
-  document.getElementById('update-date').value='2026-03-27';
-  document.getElementById('update-changelog').value='';
-  document.getElementById('update-modal').classList.add('open');
-}
-function closeUpdateModal(){document.getElementById('update-modal').classList.remove('open');}
+function closeUpdModal(){document.getElementById('upd-modal').classList.remove('open');}
 
 async function saveUpdate(){
-  const docId=document.getElementById('update-doc-id').value;
-  const ver=document.getElementById('update-ver').value.trim();
-  const date=document.getElementById('update-date').value;
-  const changelog=document.getElementById('update-changelog').value.trim();
-  const errEl=document.getElementById('update-error');
-  if(!ver||!changelog){errEl.textContent='Inserisci versione e changelog';errEl.style.display='block';return;}
-  const btn=document.getElementById('update-save-btn');
-  btn.innerHTML='<span class="spinner-sm"></span> Aggiornamento…';btn.disabled=true;
+  const docId=document.getElementById('upd-doc-id').value;
+  const ver=document.getElementById('upd-ver').value.trim();
+  const date=document.getElementById('upd-date').value;
+  const notes=document.getElementById('upd-changelog').value.trim();
+  const errEl=document.getElementById('upd-err');
+  if(!ver||!notes){errEl.textContent='Inserisci versione e changelog';errEl.style.display='block';return;}
+  const btn=document.getElementById('upd-save-btn');
+  btn.innerHTML='<span class="sp-sm"></span> Aggiornamento…';btn.disabled=true;
   errEl.style.display='none';
 
-  // 1. Update document
-  const {error:e1}=await sb.from('documents').update({
-    version:ver, description:date, updated_at:new Date().toISOString()
-  }).eq('id',docId);
+  const {error:e1}=await sb.from('documents').update({version:ver,description:date,updated_at:new Date().toISOString()}).eq('id',docId);
   if(e1){errEl.textContent=e1.message;errEl.style.display='block';btn.textContent='🔄 Aggiorna';btn.disabled=false;return;}
 
-  // 2. Save changelog
-  await sb.from('doc_changelogs').insert({
-    document_id:docId, version:ver, date:date, notes:changelog, created_at:new Date().toISOString()
-  });
+  await sb.from('doc_changelogs').insert({document_id:docId,version:ver,date,notes,created_at:new Date().toISOString()});
 
-  // 3. Mark non-missing translations as needs_update
-  const toUpdate=allTranslations.filter(t=>t.document_id===docId&&t.language!=='IT'&&t.status!=='missing');
-  for(const t of toUpdate){
+  const toUpd=allTr.filter(t=>t.document_id===docId&&t.language!=='IT'&&t.status!=='missing');
+  for(const t of toUpd){
     await sb.from('translations').update({status:'needs_update',last_updated:new Date().toISOString()}).eq('id',t.id);
   }
 
   btn.textContent='🔄 Aggiorna';btn.disabled=false;
-  closeUpdateModal();
+  closeUpdModal();
   toast('✓ Documento aggiornato — traduzioni segnalate');
   await loadData();
 }
 
-// ── TRANSLATION DETAIL MODAL ───────────────────────────────
+// ── TR DETAIL MODAL ────────────────────────────────────────
 function openTrModal(trId){
-  const t=allTranslations.find(x=>x.id===trId);
+  const t=allTr.find(x=>x.id===trId);
   const doc=allDocs.find(d=>d.id===t?.document_id);
   if(!t||!doc)return;
-  currentTrRow=t;
-  document.getElementById('tr-modal-doc-info').innerHTML=`
+  curTr=t;
+  document.getElementById('tr-doc-info').innerHTML=`
     <div style="font-weight:700;font-size:14px;margin-bottom:6px">${doc.name}</div>
-    <div style="display:flex;gap:10px;font-size:12px;color:var(--text2);flex-wrap:wrap">
+    <div style="display:flex;gap:8px;font-size:12px;color:var(--text2);flex-wrap:wrap">
       <span>📁 ${doc.category}</span>
-      <span style="font-family:monospace;background:#f1f5f9;padding:2px 8px;border-radius:5px;font-weight:700">${doc.version}</span>
+      <span style="font-family:monospace;background:#f1f5f9;padding:1px 7px;border-radius:5px;font-weight:700">${doc.version}</span>
       ${doc.description?`<span>📅 ${doc.description}</span>`:''}
     </div>`;
-  document.getElementById('tr-modal-status-grid').innerHTML=Object.entries(STATUS).map(([s,cfg])=>`
+  document.getElementById('tr-status-grid').innerHTML=Object.entries(STATUS).map(([s,cfg])=>`
     <button class="btn btn-sm" id="sc-${s}"
-      style="color:${cfg.color};border:2px solid ${t.status===s?cfg.color:'var(--border)'};background:${t.status===s?cfg.bg:'white'}"
-      onclick="selectTrStatus('${s}')">
-      ${cfg.icon} ${cfg.label}
+      style="color:${cfg.c};border:2px solid ${t.status===s?cfg.c:'var(--border)'};background:${t.status===s?cfg.bg:'white'}"
+      onclick="selTrStatus('${s}')">
+      ${cfg.i} ${cfg.l}
     </button>`).join('');
-  const vw=document.getElementById('tr-modal-version-warn');
-  vw.style.display='none';
-  if(t.status==='needs_update'){
-    vw.textContent=`🔄 Documento aggiornato — questa traduzione deve essere rivista.`;
-    vw.style.display='block';
-  }
-  document.getElementById('tr-modal-notes').value=t.notes||'';
-  document.getElementById('tr-modal-updated').textContent=`Aggiornato: ${new Date(t.last_updated).toLocaleString('it-IT')}`;
-
-  // Changelog
-  const logs=allChangelogs.filter(c=>c.document_id===doc.id);
-  const clWrap=document.getElementById('tr-modal-changelog-wrap');
+  const nw=document.getElementById('tr-needs-warn');
+  nw.style.display=t.status==='needs_update'?'block':'none';
+  if(t.status==='needs_update')nw.textContent='🔄 Documento aggiornato — rivedere questa traduzione.';
+  document.getElementById('tr-notes').value=t.notes||'';
+  document.getElementById('tr-updated').textContent=`Aggiornato: ${new Date(t.last_updated).toLocaleString('it-IT')}`;
+  const logs=allCL.filter(c=>c.document_id===doc.id);
+  const clw=document.getElementById('tr-cl-wrap');
   if(logs.length>0){
-    clWrap.style.display='block';
-    document.getElementById('tr-modal-changelog').innerHTML=logs.map(l=>`
-      <div class="changelog-item">
-        <div class="changelog-dot"></div>
+    clw.style.display='block';
+    document.getElementById('tr-cl').innerHTML=logs.map(l=>`
+      <div class="cl-item">
+        <div class="cl-dot" style="background:var(--brand)"></div>
         <div>
-          <div style="font-size:13px;font-weight:600">${l.notes}</div>
-          <div class="changelog-meta">Versione ${l.version} · ${l.date} · ${fmtDate(l.created_at)}</div>
+          <div style="font-size:12px;font-weight:700">${l.notes}</div>
+          <div class="cl-meta">Versione ${l.version} · ${l.date||''} · ${fmt(l.created_at)}</div>
         </div>
       </div>`).join('');
-  }else{clWrap.style.display='none';}
-
+  }else clw.style.display='none';
   document.getElementById('tr-modal').classList.add('open');
 }
 
-function selectTrStatus(s){
-  if(!currentTrRow)return;
-  currentTrRow.status=s;
+function selTrStatus(s){
+  if(!curTr)return;
+  curTr.status=s;
   Object.keys(STATUS).forEach(k=>{
     const el=document.getElementById('sc-'+k);
     if(!el)return;
-    const cfg=STATUS[k];
-    el.style.borderColor=k===s?cfg.color:'var(--border)';
-    el.style.background=k===s?cfg.bg:'white';
+    el.style.borderColor=k===s?STATUS[k].c:'var(--border)';
+    el.style.background=k===s?STATUS[k].bg:'white';
   });
-  sb.from('translations').update({status:s,last_updated:new Date().toISOString()}).eq('id',currentTrRow.id);
-  const t=allTranslations.find(x=>x.id===currentTrRow.id);
+  sb.from('translations').update({status:s,last_updated:new Date().toISOString()}).eq('id',curTr.id);
+  const t=allTr.find(x=>x.id===curTr.id);
   if(t){t.status=s;t.last_updated=new Date().toISOString();}
   renderKPIs();renderLangGrid();renderTable();
   toast('✓ Stato aggiornato');
 }
 
 async function saveTrModal(){
-  if(!currentTrRow)return;
-  const notes=document.getElementById('tr-modal-notes').value;
+  if(!curTr)return;
+  const notes=document.getElementById('tr-notes').value;
   const btn=document.getElementById('tr-save-btn');
-  btn.innerHTML='<span class="spinner-sm"></span>';btn.disabled=true;
-  await sb.from('translations').update({notes,last_updated:new Date().toISOString()}).eq('id',currentTrRow.id);
+  btn.innerHTML='<span class="sp-sm"></span>';btn.disabled=true;
+  await sb.from('translations').update({notes,last_updated:new Date().toISOString()}).eq('id',curTr.id);
   btn.textContent='Salva note';btn.disabled=false;
-  const t=allTranslations.find(x=>x.id===currentTrRow.id);
+  const t=allTr.find(x=>x.id===curTr.id);
   if(t)t.notes=notes;
   renderTable();
   closeTrModal();
   toast('✓ Note salvate');
 }
-function closeTrModal(){document.getElementById('tr-modal').classList.remove('open');currentTrRow=null;}
+function closeTrModal(){document.getElementById('tr-modal').classList.remove('open');curTr=null;}
 
 // ── RICHIEDI FILE ──────────────────────────────────────────
 async function sendRequest(){
@@ -909,27 +982,19 @@ async function sendRequest(){
   const email=document.getElementById('req-email').value.trim();
   const notes=document.getElementById('req-notes').value.trim();
   const errEl=document.getElementById('req-error');
-  const sucEl=document.getElementById('req-success');
-  errEl.style.display='none';sucEl.style.display='none';
+  const okEl=document.getElementById('req-ok');
+  errEl.style.display='none';okEl.style.display='none';
   if(!docId||!name||!email){errEl.textContent='Compila tutti i campi obbligatori';errEl.style.display='block';return;}
   const doc=allDocs.find(d=>d.id===docId);
-  const subject=encodeURIComponent(`Richiesta file editabile: ${doc?.name}`);
+  const subj=encodeURIComponent(`Richiesta file editabile: ${doc?.name}`);
   const body=encodeURIComponent(
-    `Ciao Marco,\n\n` +
-    `${name} (${email}) richiede il file editabile (versione italiana) del seguente documento:\n\n` +
-    `📄 Documento: ${doc?.name}\n` +
-    `📁 Categoria: ${doc?.category}\n` +
-    `🔖 Versione: ${doc?.version}\n` +
-    `📅 Data: ${doc?.description||'–'}\n\n` +
-    `${notes?`Note: ${notes}\n\n`:''}` +
-    `Grazie,\nDocuLingua`
+    `Ciao Marco,\n\n${name} (${email}) richiede il file editabile (versione italiana) del seguente documento:\n\n`+
+    `Documento: ${doc?.name}\nCategoria: ${doc?.category}\nVersione: ${doc?.version}\nData: ${doc?.description||'–'}\n\n`+
+    `${notes?`Note: ${notes}\n\n`:''}Grazie,\nDocuLingua ${APP_VER}`
   );
-  window.location.href=`mailto:marco.torquato@edilkamin.com?subject=${subject}&body=${body}`;
-  sucEl.style.display='block';
-  document.getElementById('req-doc').value='';
-  document.getElementById('req-name').value='';
-  document.getElementById('req-email').value='';
-  document.getElementById('req-notes').value='';
+  window.location.href=`mailto:marco.torquato@edilkamin.com?subject=${subj}&body=${body}`;
+  okEl.style.display='block';
+  ['req-doc','req-name','req-email','req-notes'].forEach(id=>{document.getElementById(id).value='';});
 }
 
 // ── MOBILE ─────────────────────────────────────────────────
