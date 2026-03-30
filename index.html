@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="DocuLingua">
 <link rel="apple-touch-icon" href="icon.png">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%231e3a8a'/%3E%3Crect x='18' y='25' width='64' height='8' rx='4' fill='white'/%3E%3Crect x='18' y='40' width='45' height='8' rx='4' fill='rgba(255,255,255,0.6)'/%3E%3Ccircle cx='72' cy='68' r='18' fill='%233b82f6'/%3E%3Cpath d='M64 68 L70 74 L82 62' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E">
-<title>DocuLingua v2.0</title>
+<title>DocuLingua v2.1</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <style>
@@ -220,7 +220,7 @@ tbody tr:hover td{background:#f8fafc}
         <circle cx="37" cy="37" r="10" fill="#3b82f6"/>
         <path d="M32 37 L36 41 L43 33" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
       </svg>
-      DocuLingua <span style="font-size:10px;opacity:.4;margin-left:2px">v2.0</span>
+      DocuLingua <span style="font-size:10px;opacity:.4;margin-left:2px">v2.1</span>
     </div>
     <button class="hamburger" onclick="toggleDrawer()">
       <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M3 6h18M3 12h18M3 18h18"/></svg>
@@ -248,7 +248,7 @@ tbody tr:hover td{background:#f8fafc}
         </div>
         <div class="sidebar-logo-text">
           <span>DocuLingua</span>
-          <small style="color:rgba(255,255,255,0.5)">v2.0</small>
+          <small style="color:rgba(255,255,255,0.5)">v2.1</small>
         </div>
       </div>
       <div class="sidebar-section">Principale</div>
@@ -466,7 +466,7 @@ tbody tr:hover td{background:#f8fafc}
       <div style="margin:0 0 14px 0">
         <div onclick="var cb=document.getElementById('doc-send-email');cb.checked=!cb.checked;"
              style="display:flex;align-items:center;gap:12px;cursor:pointer;background:#eff6ff;padding:12px;border-radius:10px;border:2px solid #bfdbfe;user-select:none">
-          <input type="checkbox" id="doc-send-email"
+          <input type="checkbox" id="doc-send-email" checked
                  style="width:20px;height:20px;min-width:20px;accent-color:var(--brand);cursor:pointer"
                  onclick="event.stopPropagation()">
           <div>
@@ -505,7 +505,7 @@ tbody tr:hover td{background:#f8fafc}
       <div style="margin:0 0 14px 0">
         <div onclick="var cb=document.getElementById('upd-send-email');cb.checked=!cb.checked;"
              style="display:flex;align-items:center;gap:12px;cursor:pointer;background:#eff6ff;padding:12px;border-radius:10px;border:2px solid #bfdbfe;user-select:none">
-          <input type="checkbox" id="upd-send-email"
+          <input type="checkbox" id="upd-send-email" checked
                  style="width:20px;height:20px;min-width:20px;accent-color:var(--brand);cursor:pointer"
                  onclick="event.stopPropagation()">
           <div>
@@ -595,7 +595,7 @@ tbody tr:hover td{background:#f8fafc}
 <script>
 const SUPABASE_URL='https://smhuniliucxtderrcfjc.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtaHVuaWxpdWN4dGRlcnJjZmpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MDU1MjAsImV4cCI6MjA5MDE4MTUyMH0.gHaZxhf569rw00H7mZfJglxfpKpEAZTbUtegsXUhJCc';
-const APP_VER='v2.0';
+const APP_VER='v2.1';
 const {createClient}=supabase;
 const sb=createClient(SUPABASE_URL,SUPABASE_KEY);
 
@@ -1139,7 +1139,7 @@ function openDocModal(doc){
     document.getElementById('doc-id').value='';
     document.getElementById('doc-name').value='';
     document.getElementById('doc-ver').value='v1';
-    document.getElementById('doc-desc').value='2026-03-27';
+    document.getElementById('doc-desc').value=todayStr();
     ml.checked=false;
   }
   document.getElementById('doc-modal').classList.add('open');
@@ -1195,7 +1195,7 @@ function openUpdModal(doc){
   document.getElementById('upd-doc-id').value=doc.id;
   document.getElementById('upd-doc-name').textContent=doc.name+' ('+doc.version+')';
   document.getElementById('upd-ver').value='';
-  document.getElementById('upd-date').value='2026-03-27';
+  document.getElementById('upd-date').value=todayStr();
   document.getElementById('upd-changelog').value='';
   document.getElementById('upd-modal').classList.add('open');
 }
