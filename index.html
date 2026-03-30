@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="DocuLingua">
 <link rel="apple-touch-icon" href="icon.png">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%231e3a8a'/%3E%3Crect x='18' y='25' width='64' height='8' rx='4' fill='white'/%3E%3Crect x='18' y='40' width='45' height='8' rx='4' fill='rgba(255,255,255,0.6)'/%3E%3Ccircle cx='72' cy='68' r='18' fill='%233b82f6'/%3E%3Cpath d='M64 68 L70 74 L82 62' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E">
-<title>DocuLingua v1.9</title>
+<title>DocuLingua v2.0</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <style>
@@ -220,7 +220,7 @@ tbody tr:hover td{background:#f8fafc}
         <circle cx="37" cy="37" r="10" fill="#3b82f6"/>
         <path d="M32 37 L36 41 L43 33" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
       </svg>
-      DocuLingua <span style="font-size:10px;opacity:.4;margin-left:2px">v1.9</span>
+      DocuLingua <span style="font-size:10px;opacity:.4;margin-left:2px">v2.0</span>
     </div>
     <button class="hamburger" onclick="toggleDrawer()">
       <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M3 6h18M3 12h18M3 18h18"/></svg>
@@ -248,7 +248,7 @@ tbody tr:hover td{background:#f8fafc}
         </div>
         <div class="sidebar-logo-text">
           <span>DocuLingua</span>
-          <small style="color:rgba(255,255,255,0.5)">v1.9</small>
+          <small style="color:rgba(255,255,255,0.5)">v2.0</small>
         </div>
       </div>
       <div class="sidebar-section">Principale</div>
@@ -595,7 +595,7 @@ tbody tr:hover td{background:#f8fafc}
 <script>
 const SUPABASE_URL='https://smhuniliucxtderrcfjc.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtaHVuaWxpdWN4dGRlcnJjZmpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MDU1MjAsImV4cCI6MjA5MDE4MTUyMH0.gHaZxhf569rw00H7mZfJglxfpKpEAZTbUtegsXUhJCc';
-const APP_VER='v1.9';
+const APP_VER='v2.0';
 const {createClient}=supabase;
 const sb=createClient(SUPABASE_URL,SUPABASE_KEY);
 
@@ -663,6 +663,7 @@ async function init(){
   document.getElementById('desktop-nav2').innerHTML=nav2;
   document.getElementById('mob-nav').innerHTML=nav1+nav2;
 
+  await loadSettings();
   await loadData();
   document.getElementById('loading').style.display='none';
   document.getElementById('app').style.display='flex';
@@ -1324,19 +1325,34 @@ async function saveEditCL() {
 
 // ── ADMIN ──────────────────────────────────────────────────
 const ADMIN_PWD='Pollino';
-let adminEmails=JSON.parse(localStorage.getItem('dl_emails')||'[]');
-let ejsConfig=JSON.parse(localStorage.getItem('dl_ejs')||'{}');
-let recencyBadges=JSON.parse(localStorage.getItem('dl_badges')||JSON.stringify([
+const DEFAULT_BADGES=[
   {days:0,  label:'OGGI',             bg:'#fef08a',color:'#854d0e'},
   {days:1,  label:'IERI',             bg:'#fed7aa',color:'#9a3412'},
   {days:7,  label:'QUESTA SETTIMANA', bg:'#fed7aa',color:'#9a3412'},
   {days:31, label:'Ultimo mese',      bg:'#dcfce7',color:'#15803d'},
   {days:92, label:'Ultimi 3 mesi',    bg:'#bfdbfe',color:'#1d4ed8'},
   {days:183,label:'Ultimi 6 mesi',    bg:'#e9d5ff',color:'#7c3aed'},
-]));
+];
+let adminEmails=[];
+let ejsConfig={};
+let recencyBadges=[...DEFAULT_BADGES];
 
-// Init emailjs on load
-if(ejsConfig.pubkey){try{emailjs.init(ejsConfig.pubkey);}catch(e){}}
+async function loadSettings(){
+  const {data,error}=await sb.from('app_settings').select('*');
+  if(error){console.error('Settings load error:',error);return;}
+  for(const row of data||[]){
+    try{
+      if(row.key==='email_recipients') adminEmails=JSON.parse(row.value)||[];
+      if(row.key==='emailjs_config')   ejsConfig=JSON.parse(row.value)||{};
+      if(row.key==='recency_badges')   recencyBadges=JSON.parse(row.value)||DEFAULT_BADGES;
+    }catch(e){console.error('Settings parse error:',row.key,e);}
+  }
+  if(ejsConfig.pubkey){try{emailjs.init(ejsConfig.pubkey);}catch(e){}}
+}
+
+async function saveSetting(key,value){
+  await sb.from('app_settings').upsert({key,value:JSON.stringify(value),updated_at:new Date().toISOString()},{onConflict:'key'});
+}
 
 function checkAdminPwd(){
   const v=document.getElementById('admin-pwd-input').value;
@@ -1344,7 +1360,7 @@ function checkAdminPwd(){
   if(v===ADMIN_PWD){
     document.getElementById('admin-lock').style.display='none';
     document.getElementById('admin-content').style.display='block';
-    renderAdminEmails();renderBadgeConfig();loadEjsConfig();
+    loadSettings().then(()=>{renderAdminEmails();renderBadgeConfig();loadEjsConfig();});
     document.getElementById('admin-pwd-input').value='';
     err.style.display='none';
   }else{
@@ -1368,7 +1384,7 @@ function renderAdminEmails(){
     </div>`).join('');
 }
 
-function addEmail(){
+async function addEmail(){
   const inp=document.getElementById('new-email-input');
   const err=document.getElementById('email-err');
   const em=inp.value.trim().toLowerCase();
@@ -1376,13 +1392,13 @@ function addEmail(){
   if(!em||!em.includes('@')){err.textContent='Email non valida';err.style.display='block';return;}
   if(adminEmails.includes(em)){err.textContent='Email già presente';err.style.display='block';return;}
   adminEmails.push(em);
-  localStorage.setItem('dl_emails',JSON.stringify(adminEmails));
+  await saveSetting('email_recipients',adminEmails);
   inp.value='';renderAdminEmails();toast('✓ Email aggiunta');
 }
 
-function removeEmail(i){
+async function removeEmail(i){
   adminEmails.splice(i,1);
-  localStorage.setItem('dl_emails',JSON.stringify(adminEmails));
+  await saveSetting('email_recipients',adminEmails);
   renderAdminEmails();toast('✓ Email rimossa');
 }
 
@@ -1392,13 +1408,13 @@ function loadEjsConfig(){
   document.getElementById('ejs-pubkey').value=ejsConfig.pubkey||'';
 }
 
-function saveEjsConfig(){
+async function saveEjsConfig(){
   ejsConfig={
     service:document.getElementById('ejs-service').value.trim(),
     template:document.getElementById('ejs-template').value.trim(),
     pubkey:document.getElementById('ejs-pubkey').value.trim(),
   };
-  localStorage.setItem('dl_ejs',JSON.stringify(ejsConfig));
+  await saveSetting('emailjs_config',ejsConfig);
   if(ejsConfig.pubkey){try{emailjs.init(ejsConfig.pubkey);}catch(e){}}
   document.getElementById('ejs-ok').style.display='block';
   setTimeout(()=>document.getElementById('ejs-ok').style.display='none',3000);
@@ -1487,9 +1503,9 @@ function removeBadgeRow(i){
   recencyBadges.splice(i,1);renderBadgeConfig();
 }
 
-function saveBadges(){
+async function saveBadges(){
   recencyBadges.sort((a,b)=>a.days-b.days);
-  localStorage.setItem('dl_badges',JSON.stringify(recencyBadges));
+  await saveSetting('recency_badges',recencyBadges);
   renderBadgeConfig();renderTable();
   document.getElementById('badge-ok').style.display='block';
   setTimeout(()=>document.getElementById('badge-ok').style.display='none',3000);
