@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="DocuLingua">
 <link rel="apple-touch-icon" href="icon.png">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%231e3a8a'/%3E%3Crect x='18' y='25' width='64' height='8' rx='4' fill='white'/%3E%3Crect x='18' y='40' width='45' height='8' rx='4' fill='rgba(255,255,255,0.6)'/%3E%3Ccircle cx='72' cy='68' r='18' fill='%233b82f6'/%3E%3Cpath d='M64 68 L70 74 L82 62' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E">
-<title>DocuLingua v2.3</title>
+<title>DocuLingua v2.4</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <style>
@@ -226,7 +226,7 @@ tbody tr:hover td{background:#f8fafc}
         <circle cx="37" cy="37" r="10" fill="#3b82f6"/>
         <path d="M32 37 L36 41 L43 33" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
       </svg>
-      DocuLingua <span style="font-size:10px;opacity:.4;margin-left:2px">v2.3</span>
+      DocuLingua <span style="font-size:10px;opacity:.4;margin-left:2px">v2.4</span>
     </div>
     <button class="hamburger" onclick="toggleDrawer()">
       <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M3 6h18M3 12h18M3 18h18"/></svg>
@@ -254,7 +254,7 @@ tbody tr:hover td{background:#f8fafc}
         </div>
         <div class="sidebar-logo-text">
           <span>DocuLingua</span>
-          <small style="color:rgba(255,255,255,0.5)">v2.3</small>
+          <small style="color:rgba(255,255,255,0.5)">v2.4</small>
         </div>
       </div>
       <div class="sidebar-section">Principale</div>
@@ -424,6 +424,32 @@ tbody tr:hover td{background:#f8fafc}
             <button class="btn btn-blue btn-sm" onclick="saveEjsConfig()">💾 Salva configurazione</button>
             <div id="ejs-ok" style="display:none;color:var(--green);font-size:12px;margin-top:6px">✓ Configurazione salvata</div>
           </div>
+          <!-- COLUMN WIDTHS -->
+          <div style="background:var(--white);border-radius:14px;padding:22px;box-shadow:0 1px 3px rgba(0,0,0,.06);margin-bottom:16px">
+            <div style="font-weight:800;font-size:15px;margin-bottom:4px">📐 Larghezza colonne tabella</div>
+            <div style="font-size:12px;color:var(--text3);margin-bottom:16px">Regola la larghezza di Documento e Categoria nella tabella principale</div>
+            <div style="margin-bottom:16px">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+                <label style="font-size:13px;font-weight:700;color:var(--text)">📄 Documento</label>
+                <span id="col-doc-val" style="font-size:12px;font-weight:700;color:var(--brand);background:#eff6ff;padding:2px 10px;border-radius:99px">260px</span>
+              </div>
+              <input type="range" id="col-doc-slider" min="120" max="600" step="10" value="260"
+                style="width:100%;accent-color:var(--brand)"
+                oninput="colWidths.doc=parseInt(this.value);document.getElementById('col-doc-val').textContent=this.value+'px';applyColWidths()">
+            </div>
+            <div style="margin-bottom:16px">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+                <label style="font-size:13px;font-weight:700;color:var(--text)">📁 Categoria</label>
+                <span id="col-cat-val" style="font-size:12px;font-weight:700;color:var(--brand);background:#eff6ff;padding:2px 10px;border-radius:99px">150px</span>
+              </div>
+              <input type="range" id="col-cat-slider" min="60" max="400" step="10" value="150"
+                style="width:100%;accent-color:var(--brand)"
+                oninput="colWidths.cat=parseInt(this.value);document.getElementById('col-cat-val').textContent=this.value+'px';applyColWidths()">
+            </div>
+            <button class="btn btn-blue btn-sm" onclick="saveColWidths()">💾 Salva larghezze</button>
+            <div id="col-ok" style="display:none;color:var(--green);font-size:12px;margin-top:6px">✓ Salvato</div>
+          </div>
+
           <!-- RECENCY BADGES -->
           <div style="background:var(--white);border-radius:14px;padding:22px;box-shadow:0 1px 3px rgba(0,0,0,.06)">
             <div style="font-weight:800;font-size:15px;margin-bottom:4px">🏷️ Badge recency</div>
@@ -601,7 +627,7 @@ tbody tr:hover td{background:#f8fafc}
 <script>
 const SUPABASE_URL='https://smhuniliucxtderrcfjc.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtaHVuaWxpdWN4dGRlcnJjZmpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MDU1MjAsImV4cCI6MjA5MDE4MTUyMH0.gHaZxhf569rw00H7mZfJglxfpKpEAZTbUtegsXUhJCc';
-const APP_VER='v2.3';
+const APP_VER='v2.4';
 const {createClient}=supabase;
 const sb=createClient(SUPABASE_URL,SUPABASE_KEY);
 
@@ -801,11 +827,11 @@ function renderTable(){
       </td>`;
     }).join('');
     return`<tr>
-      <td>
-        <div style="font-weight:600;max-width:230px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${doc.name}">${doc.name}${mlBadge}</div>
+      <td style="max-width:${colWidths.doc}px;width:${colWidths.doc}px">
+        <div style="font-weight:600;max-width:${colWidths.doc}px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${doc.name}">${doc.name}${mlBadge}</div>
         <div style="font-size:11px;color:var(--text3);margin-top:2px">${doc.description||''} ${rb}</div>
       </td>
-      <td style="font-size:12px;color:var(--text2)">${doc.category}</td>
+      <td style="font-size:12px;color:var(--text2);max-width:${colWidths.cat}px;width:${colWidths.cat}px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${doc.category}</td>
       <td><span style="font-family:monospace;font-size:11px;background:#f1f5f9;padding:2px 7px;border-radius:5px;font-weight:700">${doc.version}</span></td>
       <td>${badge('completed')}</td>
       <td>${clCell(doc.id)}</td>
@@ -1343,6 +1369,7 @@ const DEFAULT_BADGES=[
 let adminEmails=[];
 let ejsConfig={};
 let recencyBadges=[...DEFAULT_BADGES];
+let colWidths={doc:260,cat:150};
 
 async function loadSettings(){
   const {data,error}=await sb.from('app_settings').select('*');
@@ -1352,13 +1379,38 @@ async function loadSettings(){
       if(row.key==='email_recipients') adminEmails=JSON.parse(row.value)||[];
       if(row.key==='emailjs_config')   ejsConfig=JSON.parse(row.value)||{};
       if(row.key==='recency_badges')   recencyBadges=JSON.parse(row.value)||DEFAULT_BADGES;
+      if(row.key==='col_widths')       colWidths=JSON.parse(row.value)||{doc:260,cat:150};
     }catch(e){console.error('Settings parse error:',row.key,e);}
   }
   if(ejsConfig.pubkey){try{emailjs.init(ejsConfig.pubkey);}catch(e){}}
+  applyColWidths();
 }
 
 async function saveSetting(key,value){
   await sb.from('app_settings').upsert({key,value:JSON.stringify(value),updated_at:new Date().toISOString()},{onConflict:'key'});
+}
+
+
+function applyColWidths(){
+  const thDoc=document.getElementById('th-doc');
+  const thCat=document.getElementById('th-cat');
+  if(thDoc) thDoc.style.width=colWidths.doc+'px';
+  if(thCat) thCat.style.width=colWidths.cat+'px';
+  renderTable();
+}
+
+async function saveColWidths(){
+  await saveSetting('col_widths',colWidths);
+  document.getElementById('col-ok').style.display='block';
+  setTimeout(()=>document.getElementById('col-ok').style.display='none',2000);
+  toast('✓ Larghezze colonne salvate');
+}
+
+function loadColWidthsUI(){
+  const s1=document.getElementById('col-doc-slider');
+  const s2=document.getElementById('col-cat-slider');
+  if(s1){s1.value=colWidths.doc;document.getElementById('col-doc-val').textContent=colWidths.doc+'px';}
+  if(s2){s2.value=colWidths.cat;document.getElementById('col-cat-val').textContent=colWidths.cat+'px';}
 }
 
 function checkAdminPwd(){
@@ -1367,7 +1419,7 @@ function checkAdminPwd(){
   if(v===ADMIN_PWD){
     document.getElementById('admin-lock').style.display='none';
     document.getElementById('admin-content').style.display='block';
-    loadSettings().then(()=>{renderAdminEmails();renderBadgeConfig();loadEjsConfig();});
+    loadSettings().then(()=>{renderAdminEmails();renderBadgeConfig();loadEjsConfig();loadColWidthsUI();});
     document.getElementById('admin-pwd-input').value='';
     err.style.display='none';
   }else{
