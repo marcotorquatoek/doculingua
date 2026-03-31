@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="DocuLingua">
 <link rel="apple-touch-icon" href="icon.png">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%231e3a8a'/%3E%3Crect x='18' y='25' width='64' height='8' rx='4' fill='white'/%3E%3Crect x='18' y='40' width='45' height='8' rx='4' fill='rgba(255,255,255,0.6)'/%3E%3Ccircle cx='72' cy='68' r='18' fill='%233b82f6'/%3E%3Cpath d='M64 68 L70 74 L82 62' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E">
-<title>DocuLingua v2.4</title>
+<title>DocuLingua v2.5</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <style>
@@ -98,6 +98,8 @@ tbody tr:hover td{background:#f8fafc}
 .status-sel.needs_update{background:var(--orange-bg);color:var(--orange)}
 .status-sel.outdated{background:var(--purple-bg);color:var(--purple)}
 .status-sel.missing{background:var(--red-bg);color:var(--red)}
+.status-sel.to_remove{background:#f1f5f9;color:#64748b}
+.badge.to_remove{background:#f1f5f9;color:#64748b}
 
 /* RECENCY */
 .rb{display:inline-block;padding:1px 7px;border-radius:99px;font-size:10px;font-weight:800;white-space:nowrap;margin-left:3px;vertical-align:middle}
@@ -226,7 +228,7 @@ tbody tr:hover td{background:#f8fafc}
         <circle cx="37" cy="37" r="10" fill="#3b82f6"/>
         <path d="M32 37 L36 41 L43 33" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
       </svg>
-      DocuLingua <span style="font-size:10px;opacity:.4;margin-left:2px">v2.4</span>
+      DocuLingua <span style="font-size:10px;opacity:.4;margin-left:2px">v2.5</span>
     </div>
     <button class="hamburger" onclick="toggleDrawer()">
       <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M3 6h18M3 12h18M3 18h18"/></svg>
@@ -254,7 +256,7 @@ tbody tr:hover td{background:#f8fafc}
         </div>
         <div class="sidebar-logo-text">
           <span>DocuLingua</span>
-          <small style="color:rgba(255,255,255,0.5)">v2.4</small>
+          <small style="color:rgba(255,255,255,0.5)">v2.5</small>
         </div>
       </div>
       <div class="sidebar-section">Principale</div>
@@ -342,6 +344,7 @@ tbody tr:hover td{background:#f8fafc}
             <option value="in_progress">⏳ In corso</option>
             <option value="needs_update">🔄 Da aggiornare</option>
             <option value="outdated">↻ Obsoleta</option>
+            <option value="to_remove">🗑 Da rimuovere</option>
           </select>
         </div>
         <div id="bylang-page"></div>
@@ -627,7 +630,7 @@ tbody tr:hover td{background:#f8fafc}
 <script>
 const SUPABASE_URL='https://smhuniliucxtderrcfjc.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtaHVuaWxpdWN4dGRlcnJjZmpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MDU1MjAsImV4cCI6MjA5MDE4MTUyMH0.gHaZxhf569rw00H7mZfJglxfpKpEAZTbUtegsXUhJCc';
-const APP_VER='v2.4';
+const APP_VER='v2.5';
 const {createClient}=supabase;
 const sb=createClient(SUPABASE_URL,SUPABASE_KEY);
 
@@ -636,10 +639,10 @@ const FLAGS={IT:'🇮🇹',EN:'🇬🇧',FR:'🇫🇷',DE:'🇩🇪'};
 function flagImg(lang,w=16,h=12){const c=lang==='EN'?'gb':lang.toLowerCase();const ws=w<16?16:w;const hs=h<12?12:h;return `<img src="https://flagcdn.com/${ws}x${hs}/${c}.png" width="${w}" height="${h}" style="border-radius:1px;vertical-align:middle" alt="${lang}">`;}
 const LNAMES={IT:'Italiano',EN:'English',FR:'Français',DE:'Deutsch'};
 const STATUS_LABELS={
-  IT:{completed:'Completata',in_progress:'In corso',needs_update:'Da aggiornare',outdated:'Obsoleta',missing:'Mancante'},
-  EN:{completed:'Completed',in_progress:'In progress',needs_update:'To update',outdated:'Outdated',missing:'Missing'},
-  FR:{completed:'Complétée',in_progress:'En cours',needs_update:'À mettre à jour',outdated:'Obsolète',missing:'Manquante'},
-  DE:{completed:'Abgeschlossen',in_progress:'In Bearbeitung',needs_update:'Zu aktualisieren',outdated:'Veraltet',missing:'Fehlend'},
+  IT:{completed:'Completata',in_progress:'In corso',needs_update:'Da aggiornare',outdated:'Obsoleta',missing:'Mancante',to_remove:'Da rimuovere'},
+  EN:{completed:'Completed',in_progress:'In progress',needs_update:'To update',outdated:'Outdated',missing:'Missing',to_remove:'To remove'},
+  FR:{completed:'Complétée',in_progress:'En cours',needs_update:'À mettre à jour',outdated:'Obsolète',missing:'Manquante',to_remove:'À supprimer'},
+  DE:{completed:'Abgeschlossen',in_progress:'In Bearbeitung',needs_update:'Zu aktualisieren',outdated:'Veraltet',missing:'Fehlend',to_remove:'Zu entfernen'},
 };
 const STATUS={
   completed:   {l:'Completata',   i:'✓', c:'var(--green)',  bg:'var(--green-bg)'},
@@ -647,6 +650,7 @@ const STATUS={
   needs_update:{l:'Da aggiornare',i:'🔄', c:'var(--orange)', bg:'var(--orange-bg)'},
   outdated:    {l:'Obsoleta',     i:'↻', c:'var(--purple)', bg:'var(--purple-bg)'},
   missing:     {l:'Mancante',     i:'✗', c:'var(--red)',    bg:'var(--red-bg)'},
+  to_remove:   {l:'Da rimuovere', i:'🗑', c:'#64748b',      bg:'#f1f5f9'},
 };
 function statusLabel(statusKey, lang){
   return STATUS_LABELS[lang]?.[statusKey] || STATUS[statusKey]?.l || statusKey;
@@ -816,6 +820,11 @@ function renderTable(){
     const pc=pctC(pct);
     const rb=recBadge(doc.description);
     const mlBadge=doc.multilingual?'<span class="ml-badge">🌐 Multilingue</span>':'';
+    // IT column - editable
+    const tIT=getTr(doc.id,'IT');
+    const sIT=tIT?.status||'completed';
+    const itCol=tIT?`<td><select class="status-sel ${sIT}" onchange="qSC('${tIT.id}','${doc.id}',this)">${Object.entries(STATUS).map(([k,v])=>`<option value="${k}" ${sIT===k?'selected':''}>${v.i} ${statusLabel(k,'IT')}</option>`).join('')}</select></td>`:'<td>–</td>';
+    // EN/FR/DE columns
     const langCols=['EN','FR','DE'].map(l=>{
       const t=getTr(doc.id,l);
       if(!t)return'<td>–</td>';
@@ -833,7 +842,7 @@ function renderTable(){
       </td>
       <td style="font-size:12px;color:var(--text2);max-width:${colWidths.cat}px;width:${colWidths.cat}px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${doc.category}</td>
       <td><span style="font-family:monospace;font-size:11px;background:#f1f5f9;padding:2px 7px;border-radius:5px;font-weight:700">${doc.version}</span></td>
-      <td>${badge('completed')}</td>
+      ${itCol}
       <td>${clCell(doc.id)}</td>
       ${langCols}
       <td>
