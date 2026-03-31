@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="DocuLingua">
 <link rel="apple-touch-icon" href="icon.png">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%231e3a8a'/%3E%3Crect x='18' y='25' width='64' height='8' rx='4' fill='white'/%3E%3Crect x='18' y='40' width='45' height='8' rx='4' fill='rgba(255,255,255,0.6)'/%3E%3Ccircle cx='72' cy='68' r='18' fill='%233b82f6'/%3E%3Cpath d='M64 68 L70 74 L82 62' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E">
-<title>DocuLingua v3.3</title>
+<title>DocuLingua v3.5</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <style>
@@ -228,7 +228,7 @@ tbody tr:hover td{background:#f8fafc}
         <circle cx="37" cy="37" r="10" fill="#3b82f6"/>
         <path d="M32 37 L36 41 L43 33" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
       </svg>
-      DocuLingua <span style="font-size:10px;opacity:.4;margin-left:2px">v3.3</span>
+      DocuLingua <span style="font-size:10px;opacity:.4;margin-left:2px">v3.5</span>
     </div>
     <button class="hamburger" onclick="toggleDrawer()">
       <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M3 6h18M3 12h18M3 18h18"/></svg>
@@ -256,7 +256,7 @@ tbody tr:hover td{background:#f8fafc}
         </div>
         <div class="sidebar-logo-text">
           <span>DocuLingua</span>
-          <small style="color:rgba(255,255,255,0.5)">v3.3</small>
+          <small style="color:rgba(255,255,255,0.5)">v3.5</small>
         </div>
       </div>
       <div class="sidebar-section">Principale</div>
@@ -676,7 +676,7 @@ tbody tr:hover td{background:#f8fafc}
 <script>
 const SUPABASE_URL='https://smhuniliucxtderrcfjc.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtaHVuaWxpdWN4dGRlcnJjZmpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MDU1MjAsImV4cCI6MjA5MDE4MTUyMH0.gHaZxhf569rw00H7mZfJglxfpKpEAZTbUtegsXUhJCc';
-const APP_VER='v3.3';
+const APP_VER='v3.5';
 const {createClient}=supabase;
 const sb=createClient(SUPABASE_URL,SUPABASE_KEY);
 
@@ -713,7 +713,7 @@ function todayStr(){
 
 
 function newBadge(createdAt){
-  // Only show NEW if document has a real created_at (set by app after v3.3)
+  // Only show NEW if document has a real created_at (set by app after v3.5)
   // Documents imported from Excel have NULL created_at — never show NEW
   if(!createdAt) return '';
   const d=new Date(createdAt), now=new Date(), days=(now-d)/86400000;
@@ -755,8 +755,8 @@ async function init(){
   document.getElementById('desktop-nav2').innerHTML=nav2;
   document.getElementById('mob-nav').innerHTML=nav1+nav2;
 
-  await loadSettings();
-  await loadData();
+  try{ await loadSettings(); }catch(e){ console.warn('settings failed:',e); }
+  try{ await loadData(); }catch(e){ console.warn('loadData failed:',e); }
   document.getElementById('loading').style.display='none';
   document.getElementById('app').style.display='flex';
   document.getElementById('app').style.flexDirection='column';
@@ -765,12 +765,20 @@ async function init(){
 }
 
 async function loadData(){
-  const [{data:docs},{data:tr},{data:cl}]=await Promise.all([
-    sb.from('documents').select('*').order('sort_order',{ascending:true,nullsFirst:false}),
-    sb.from('translations').select('*'),
-    sb.from('doc_changelogs').select('*').order('created_at',{ascending:false})
-  ]);
-  allDocs=docs||[]; allTr=tr||[]; allCL=cl||[];
+  try{
+    const [r1,r2,r3]=await Promise.all([
+      sb.from('documents').select('*').order('sort_order',{ascending:true,nullsFirst:false}),
+      sb.from('translations').select('*'),
+      sb.from('doc_changelogs').select('*').order('created_at',{ascending:false})
+    ]);
+    if(r1.error) console.error('docs error:',r1.error);
+    if(r2.error) console.error('tr error:',r2.error);
+    if(r3.error) console.error('cl error:',r3.error);
+    allDocs=r1.data||[]; allTr=r2.data||[]; allCL=r3.data||[];
+  }catch(e){
+    console.error('loadData error:',e);
+    allDocs=[]; allTr=[]; allCL=[];
+  }
   // req-doc dropdown populated via filterReqDocs()
   filterReqDocs();
   renderDashboard();
@@ -1465,7 +1473,7 @@ function renderNuovi(){
     if(wrap) wrap.innerHTML='<div style="padding:40px;text-align:center;color:var(--text3)"><div class="sp-sm" style="display:inline-block;margin-bottom:8px"></div><br>Caricamento…</div>';
     return;
   }
-  // Only show docs with created_at set (inserted from app after v3.3)
+  // Only show docs with created_at set (inserted from app after v3.5)
   const sorted=[...allDocs]
     .filter(d=>!!d.created_at)
     .sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
@@ -1478,7 +1486,7 @@ function renderNuovi(){
   const wrap=document.getElementById('nuovi-wrap');
   if(!wrap)return;
   if(!filtered.length){
-    wrap.innerHTML='<div style="padding:40px;text-align:center;color:var(--text3)"><div style="font-size:24px;margin-bottom:12px">🆕</div><div style="font-weight:700;margin-bottom:6px">Nessun nuovo documento</div><div style="font-size:12px">I documenti aggiunti dall'app dalla v3.3 in poi appariranno qui</div></div>';
+    wrap.innerHTML='<div style="padding:40px;text-align:center;color:var(--text3)"><div style="font-size:24px;margin-bottom:12px">🆕</div><div style="font-weight:700;margin-bottom:6px">Nessun nuovo documento</div><div style="font-size:12px">I documenti aggiunti dall\'app dalla v3.5 in poi appariranno qui</div></div>';
     return;
   }
 
@@ -1585,18 +1593,22 @@ let recencyBadges=[...DEFAULT_BADGES];
 let colWidths={doc:260,cat:150};
 
 async function loadSettings(){
-  const {data,error}=await sb.from('app_settings').select('*');
-  if(error){console.error('Settings load error:',error);return;}
-  for(const row of data||[]){
-    try{
-      if(row.key==='email_recipients') adminEmails=JSON.parse(row.value)||[];
-      if(row.key==='emailjs_config')   ejsConfig=JSON.parse(row.value)||{};
-      if(row.key==='recency_badges')   recencyBadges=JSON.parse(row.value)||DEFAULT_BADGES;
-      if(row.key==='col_widths')       colWidths=JSON.parse(row.value)||{doc:260,cat:150};
-    }catch(e){console.error('Settings parse error:',row.key,e);}
+  try{
+    const {data,error}=await sb.from('app_settings').select('*');
+    if(error){console.warn('Settings not available:',error.message);return;}
+    for(const row of data||[]){
+      try{
+        if(row.key==='email_recipients') adminEmails=JSON.parse(row.value)||[];
+        if(row.key==='emailjs_config')   ejsConfig=JSON.parse(row.value)||{};
+        if(row.key==='recency_badges')   recencyBadges=JSON.parse(row.value)||DEFAULT_BADGES;
+        if(row.key==='col_widths')       colWidths=JSON.parse(row.value)||{doc:260,cat:150};
+      }catch(e){console.error('Settings parse error:',row.key,e);}
+    }
+    if(ejsConfig.pubkey){try{emailjs.init(ejsConfig.pubkey);}catch(e){}}
+    applyColWidths();
+  }catch(e){
+    console.warn('loadSettings failed silently:',e);
   }
-  if(ejsConfig.pubkey){try{emailjs.init(ejsConfig.pubkey);}catch(e){}}
-  applyColWidths();
 }
 
 async function saveSetting(key,value){
