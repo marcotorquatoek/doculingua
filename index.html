@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="DocuLingua">
 <link rel="apple-touch-icon" href="icon.png">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%231e3a8a'/%3E%3Crect x='18' y='25' width='64' height='8' rx='4' fill='white'/%3E%3Crect x='18' y='40' width='45' height='8' rx='4' fill='rgba(255,255,255,0.6)'/%3E%3Ccircle cx='72' cy='68' r='18' fill='%233b82f6'/%3E%3Cpath d='M64 68 L70 74 L82 62' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E">
-<title>DocuLingua v2.8</title>
+<title>DocuLingua v3.0</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <style>
@@ -228,7 +228,7 @@ tbody tr:hover td{background:#f8fafc}
         <circle cx="37" cy="37" r="10" fill="#3b82f6"/>
         <path d="M32 37 L36 41 L43 33" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
       </svg>
-      DocuLingua <span style="font-size:10px;opacity:.4;margin-left:2px">v2.8</span>
+      DocuLingua <span style="font-size:10px;opacity:.4;margin-left:2px">v3.0</span>
     </div>
     <button class="hamburger" onclick="toggleDrawer()">
       <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M3 6h18M3 12h18M3 18h18"/></svg>
@@ -256,7 +256,7 @@ tbody tr:hover td{background:#f8fafc}
         </div>
         <div class="sidebar-logo-text">
           <span>DocuLingua</span>
-          <small style="color:rgba(255,255,255,0.5)">v2.8</small>
+          <small style="color:rgba(255,255,255,0.5)">v3.0</small>
         </div>
       </div>
       <div class="sidebar-section">Principale</div>
@@ -357,7 +357,15 @@ tbody tr:hover td{background:#f8fafc}
         </div>
         <div style="background:var(--white);border-radius:16px;padding:22px;box-shadow:0 1px 3px rgba(0,0,0,.06);max-width:560px">
           <div class="info">La richiesta verrà inviata a <strong>marco.torquato@edilkamin.com</strong></div>
-          <div class="ff"><label>Documento richiesto *</label><select id="req-doc"><option value="">— Seleziona —</option></select></div>
+          <div class="ff">
+            <label>Documento richiesto *</label>
+            <input type="text" id="req-doc-search" placeholder="🔍 Cerca documento…" autocomplete="off"
+              style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:16px;outline:none;margin-bottom:4px"
+              oninput="filterReqDocs()" onfocus="showReqDropdown()" onblur="setTimeout(hideReqDropdown,200)">
+            <input type="hidden" id="req-doc">
+            <div id="req-doc-selected" style="display:none;background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:8px;padding:8px 12px;font-size:13px;color:var(--brand);font-weight:600;margin-bottom:4px"></div>
+            <div id="req-doc-dropdown" style="display:none;position:relative;z-index:100;background:var(--white);border:1.5px solid var(--border);border-radius:8px;max-height:220px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.12)"></div>
+          </div>
           <div class="ff"><label>Il tuo nome *</label><input type="text" id="req-name" placeholder="es. Marie Dupont" autocomplete="name"></div>
           <div class="ff"><label>Note aggiuntive</label><textarea id="req-notes" rows="3" placeholder="Motivazione, urgenza, formato…"></textarea></div>
           <div id="req-error" class="err" style="display:none"></div>
@@ -486,6 +494,10 @@ tbody tr:hover td{background:#f8fafc}
         <div class="ff"><label>Versione *</label><input type="text" id="doc-ver" placeholder="v1" autocomplete="off"></div>
       </div>
       <div class="ff"><label>Data documento</label><input type="date" id="doc-desc"></div>
+      <div class="ff">
+        <label>Note / descrizione</label>
+        <textarea id="doc-notes" rows="3" placeholder="Descrivi il documento, cosa contiene, eventuali note…" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;outline:none;resize:vertical;font-family:inherit"></textarea>
+      </div>
       <div style="margin:0 0 14px 0">
       <div onclick="var cb=document.getElementById('doc-multilingual');cb.checked=!cb.checked;" 
            style="display:flex;align-items:flex-start;gap:12px;cursor:pointer;background:#f5f3ff;padding:14px;border-radius:10px;border:2px solid #c4b5fd;user-select:none">
@@ -650,7 +662,7 @@ tbody tr:hover td{background:#f8fafc}
 <script>
 const SUPABASE_URL='https://smhuniliucxtderrcfjc.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtaHVuaWxpdWN4dGRlcnJjZmpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MDU1MjAsImV4cCI6MjA5MDE4MTUyMH0.gHaZxhf569rw00H7mZfJglxfpKpEAZTbUtegsXUhJCc';
-const APP_VER='v2.8';
+const APP_VER='v3.0';
 const {createClient}=supabase;
 const sb=createClient(SUPABASE_URL,SUPABASE_KEY);
 
@@ -735,9 +747,8 @@ async function loadData(){
     sb.from('doc_changelogs').select('*').order('created_at',{ascending:false})
   ]);
   allDocs=docs||[]; allTr=tr||[]; allCL=cl||[];
-  const sel=document.getElementById('req-doc');
-  sel.innerHTML='<option value="">— Seleziona —</option>';
-  allDocs.forEach(d=>{sel.innerHTML+=`<option value="${d.id}">${d.name} (${d.category})</option>`;});
+  // req-doc dropdown populated via filterReqDocs()
+  filterReqDocs();
   renderDashboard();
 }
 
@@ -999,17 +1010,15 @@ function renderSheetLangs(){
     const t=getTr(doc.id,lang);
     const s=t?.status||'missing';
     const sc=STATUS[s]||{};
-    const isIT=lang==='IT';
     return`<div style="margin-bottom:10px">
-      <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:6px">${flagImg(lang)} ${LNAMES[lang]}</div>
-      ${isIT?`<div class="sheet-lang-btn active" style="cursor:default;border-color:var(--green);background:var(--green-bg);color:var(--green)">✓ Completata (lingua master)</div>`:
-      `<div style="display:flex;flex-wrap:wrap;gap:6px">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">${flagImg(lang)} <span style="font-size:13px;font-weight:700;color:var(--text2)">${LNAMES[lang]}</span></div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">
         ${Object.entries(STATUS).map(([k,v])=>`
           <button onclick="sheetSetStatus('${t?.id||''}','${doc.id}','${lang}','${k}')"
             style="flex:1;min-width:calc(50% - 3px);padding:10px 6px;border:2px solid ${s===k?v.c:'var(--border)'};border-radius:8px;background:${s===k?v.bg:'white'};color:${v.c};font-size:12px;font-weight:700;cursor:pointer;touch-action:manipulation;text-align:center">
             ${v.i} ${statusLabel(k,lang)}
           </button>`).join('')}
-      </div>`}
+      </div>
     </div>`;
   }).join('');
 }
@@ -1247,6 +1256,7 @@ function openDocModal(doc){
     document.getElementById('doc-cat').value=doc.category;
     document.getElementById('doc-ver').value=doc.version;
     document.getElementById('doc-desc').value=doc.description||'';
+    document.getElementById('doc-notes').value=doc.notes||'';
     ml.checked=!!doc.multilingual;
   }else{
     document.getElementById('doc-modal-title').textContent='Nuovo documento';
@@ -1255,6 +1265,7 @@ function openDocModal(doc){
     document.getElementById('doc-name').value='';
     document.getElementById('doc-ver').value='v1';
     document.getElementById('doc-desc').value=todayStr();
+    document.getElementById('doc-notes').value='';
     ml.checked=false;
   }
   document.getElementById('doc-modal').classList.add('open');
@@ -1268,6 +1279,8 @@ async function saveDoc(){
   const ver=document.getElementById('doc-ver').value.trim();
   const desc=document.getElementById('doc-desc').value;
   const multilingual=document.getElementById('doc-multilingual').checked;
+  const docNotes=document.getElementById('doc-notes')?.value.trim()||'';
+  const notes=document.getElementById('doc-notes').value.trim();
   const errEl=document.getElementById('doc-err');
   if(!name||!cat||!ver){errEl.textContent='Compila tutti i campi obbligatori';errEl.style.display='block';return;}
   const btn=document.getElementById('doc-save-btn');
@@ -1362,7 +1375,8 @@ function sendRequest(){
   const errEl=document.getElementById('req-error');
   const okEl=document.getElementById('req-ok');
   errEl.style.display='none';okEl.style.display='none';
-  if(!docId||!name){errEl.textContent='Seleziona documento e inserisci il tuo nome';errEl.style.display='block';return;}
+  if(!docId){errEl.textContent='Seleziona un documento dalla lista';errEl.style.display='block';return;}
+  if(!name){errEl.textContent='Inserisci il tuo nome';errEl.style.display='block';return;}
   const doc=allDocs.find(d=>d.id===docId);
   const subj=encodeURIComponent(`Richiesta file editabile: ${doc?.name}`);
   const body=encodeURIComponent(
@@ -1373,8 +1387,48 @@ function sendRequest(){
   window.open(`mailto:marco.torquato@edilkamin.com?subject=${subj}&body=${body}`);
   okEl.style.display='block';
   document.getElementById('req-doc').value='';
+  document.getElementById('req-doc-search').value='';
+  const selDiv=document.getElementById('req-doc-selected');
+  if(selDiv){selDiv.style.display='none';selDiv.textContent='';}
   document.getElementById('req-name').value='';
   document.getElementById('req-notes').value='';
+}
+
+
+// ── SEARCHABLE DOC PICKER ──────────────────────────────────
+function filterReqDocs(){
+  const q=(document.getElementById('req-doc-search')?.value||'').toLowerCase();
+  const dd=document.getElementById('req-doc-dropdown');
+  if(!dd)return;
+  const filtered=allDocs.filter(d=>!q||d.name.toLowerCase().includes(q)||d.category.toLowerCase().includes(q));
+  dd.innerHTML=filtered.slice(0,40).map(d=>`
+    <div onclick="selectReqDoc('${d.id}','${d.name.replace(/'/g,"\'")} (${d.category.replace(/'/g,"\'")})')"
+      style="padding:9px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--border);transition:.1s"
+      onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background=''">
+      <div style="font-weight:600;color:var(--text)">${d.name}</div>
+      <div style="font-size:11px;color:var(--text3)">${d.category}</div>
+    </div>`).join('');
+  if(!filtered.length) dd.innerHTML='<div style="padding:12px 14px;font-size:13px;color:var(--text3)">Nessun documento trovato</div>';
+  showReqDropdown();
+}
+
+function showReqDropdown(){
+  const dd=document.getElementById('req-doc-dropdown');
+  if(dd) dd.style.display='block';
+}
+
+function hideReqDropdown(){
+  const dd=document.getElementById('req-doc-dropdown');
+  if(dd) dd.style.display='none';
+}
+
+function selectReqDoc(id,label){
+  document.getElementById('req-doc').value=id;
+  document.getElementById('req-doc-search').value='';
+  const sel=document.getElementById('req-doc-selected');
+  sel.textContent='✓ '+label;
+  sel.style.display='block';
+  hideReqDropdown();
 }
 
 // ── MOBILE NAV ─────────────────────────────────────────────
