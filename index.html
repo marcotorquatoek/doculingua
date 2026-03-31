@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="DocuLingua">
 <link rel="apple-touch-icon" href="icon.png">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%231e3a8a'/%3E%3Crect x='18' y='25' width='64' height='8' rx='4' fill='white'/%3E%3Crect x='18' y='40' width='45' height='8' rx='4' fill='rgba(255,255,255,0.6)'/%3E%3Ccircle cx='72' cy='68' r='18' fill='%233b82f6'/%3E%3Cpath d='M64 68 L70 74 L82 62' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E">
-<title>DocuLingua v2.7</title>
+<title>DocuLingua v2.8</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <style>
@@ -228,7 +228,7 @@ tbody tr:hover td{background:#f8fafc}
         <circle cx="37" cy="37" r="10" fill="#3b82f6"/>
         <path d="M32 37 L36 41 L43 33" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
       </svg>
-      DocuLingua <span style="font-size:10px;opacity:.4;margin-left:2px">v2.7</span>
+      DocuLingua <span style="font-size:10px;opacity:.4;margin-left:2px">v2.8</span>
     </div>
     <button class="hamburger" onclick="toggleDrawer()">
       <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M3 6h18M3 12h18M3 18h18"/></svg>
@@ -256,7 +256,7 @@ tbody tr:hover td{background:#f8fafc}
         </div>
         <div class="sidebar-logo-text">
           <span>DocuLingua</span>
-          <small style="color:rgba(255,255,255,0.5)">v2.7</small>
+          <small style="color:rgba(255,255,255,0.5)">v2.8</small>
         </div>
       </div>
       <div class="sidebar-section">Principale</div>
@@ -625,12 +625,32 @@ tbody tr:hover td{background:#f8fafc}
   </div>
 </div>
 
+
+<!-- CHANGELOG POPUP (desktop only) -->
+<div class="modal-overlay" id="cl-popup">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="cl-popup-title"></div>
+        <div id="cl-popup-date" style="font-size:12px;color:var(--text3);margin-top:3px"></div>
+      </div>
+      <button class="modal-close" onclick="document.getElementById('cl-popup').classList.remove('open')">×</button>
+    </div>
+    <div class="modal-body">
+      <p id="cl-popup-body" style="font-size:14px;color:var(--text2);line-height:1.7;white-space:pre-wrap"></p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-gray" onclick="document.getElementById('cl-popup').classList.remove('open')">Chiudi</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
 const SUPABASE_URL='https://smhuniliucxtderrcfjc.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtaHVuaWxpdWN4dGRlcnJjZmpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MDU1MjAsImV4cCI6MjA5MDE4MTUyMH0.gHaZxhf569rw00H7mZfJglxfpKpEAZTbUtegsXUhJCc';
-const APP_VER='v2.7';
+const APP_VER='v2.8';
 const {createClient}=supabase;
 const sb=createClient(SUPABASE_URL,SUPABASE_KEY);
 
@@ -809,16 +829,20 @@ function clCell(docId){
   const cl=lastCL(docId);
   if(!cl)return'<span style="color:var(--text3);font-size:11px">–</span>';
   const rb=recBadge(cl.date||cl.created_at);
-  const MAX=80;
+  const MAX=60;
   const notes=cl.notes||'';
   const isLong=notes.length>MAX;
   const short=isLong?notes.slice(0,MAX)+'…':notes;
   const id='cl-'+docId.replace(/-/g,'').slice(0,12);
   clFullText[id]=notes;
+  // Desktop: show popup on click if long
+  // Mobile: inline expand
   return`<div style="max-width:200px">
     <div style="font-size:11px;font-weight:700;color:var(--text)">${cl.version} · ${cl.date||''}</div>
     <div id="${id}-txt" style="font-size:11px;color:var(--text2);margin-top:2px;line-height:1.4">${short}</div>
-    ${isLong?`<button id="${id}-btn" onclick="toggleCL('${id}')" style="background:none;border:none;color:var(--brand);font-size:10px;font-weight:700;cursor:pointer;padding:2px 0;display:block;margin-top:2px">▼ Mostra tutto</button>`:''}
+    ${isLong?`<button id="${id}-btn"
+      onclick="window.innerWidth>768?showCLPopup('${id}'):toggleCL('${id}')"
+      style="background:none;border:none;color:var(--brand);font-size:10px;font-weight:700;cursor:pointer;padding:2px 0;display:block;margin-top:2px">▼ Leggi tutto</button>`:''}
     ${rb}
   </div>`;
 }
@@ -830,14 +854,25 @@ function toggleCL(id){
   const full=clFullText[id]||'';
   const expanded=btnEl.dataset.expanded==='1';
   if(expanded){
-    txtEl.textContent=full.slice(0,80)+'…';
-    btnEl.textContent='▼ Mostra tutto';
+    txtEl.textContent=full.slice(0,60)+'…';
+    btnEl.textContent='▼ Leggi tutto';
     btnEl.dataset.expanded='0';
   }else{
     txtEl.textContent=full;
     btnEl.textContent='▲ Riduci';
     btnEl.dataset.expanded='1';
   }
+}
+
+function showCLPopup(id){
+  const full=clFullText[id]||'';
+  // Find doc name from context
+  const cl=allCL.find(c=>('cl-'+c.document_id.replace(/-/g,'').slice(0,12))===id);
+  const doc=cl?allDocs.find(d=>d.id===cl.document_id):null;
+  document.getElementById('cl-popup-title').textContent=(doc?.name||'Aggiornamento')+' — '+( cl?.version||'');
+  document.getElementById('cl-popup-date').textContent=cl?.date||'';
+  document.getElementById('cl-popup-body').textContent=full;
+  document.getElementById('cl-popup').classList.add('open');
 }
 
 function renderTable(){
