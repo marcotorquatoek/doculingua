@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="DocuLingua">
 <link rel="apple-touch-icon" href="icon.png">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%231e3a8a'/%3E%3Crect x='18' y='25' width='64' height='8' rx='4' fill='white'/%3E%3Crect x='18' y='40' width='45' height='8' rx='4' fill='rgba(255,255,255,0.6)'/%3E%3Ccircle cx='72' cy='68' r='18' fill='%233b82f6'/%3E%3Cpath d='M64 68 L70 74 L82 62' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E">
-<title>DocuLingua v3.0</title>
+<title>DocuLingua v3.1</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <style>
@@ -228,7 +228,7 @@ tbody tr:hover td{background:#f8fafc}
         <circle cx="37" cy="37" r="10" fill="#3b82f6"/>
         <path d="M32 37 L36 41 L43 33" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
       </svg>
-      DocuLingua <span style="font-size:10px;opacity:.4;margin-left:2px">v3.0</span>
+      DocuLingua <span style="font-size:10px;opacity:.4;margin-left:2px">v3.1</span>
     </div>
     <button class="hamburger" onclick="toggleDrawer()">
       <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M3 6h18M3 12h18M3 18h18"/></svg>
@@ -256,7 +256,7 @@ tbody tr:hover td{background:#f8fafc}
         </div>
         <div class="sidebar-logo-text">
           <span>DocuLingua</span>
-          <small style="color:rgba(255,255,255,0.5)">v3.0</small>
+          <small style="color:rgba(255,255,255,0.5)">v3.1</small>
         </div>
       </div>
       <div class="sidebar-section">Principale</div>
@@ -348,6 +348,20 @@ tbody tr:hover td{background:#f8fafc}
           </select>
         </div>
         <div id="bylang-page"></div>
+      </div>
+
+      <!-- NUOVI DOCUMENTI -->
+      <div class="page" id="page-nuovi">
+        <div class="page-header">
+          <div><div class="page-title">🆕 Nuovi documenti</div><div class="page-sub">Documenti aggiunti al sistema</div></div>
+        </div>
+        <div class="filters-bar">
+          <input type="text" id="new-search" placeholder="🔍 Cerca documento…" oninput="renderNuovi()">
+          <div class="filter-row">
+            <select id="new-cat" onchange="renderNuovi()"><option value="">Tutte le categorie</option></select>
+          </div>
+        </div>
+        <div class="table-wrap" id="nuovi-wrap"></div>
       </div>
 
       <!-- RICHIEDI FILE -->
@@ -662,7 +676,7 @@ tbody tr:hover td{background:#f8fafc}
 <script>
 const SUPABASE_URL='https://smhuniliucxtderrcfjc.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtaHVuaWxpdWN4dGRlcnJjZmpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MDU1MjAsImV4cCI6MjA5MDE4MTUyMH0.gHaZxhf569rw00H7mZfJglxfpKpEAZTbUtegsXUhJCc';
-const APP_VER='v3.0';
+const APP_VER='v3.1';
 const {createClient}=supabase;
 const sb=createClient(SUPABASE_URL,SUPABASE_KEY);
 
@@ -715,7 +729,7 @@ function lastCL(docId){return allCL.find(c=>c.document_id===docId);}
 // ── INIT ───────────────────────────────────────────────────
 async function init(){
   CATS.forEach(c=>{
-    ['filter-cat','doc-cat','cl-cat','bl-cat'].forEach(id=>{
+    ['filter-cat','doc-cat','cl-cat','bl-cat','new-cat'].forEach(id=>{
       const el=document.getElementById(id);
       if(el)el.innerHTML+=`<option value="${c}">${c}</option>`;
     });
@@ -724,7 +738,8 @@ async function init(){
   const nav1=`
     <button class="nav-btn active" id="nav-dashboard" onclick="showPage('dashboard')">◈ Dashboard</button>
     <button class="nav-btn" id="nav-bylang" onclick="showPage('bylang')">🌍 Per lingua</button>
-    <button class="nav-btn" id="nav-storico" onclick="showPage('storico')">📋 Storico modifiche</button>`;
+    <button class="nav-btn" id="nav-storico" onclick="showPage('storico')">📋 Storico modifiche</button>
+    <button class="nav-btn" id="nav-nuovi" onclick="showPage('nuovi')">🆕 Nuovi documenti</button>`;
   const nav2=`<button class="nav-btn" id="nav-request" onclick="showPage('request')">📨 Richiedi file</button>
     <button class="nav-btn" id="nav-admin" onclick="showPage('admin')">⚙️ Admin</button>`;
   document.getElementById('desktop-nav').innerHTML=nav1;
@@ -759,6 +774,7 @@ function showPage(name){
   const nb=document.getElementById('nav-'+name);
   if(nb)nb.classList.add('active');
   if(name==='storico')renderStorico();
+  if(name==='nuovi')renderNuovi();
   if(name==='bylang')renderByLangPage();
   closeDrawer();
 }
@@ -826,11 +842,11 @@ function getFiltered(){
   });
   if(srt==='name_asc')  return docs.slice().sort((a,b)=>a.name.localeCompare(b.name,'it'));
   if(srt==='name_desc') return docs.slice().sort((a,b)=>b.name.localeCompare(a.name,'it'));
-  if(srt==='date_asc')  return docs.slice().sort((a,b)=>(a.description||'0').localeCompare(b.description||'0'));
+  if(srt==='date_asc')  return docs.slice().sort((a,b)=>new Date(a.updated_at||a.description||0)-new Date(b.updated_at||b.description||0));
   if(srt==='cat_asc')   return docs.slice().sort((a,b)=>a.category.localeCompare(b.category,'it')||a.name.localeCompare(b.name,'it'));
   if(srt==='cat_desc')  return docs.slice().sort((a,b)=>b.category.localeCompare(a.category,'it')||a.name.localeCompare(b.name,'it'));
   if(srt==='default')   return docs.slice().sort((a,b)=>(a.sort_order??999)-(b.sort_order??999));
-  return docs.slice().sort((a,b)=>(b.description||'0').localeCompare(a.description||'0'));
+  return docs.slice().sort((a,b)=>new Date(b.updated_at||b.description||0)-new Date(a.updated_at||a.description||0));
 }
 
 // Store full changelog notes by id
@@ -1305,8 +1321,7 @@ async function saveDoc(){
   toast(id?'✓ Documento aggiornato':'✓ Documento creato');
   await loadData();
   if(sendMail){
-    const d=allDocs.find(x=>x.name===name);
-    await sendDocEmail(name,ver,desc,'',!id);
+    await sendDocEmail(name,ver,desc,docNotes,!id);
   }
 }
 
@@ -1429,6 +1444,51 @@ function selectReqDoc(id,label){
   sel.textContent='✓ '+label;
   sel.style.display='block';
   hideReqDropdown();
+}
+
+
+// ── NUOVI DOCUMENTI ────────────────────────────────────────
+function renderNuovi(){
+  const q=(document.getElementById('new-search')?.value||'').toLowerCase();
+  const cat=document.getElementById('new-cat')?.value||'';
+
+  // Sort docs by created date desc (using updated_at as proxy for first insert)
+  // Actually use sort_order=0 as newest - better: sort by created_at if available, else updated_at
+  const sorted=[...allDocs].sort((a,b)=>new Date(b.updated_at||0)-new Date(a.updated_at||0));
+  const filtered=sorted.filter(d=>{
+    if(cat&&d.category!==cat)return false;
+    if(q&&!d.name.toLowerCase().includes(q)&&!d.category.toLowerCase().includes(q))return false;
+    return true;
+  });
+
+  const wrap=document.getElementById('nuovi-wrap');
+  if(!wrap)return;
+  if(!filtered.length){wrap.innerHTML='<div style="padding:40px;text-align:center;color:var(--text3)">Nessun documento trovato</div>';return;}
+
+  wrap.innerHTML=`<div>${filtered.map(doc=>{
+    const rb=recBadge(doc.description||doc.updated_at);
+    const pct=calcPct(doc.id);
+    const pc=pctColor(pct);
+    return`<div class="cl-item">
+      <div class="cl-dot" style="background:var(--green)"></div>
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span style="font-weight:700;font-size:13px">${doc.name}</span>
+          <span style="font-family:monospace;font-size:11px;background:#f1f5f9;padding:1px 6px;border-radius:4px;font-weight:700">${doc.version}</span>
+          ${doc.multilingual?'<span style="background:#ede9fe;color:#7c3aed;font-size:10px;font-weight:800;padding:1px 7px;border-radius:99px">🌐 Multilingue</span>':''}
+          ${rb}
+        </div>
+        <div style="font-size:11px;color:var(--text3);margin-top:3px">${doc.category} · ${doc.description||''}</div>
+        ${doc.notes?`<div style="font-size:12px;color:var(--text2);margin-top:4px;font-style:italic">${doc.notes}</div>`:''}
+        <div style="margin-top:6px">
+          <div style="font-size:11px;font-weight:700;color:${pc};margin-bottom:2px">${pct}% completato</div>
+          <div style="background:#f1f5f9;border-radius:99px;height:4px;overflow:hidden;max-width:200px">
+            <div style="width:${pct}%;height:100%;background:${pc};border-radius:99px"></div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('')}</div>`;
 }
 
 // ── MOBILE NAV ─────────────────────────────────────────────
@@ -1621,7 +1681,7 @@ async function sendDocEmail(docName,version,description,changeNotes,isNew){
   if(!ejsConfig.service||!ejsConfig.template||!ejsConfig.pubkey){toast('⚠️ Configura EmailJS in Admin');return;}
   const subject=isNew?`[DocuLingua] Nuovo documento: ${docName}`:`[DocuLingua] Aggiornamento: ${docName} ${version}`;
   const message=isNew
-    ?`È stato aggiunto un nuovo documento:\n\nNome: ${docName}\nVersione: ${version}\nData: ${description||'–'}`
+    ?`È stato aggiunto un nuovo documento:\n\nNome: ${docName}\nVersione: ${version}\nData: ${description||'–'}${changeNotes?'\nNote: '+changeNotes:''}`
     :`È stato aggiornato:\n\nNome: ${docName}\nNuova versione: ${version}\nData: ${description||'–'}\nModifiche: ${changeNotes||'–'}`;
   let sent=0;
   for(const to of adminEmails){
