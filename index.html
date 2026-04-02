@@ -11,7 +11,7 @@
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 <link rel="icon" type="image/png" href="icon.png">
 <meta name="theme-color" content="#1e3a8a">
-<title>DocuLingua v4.2</title>
+<title>DocuLingua v6.3</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <style>
@@ -82,6 +82,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .table-wrap{background:var(--white);border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.06);overflow:hidden}
 .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
 table{width:100%;border-collapse:collapse;table-layout:fixed}
+
 thead th{padding:7px 8px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);background:#f8fafc;border-bottom:2px solid var(--border);white-space:nowrap;text-align:left}
 tbody td{padding:8px 8px;font-size:12px;border-bottom:1px solid #f8fafc;vertical-align:middle}
 tbody tr:last-child td{border-bottom:none}
@@ -95,7 +96,7 @@ tbody tr:hover td{background:#f8fafc}
 .badge.needs_update{background:var(--orange-bg);color:var(--orange)}
 .badge.outdated{background:var(--purple-bg);color:var(--purple)}
 .badge.missing{background:var(--red-bg);color:var(--red)}
-.status-sel{border:none;border-radius:99px;padding:3px 6px;font-size:10px;font-weight:700;cursor:pointer;outline:none;-webkit-appearance:none;max-width:110px}
+.status-sel{border:none;border-radius:99px;padding:2px 5px;font-size:10px;font-weight:700;cursor:pointer;outline:none;-webkit-appearance:none}
 .status-sel.completed{background:var(--green-bg);color:var(--green)}
 .status-sel.in_progress{background:var(--yellow-bg);color:var(--yellow)}
 .status-sel.needs_update{background:var(--orange-bg);color:var(--orange)}
@@ -182,6 +183,7 @@ tbody tr:hover td{background:#f8fafc}
 @keyframes spin{to{transform:rotate(360deg)}}
 
 .filter-row{display:flex;gap:8px;flex-wrap:wrap;width:100%;align-items:center}
+@media(min-width:769px){.filter-collapsible{display:flex !important;flex-wrap:wrap;gap:8px;width:100%}#filter-toggle-btn{display:none !important}}
 @media(max-width:900px){
   .kpi-grid{grid-template-columns:1fr 1fr}
   .lang-grid{grid-template-columns:1fr 1fr}
@@ -198,8 +200,9 @@ tbody tr:hover td{background:#f8fafc}
   .filter-row{gap:6px}
   .filter-row select{flex:1;min-width:120px;font-size:13px}
   .clear-btn{font-size:13px}
-  .filter-collapsible{display:none}
-  .filter-collapsible.open{display:flex;flex-direction:column;gap:8px;width:100%}
+  .filter-collapsible{display:none !important}
+  .filter-collapsible.open{display:flex !important;flex-direction:column;gap:8px;width:100%}
+  #filter-toggle-btn{display:flex !important}
 }
 @media(max-width:480px){
   .kpi-grid{grid-template-columns:1fr 1fr}
@@ -233,7 +236,7 @@ tbody tr:hover td{background:#f8fafc}
         <circle cx="37" cy="37" r="10" fill="#3b82f6"/>
         <path d="M32 37 L36 41 L43 33" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
       </svg>
-      DocuLingua <span style="font-size:10px;opacity:.4;margin-left:2px">v4.2</span>
+      DocuLingua <span style="font-size:10px;opacity:.4;margin-left:2px">v6.3</span>
     </div>
     <button class="hamburger" onclick="toggleDrawer()">
       <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M3 6h18M3 12h18M3 18h18"/></svg>
@@ -261,7 +264,7 @@ tbody tr:hover td{background:#f8fafc}
         </div>
         <div class="sidebar-logo-text">
           <span>DocuLingua</span>
-          <small style="color:rgba(255,255,255,0.5)">v4.2</small>
+          <small style="color:rgba(255,255,255,0.5)">v6.3</small>
         </div>
       </div>
       <div class="sidebar-section">Principale</div>
@@ -309,9 +312,21 @@ tbody tr:hover td{background:#f8fafc}
         <div class="table-wrap">
           <div class="table-scroll">
             <table>
+              <colgroup>
+                <col><!-- doc: fills remaining ~850px on 1920 screen -->
+                <col style="width:120px"><!-- cat -->
+                <col style="width:38px"><!-- ver -->
+                <col style="width:105px"><!-- IT -->
+                <col style="width:140px"><!-- agg -->
+                <col style="width:105px"><!-- EN -->
+                <col style="width:105px"><!-- FR -->
+                <col style="width:105px"><!-- DE -->
+                <col style="width:35px"><!-- % -->
+                <col style="width:80px"><!-- azioni -->
+              </colgroup>
               <thead><tr>
-                <th>Documento</th><th>Categoria</th><th>Ver.</th>
-                <th><img src="https://flagcdn.com/16x12/it.png" width="16" height="12" alt="IT" style="vertical-align:middle;border-radius:1px"> IT</th><th style="min-width:180px">📋 Ultimo aggiornamento</th>
+                <th id="th-doc">Documento</th><th id="th-cat">Categoria</th><th>Ver.</th>
+                <th><img src="https://flagcdn.com/16x12/it.png" width="16" height="12" alt="IT" style="vertical-align:middle;border-radius:1px"> IT</th><th>📋 Ultimo agg.</th>
                 <th><img src="https://flagcdn.com/16x12/gb.png" width="16" height="12" alt="EN" style="vertical-align:middle;margin-right:3px"> EN</th><th><img src="https://flagcdn.com/16x12/fr.png" width="16" height="12" alt="FR" style="vertical-align:middle;margin-right:3px"> FR</th><th><img src="https://flagcdn.com/16x12/de.png" width="16" height="12" alt="DE" style="vertical-align:middle;margin-right:3px"> DE</th>
                 <th>%</th><th>Azioni</th>
               </tr></thead>
@@ -487,20 +502,29 @@ tbody tr:hover td{background:#f8fafc}
             <div style="margin-bottom:16px">
               <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
                 <label style="font-size:13px;font-weight:700;color:var(--text)">📄 Documento</label>
-                <span id="col-doc-val" style="font-size:12px;font-weight:700;color:var(--brand);background:#eff6ff;padding:2px 10px;border-radius:99px">260px</span>
+                <span id="col-doc-val" style="font-size:12px;font-weight:700;color:var(--brand);background:#eff6ff;padding:2px 10px;border-radius:99px">300px</span>
               </div>
-              <input type="range" id="col-doc-slider" min="120" max="600" step="10" value="260"
+              <input type="range" id="col-doc-slider" min="120" max="500" step="5" value="300"
                 style="width:100%;accent-color:var(--brand)"
-                oninput="colWidths.doc=parseInt(this.value);document.getElementById('col-doc-val').textContent=this.value+'px';applyColWidths()">
+                oninput="colWidths.doc=parseInt(this.value);document.getElementById('col-doc-val').textContent=this.value+'px';applyColWidths();updateColPreview()">
             </div>
             <div style="margin-bottom:16px">
               <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
                 <label style="font-size:13px;font-weight:700;color:var(--text)">📁 Categoria</label>
-                <span id="col-cat-val" style="font-size:12px;font-weight:700;color:var(--brand);background:#eff6ff;padding:2px 10px;border-radius:99px">150px</span>
+                <span id="col-cat-val" style="font-size:12px;font-weight:700;color:var(--brand);background:#eff6ff;padding:2px 10px;border-radius:99px">90px</span>
               </div>
-              <input type="range" id="col-cat-slider" min="60" max="400" step="10" value="150"
+              <input type="range" id="col-cat-slider" min="50" max="250" step="5" value="90"
                 style="width:100%;accent-color:var(--brand)"
-                oninput="colWidths.cat=parseInt(this.value);document.getElementById('col-cat-val').textContent=this.value+'px';applyColWidths()">
+                oninput="colWidths.cat=parseInt(this.value);document.getElementById('col-cat-val').textContent=this.value+'px';applyColWidths();updateColPreview()">
+            </div>
+            <!-- PREVIEW -->
+            <div style="margin-bottom:14px">
+              <div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em">Anteprima proporzioni</div>
+              <div style="display:flex;gap:2px;height:28px;border-radius:6px;overflow:hidden;border:1px solid var(--border)">
+                <div id="prev-doc" style="background:#2563eb;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:white;transition:.2s;overflow:hidden;white-space:nowrap;padding:0 4px">DOC</div>
+                <div id="prev-cat" style="background:#64748b;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:white;transition:.2s;overflow:hidden;white-space:nowrap;padding:0 4px">CAT</div>
+                <div style="flex:1;background:#e2e8f0;display:flex;align-items:center;justify-content:center;font-size:9px;color:#94a3b8">resto</div>
+              </div>
             </div>
             <button class="btn btn-blue btn-sm" onclick="saveColWidths()">💾 Salva larghezze</button>
             <div id="col-ok" style="display:none;color:var(--green);font-size:12px;margin-top:6px">✓ Salvato</div>
@@ -716,7 +740,7 @@ tbody tr:hover td{background:#f8fafc}
     <div class="modal-body">
       <input type="hidden" id="upload-doc-id">
       <input type="hidden" id="upload-lang">
-      <div class="info" id="upload-lang-info"></div>
+<div id="upload-lang-info" style="display:none"></div>
       <div class="ff">
         <label>Il tuo nome *</label>
         <input type="text" id="upload-uploader" placeholder="es. Marie Dupont" autocomplete="name">
@@ -763,7 +787,7 @@ tbody tr:hover td{background:#f8fafc}
 <script>
 const SUPABASE_URL='https://smhuniliucxtderrcfjc.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtaHVuaWxpdWN4dGRlcnJjZmpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MDU1MjAsImV4cCI6MjA5MDE4MTUyMH0.gHaZxhf569rw00H7mZfJglxfpKpEAZTbUtegsXUhJCc';
-const APP_VER='v4.2';
+const APP_VER='v6.3';
 const {createClient}=supabase;
 const sb=createClient(SUPABASE_URL,SUPABASE_KEY);
 
@@ -800,7 +824,7 @@ function todayStr(){
 
 
 function newBadge(createdAt){
-  // Only show NEW if document has a real created_at (set by app after v4.2)
+  // Only show NEW if document has a real created_at (set by app after v6.3)
   // Documents imported from Excel have NULL created_at — never show NEW
   if(!createdAt) return '';
   const d=new Date(createdAt), now=new Date(), days=(now-d)/86400000;
@@ -871,6 +895,7 @@ async function loadData(){
   // req-doc dropdown populated via filterReqDocs()
   filterReqDocs();
   renderDashboard();
+  
 }
 
 function showPage(name){
@@ -949,11 +974,19 @@ function getFiltered(){
   });
   if(srt==='name_asc')  return docs.slice().sort((a,b)=>a.name.localeCompare(b.name,'it'));
   if(srt==='name_desc') return docs.slice().sort((a,b)=>b.name.localeCompare(a.name,'it'));
-  if(srt==='date_asc')  return docs.slice().sort((a,b)=>new Date(a.updated_at||a.description||0)-new Date(b.updated_at||b.description||0));
+  if(srt==='date_asc')  return docs.slice().sort((a,b)=>{
+    const dateDiff = (a.description||'0').localeCompare(b.description||'0');
+    if(dateDiff!==0) return dateDiff;
+    return new Date(a.updated_at||0)-new Date(b.updated_at||0);
+  });
   if(srt==='cat_asc')   return docs.slice().sort((a,b)=>a.category.localeCompare(b.category,'it')||a.name.localeCompare(b.name,'it'));
   if(srt==='cat_desc')  return docs.slice().sort((a,b)=>b.category.localeCompare(a.category,'it')||a.name.localeCompare(b.name,'it'));
   if(srt==='default')   return docs.slice().sort((a,b)=>(a.sort_order??999)-(b.sort_order??999));
-  return docs.slice().sort((a,b)=>new Date(b.updated_at||b.description||0)-new Date(a.updated_at||a.description||0));
+  return docs.slice().sort((a,b)=>{
+    const dateDiff = (b.description||'0').localeCompare(a.description||'0');
+    if(dateDiff!==0) return dateDiff;
+    return new Date(b.updated_at||0)-new Date(a.updated_at||0);
+  });
 }
 
 // Store full changelog notes by id
@@ -963,21 +996,15 @@ function clCell(docId){
   const cl=lastCL(docId);
   if(!cl)return'<span style="color:var(--text3);font-size:11px">–</span>';
   const rb=recBadge(cl.date||cl.created_at);
-  const MAX=60;
+  const MAX=55;
   const notes=cl.notes||'';
   const isLong=notes.length>MAX;
   const short=isLong?notes.slice(0,MAX)+'…':notes;
   const id='cl-'+docId.replace(/-/g,'').slice(0,12);
   clFullText[id]=notes;
-  // Desktop: show popup on click if long
-  // Mobile: inline expand
-  return`<div style="max-width:200px">
-    <div style="font-size:11px;font-weight:700;color:var(--text)">${cl.version} · ${cl.date||''}</div>
-    <div id="${id}-txt" style="font-size:11px;color:var(--text2);margin-top:2px;line-height:1.4">${short}</div>
-    ${isLong?`<button id="${id}-btn"
-      onclick="window.innerWidth>768?showCLPopup('${id}'):toggleCL('${id}')"
-      style="background:none;border:none;color:var(--brand);font-size:10px;font-weight:700;cursor:pointer;padding:2px 0;display:block;margin-top:2px">▼ Leggi tutto</button>`:''}
-    ${rb}
+  return`<div>
+    <div style="font-size:10px;font-weight:700;color:var(--text);white-space:nowrap">${cl.version} · ${cl.date||''} ${rb}</div>
+    <div style="font-size:10px;color:var(--text2);margin-top:1px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${short}${isLong?`<button id="${id}-btn" onclick="window.innerWidth>768?showCLPopup('${id}'):toggleCL('${id}')" style="background:none;border:none;color:var(--brand);font-size:10px;font-weight:700;cursor:pointer;padding:0 2px;display:inline">▼</button>`:''}</div>
   </div>`;
 }
 
@@ -1038,11 +1065,11 @@ function renderTable(){
     }).join('');
     return`<tr>
       <td style="max-width:${colWidths.doc}px;width:${colWidths.doc}px">
-        <div style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${doc.name}">${newBadge(doc.created_at)}${doc.name}${mlBadge}</div>
-        <div style="font-size:11px;color:var(--text3);margin-top:2px">${doc.description||''} ${rb}</div>
+        <div style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${doc.name}">${newBadge(doc.created_at)}${doc.name}</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px">${doc.description||''} ${rb}${mlBadge}</div>
       </td>
-      <td style="font-size:12px;color:var(--text2);max-width:${colWidths.cat}px;width:${colWidths.cat}px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${doc.category}</td>
-      <td><span style="font-family:monospace;font-size:11px;background:#f1f5f9;padding:2px 7px;border-radius:5px;font-weight:700">${doc.version}</span></td>
+      <td style="font-size:12px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${doc.category}</td>
+      <td><span style="font-family:monospace;font-size:10px;background:#f1f5f9;padding:1px 5px;border-radius:4px;font-weight:700;white-space:nowrap">${doc.version}</span></td>
       ${itCol}
       <td>${clCell(doc.id)}</td>
       ${langCols}
@@ -1076,8 +1103,8 @@ function renderTable(){
     return`<div class="m-card">
       <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;margin-bottom:6px">
         <div style="min-width:0">
-          <div style="font-weight:700;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${newBadge(doc.created_at)}${doc.name} ${mlBadge}</div>
-          <div style="font-size:11px;color:var(--text3)">${doc.category} · ${doc.description||''} ${rb}</div>
+          <div style="font-weight:700;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${newBadge(doc.created_at)}${doc.name}</div>
+          <div style="font-size:11px;color:var(--text3)">${doc.category} · ${doc.description||''} ${rb}${mlBadge}</div>
         </div>
         <span style="font-family:monospace;font-size:11px;background:#f1f5f9;padding:2px 7px;border-radius:5px;font-weight:700;flex-shrink:0">${doc.version}</span>
       </div>
@@ -1122,14 +1149,13 @@ function toggleFilters(){
 }
 
 function initFilterToggle(){
-  const btn=document.getElementById('filter-toggle-btn');
-  if(!btn)return;
-  if(window.innerWidth<=768){
-    btn.style.display='flex';
-  }else{
-    btn.style.display='none';
+  // Handled purely by CSS media queries now
+  // Just reset toggle state on resize
+  if(window.innerWidth>768){
     const fc=document.getElementById('filter-collapsible');
-    if(fc) fc.classList.add('open');
+    const btn=document.getElementById('filter-toggle-btn');
+    if(fc) fc.classList.remove('open');
+    if(btn) btn.textContent='⚙️ Filtri';
   }
 }
 window.addEventListener('resize',initFilterToggle);
@@ -1197,7 +1223,7 @@ async function qSC(trId,docId,sel){
   await sb.from('translations').update({status,last_updated:new Date().toISOString()}).eq('id',trId);
   const t=allTr.find(t=>t.id===trId);
   if(t){t.status=status;t.last_updated=new Date().toISOString();}
-  renderKPIs();renderLangGrid();
+  renderKPIs();renderLangGrid();renderTable();
   toast('✓ Stato aggiornato');
 }
 
@@ -1437,7 +1463,18 @@ async function saveDoc(){
   btn.innerHTML='<span class="sp-sm"></span> Salvataggio…';btn.disabled=true;
   let error;
   if(id){
-    ({error}=await sb.from('documents').update({name,category:cat,version:ver,description:desc,multilingual,notes:docNotes,updated_at:new Date().toISOString()}).eq('id',id));
+    // Only bump updated_at if actual content changed, not just multilingual toggle
+    const existingDoc = allDocs.find(d=>d.id===id);
+    const norm = v => (v||'').trim();
+    const contentChanged = !existingDoc 
+      || norm(existingDoc.name)!==norm(name) 
+      || norm(existingDoc.category)!==norm(cat) 
+      || norm(existingDoc.version)!==norm(ver) 
+      || norm(existingDoc.description)!==norm(desc) 
+      || norm(existingDoc.notes)!==norm(docNotes);
+    const updatePayload = {name,category:cat,version:ver,description:desc,multilingual,notes:docNotes};
+    if(contentChanged) updatePayload.updated_at = new Date().toISOString();
+    ({error}=await sb.from('documents').update(updatePayload).eq('id',id));
     // if multilingual, set all translations to completed
     if(!error&&multilingual){
       const trs=allTr.filter(t=>t.document_id===id);
@@ -1590,7 +1627,7 @@ function renderNuovi(){
     if(wrap) wrap.innerHTML='<div style="padding:40px;text-align:center;color:var(--text3)"><div class="sp-sm" style="display:inline-block;margin-bottom:8px"></div><br>Caricamento…</div>';
     return;
   }
-  // Only show docs with created_at set (inserted from app after v4.2)
+  // Only show docs with created_at set (inserted from app after v6.3)
   const sorted=[...allDocs]
     .filter(d=>!!d.created_at)
     .sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
@@ -1603,7 +1640,7 @@ function renderNuovi(){
   const wrap=document.getElementById('nuovi-wrap');
   if(!wrap)return;
   if(!filtered.length){
-    wrap.innerHTML='<div style="padding:40px;text-align:center;color:var(--text3)"><div style="font-size:24px;margin-bottom:12px">🆕</div><div style="font-weight:700;margin-bottom:6px">Nessun nuovo documento</div><div style="font-size:12px">I documenti aggiunti dall\'app dalla v4.2 in poi appariranno qui</div></div>';
+    wrap.innerHTML='<div style="padding:40px;text-align:center;color:var(--text3)"><div style="font-size:24px;margin-bottom:12px">🆕</div><div style="font-weight:700;margin-bottom:6px">Nessun nuovo documento</div><div style="font-size:12px">I documenti aggiunti dall\'app dalla v6.3 in poi appariranno qui</div></div>';
     return;
   }
 
@@ -1648,7 +1685,11 @@ function openUploadModal(docId, lang) {
   document.getElementById('upload-doc-id').value = docId;
   document.getElementById('upload-lang').value = lang;
   document.getElementById('upload-doc-name').textContent = doc.name;
-  const flags = {EN:'🇬🇧',FR:'🇫🇷',DE:'🇩🇪'};
+  const flags = {
+    EN:'<img src="https://flagcdn.com/16x12/gb.png" width="16" height="12" style="border-radius:1px;vertical-align:middle">',
+    FR:'<img src="https://flagcdn.com/16x12/fr.png" width="16" height="12" style="border-radius:1px;vertical-align:middle">',
+    DE:'<img src="https://flagcdn.com/16x12/de.png" width="16" height="12" style="border-radius:1px;vertical-align:middle">',
+  };
   const names = {EN:'English',FR:'Français',DE:'Deutsch'};
   document.getElementById('upload-lang-info').textContent = `Il file verrà caricato nella cartella Google Drive ${flags[lang]} ${names[lang]}`;
   document.getElementById('upload-err').style.display='none';
@@ -1801,7 +1842,11 @@ function renderUploads() {
     return;
   }
 
-  const flags = {EN:'🇬🇧',FR:'🇫🇷',DE:'🇩🇪'};
+  const flags = {
+    EN:'<img src="https://flagcdn.com/16x12/gb.png" width="16" height="12" style="border-radius:1px;vertical-align:middle">',
+    FR:'<img src="https://flagcdn.com/16x12/fr.png" width="16" height="12" style="border-radius:1px;vertical-align:middle">',
+    DE:'<img src="https://flagcdn.com/16x12/de.png" width="16" height="12" style="border-radius:1px;vertical-align:middle">',
+  };
   wrap.innerHTML = `<div>${filtered.map(u=>{
     const rb = recBadge(u.uploadedAt);
     return `<div class="cl-item">
@@ -1820,6 +1865,12 @@ function renderUploads() {
     </div>`;
   }).join('')}</div>`;
 }
+
+
+// ── COLUMN RESIZE ──────────────────────────────────────────
+let resizeState = null;
+
+
 
 // ── MOBILE NAV ─────────────────────────────────────────────
 function toggleDrawer(){
@@ -1895,7 +1946,7 @@ const DEFAULT_BADGES=[
 let adminEmails=[];
 let ejsConfig={};
 let recencyBadges=[...DEFAULT_BADGES];
-let colWidths={doc:260,cat:150};
+let colWidths={doc:300,cat:90};
 
 async function loadSettings(){
   try{
@@ -1927,8 +1978,13 @@ function applyColWidths(){
   const thCat=document.getElementById('th-cat');
   if(thDoc) thDoc.style.width=colWidths.doc+'px';
   if(thCat) thCat.style.width=colWidths.cat+'px';
+  document.documentElement.style.setProperty('--col-doc-w', colWidths.doc+'px');
+  document.documentElement.style.setProperty('--col-cat-w', colWidths.cat+'px');
   renderTable();
+  
 }
+
+
 
 async function saveColWidths(){
   await saveSetting('col_widths',colWidths);
@@ -1942,6 +1998,17 @@ function loadColWidthsUI(){
   const s2=document.getElementById('col-cat-slider');
   if(s1){s1.value=colWidths.doc;document.getElementById('col-doc-val').textContent=colWidths.doc+'px';}
   if(s2){s2.value=colWidths.cat;document.getElementById('col-cat-val').textContent=colWidths.cat+'px';}
+  updateColPreview();
+}
+
+
+function updateColPreview(){
+  const pd = document.getElementById('prev-doc');
+  const pc = document.getElementById('prev-cat');
+  if(!pd||!pc) return;
+  const total = 900; // approximate table width
+  pd.style.width = (colWidths.doc/total*100)+'%';
+  pc.style.width = (colWidths.cat/total*100)+'%';
 }
 
 function checkAdminPwd(){
@@ -1950,7 +2017,7 @@ function checkAdminPwd(){
   if(v===ADMIN_PWD){
     document.getElementById('admin-lock').style.display='none';
     document.getElementById('admin-content').style.display='block';
-    loadSettings().then(()=>{renderAdminEmails();renderBadgeConfig();loadEjsConfig();loadColWidthsUI();});
+    loadSettings().then(()=>{renderAdminEmails();renderBadgeConfig();loadEjsConfig();loadColWidthsUI();updateColPreview();});
     document.getElementById('admin-pwd-input').value='';
     err.style.display='none';
   }else{
