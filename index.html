@@ -11,7 +11,7 @@
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 <link rel="icon" type="image/png" href="icon.png">
 <meta name="theme-color" content="#1e3a8a">
-<title>DocuLingua v3.9</title>
+<title>DocuLingua v4.0</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <style>
@@ -231,7 +231,7 @@ tbody tr:hover td{background:#f8fafc}
         <circle cx="37" cy="37" r="10" fill="#3b82f6"/>
         <path d="M32 37 L36 41 L43 33" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
       </svg>
-      DocuLingua <span style="font-size:10px;opacity:.4;margin-left:2px">v3.9</span>
+      DocuLingua <span style="font-size:10px;opacity:.4;margin-left:2px">v4.0</span>
     </div>
     <button class="hamburger" onclick="toggleDrawer()">
       <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M3 6h18M3 12h18M3 18h18"/></svg>
@@ -259,7 +259,7 @@ tbody tr:hover td{background:#f8fafc}
         </div>
         <div class="sidebar-logo-text">
           <span>DocuLingua</span>
-          <small style="color:rgba(255,255,255,0.5)">v3.9</small>
+          <small style="color:rgba(255,255,255,0.5)">v4.0</small>
         </div>
       </div>
       <div class="sidebar-section">Principale</div>
@@ -365,6 +365,32 @@ tbody tr:hover td{background:#f8fafc}
           </div>
         </div>
         <div class="table-wrap" id="nuovi-wrap"></div>
+      </div>
+
+
+      <!-- CARICAMENTI LINGUE -->
+      <div class="page" id="page-uploads">
+        <div class="page-header">
+          <div><div class="page-title">📤 Caricamenti lingue</div><div class="page-sub">Storico file caricati dai traduttori su Google Drive</div></div>
+        </div>
+        <div class="filters-bar">
+          <input type="text" id="ul-search" placeholder="🔍 Cerca documento…" oninput="renderUploads()">
+          <div class="filter-row">
+            <select id="ul-lang" onchange="renderUploads()">
+              <option value="">Tutte le lingue</option>
+              <option value="EN">🇬🇧 English</option>
+              <option value="FR">🇫🇷 Français</option>
+              <option value="DE">🇩🇪 Deutsch</option>
+            </select>
+          </div>
+        </div>
+        <div class="table-wrap" id="uploads-wrap">
+          <div style="padding:40px;text-align:center;color:var(--text3)">
+            <div style="font-size:24px;margin-bottom:12px">📤</div>
+            <div style="font-weight:700;margin-bottom:6px">Nessun caricamento ancora</div>
+            <div style="font-size:12px">Quando un traduttore carica un file, apparirà qui</div>
+          </div>
+        </div>
       </div>
 
       <!-- RICHIEDI FILE -->
@@ -674,12 +700,68 @@ tbody tr:hover td{background:#f8fafc}
   </div>
 </div>
 
+
+<!-- UPLOAD FILE MODAL -->
+<div class="modal-overlay" id="upload-modal">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">📤 Carica file traduzione</div>
+        <div id="upload-doc-name" style="font-size:12px;color:var(--text3);margin-top:3px"></div>
+      </div>
+      <button class="modal-close" onclick="closeUploadModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="upload-doc-id">
+      <input type="hidden" id="upload-lang">
+      <div class="info" id="upload-lang-info"></div>
+      <div class="ff">
+        <label>Il tuo nome *</label>
+        <input type="text" id="upload-uploader" placeholder="es. Marie Dupont" autocomplete="name">
+      </div>
+      <div class="ff">
+        <label>File traduzione *</label>
+        <div id="upload-drop-zone" style="border:2px dashed var(--border);border-radius:10px;padding:28px;text-align:center;cursor:pointer;transition:.2s;background:#f8fafc"
+          onclick="document.getElementById('upload-file-input').click()"
+          ondragover="event.preventDefault();this.style.borderColor='var(--brand)';this.style.background='#eff6ff'"
+          ondragleave="this.style.borderColor='var(--border)';this.style.background='#f8fafc'"
+          ondrop="handleFileDrop(event)">
+          <div style="font-size:28px;margin-bottom:8px">📁</div>
+          <div style="font-size:13px;font-weight:600;color:var(--text2)">Trascina il file qui o clicca per selezionare</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:4px">PDF, Word, Excel, PowerPoint…</div>
+        </div>
+        <input type="file" id="upload-file-input" style="display:none" onchange="handleFileSelect(this)">
+        <div id="upload-file-preview" style="display:none;margin-top:10px;background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:10px">
+          <span style="font-size:20px">📄</span>
+          <div style="flex:1;min-width:0">
+            <div id="upload-file-name" style="font-weight:700;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></div>
+            <div id="upload-file-size" style="font-size:11px;color:var(--text3)"></div>
+          </div>
+          <button onclick="clearUploadFile()" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:18px;padding:0">×</button>
+        </div>
+      </div>
+      <div id="upload-progress" style="display:none;margin-top:8px">
+        <div style="background:#e2e8f0;border-radius:99px;height:6px;overflow:hidden">
+          <div id="upload-progress-bar" style="height:100%;background:var(--brand);border-radius:99px;width:0%;transition:width .3s"></div>
+        </div>
+        <div id="upload-progress-text" style="font-size:11px;color:var(--text3);margin-top:4px;text-align:center">Caricamento in corso…</div>
+      </div>
+      <div id="upload-err" class="err" style="display:none"></div>
+      <div id="upload-ok" style="display:none;background:#dcfce7;border:1px solid #86efac;color:#15803d;font-size:13px;padding:10px 14px;border-radius:8px;margin-top:8px"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-gray" onclick="closeUploadModal()">Annulla</button>
+      <button class="btn btn-blue" id="upload-save-btn" onclick="submitUpload()">📤 Carica su Drive</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
 const SUPABASE_URL='https://smhuniliucxtderrcfjc.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtaHVuaWxpdWN4dGRlcnJjZmpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MDU1MjAsImV4cCI6MjA5MDE4MTUyMH0.gHaZxhf569rw00H7mZfJglxfpKpEAZTbUtegsXUhJCc';
-const APP_VER='v3.9';
+const APP_VER='v4.0';
 const {createClient}=supabase;
 const sb=createClient(SUPABASE_URL,SUPABASE_KEY);
 
@@ -716,7 +798,7 @@ function todayStr(){
 
 
 function newBadge(createdAt){
-  // Only show NEW if document has a real created_at (set by app after v3.9)
+  // Only show NEW if document has a real created_at (set by app after v4.0)
   // Documents imported from Excel have NULL created_at — never show NEW
   if(!createdAt) return '';
   const d=new Date(createdAt), now=new Date(), days=(now-d)/86400000;
@@ -751,7 +833,8 @@ async function init(){
     <button class="nav-btn active" id="nav-dashboard" onclick="showPage('dashboard')">◈ Dashboard</button>
     <button class="nav-btn" id="nav-bylang" onclick="showPage('bylang')">🌍 Per lingua</button>
     <button class="nav-btn" id="nav-storico" onclick="showPage('storico')">📋 Storico modifiche</button>
-    <button class="nav-btn" id="nav-nuovi" onclick="showPage('nuovi')">🆕 Nuovi documenti</button>`;
+    <button class="nav-btn" id="nav-nuovi" onclick="showPage('nuovi')">🆕 Nuovi documenti</button>
+    <button class="nav-btn" id="nav-uploads" onclick="showPage('uploads')">📤 Caricamenti lingue</button>`;
   const nav2=`<button class="nav-btn" id="nav-request" onclick="showPage('request')">📨 Richiedi file</button>
     <button class="nav-btn" id="nav-admin" onclick="showPage('admin')">⚙️ Admin</button>`;
   document.getElementById('desktop-nav').innerHTML=nav1;
@@ -795,6 +878,7 @@ function showPage(name){
   if(nb)nb.classList.add('active');
   if(name==='storico')renderStorico();
   if(name==='nuovi')renderNuovi();
+  if(name==='uploads')renderUploads();
   if(name==='bylang')renderByLangPage();
   closeDrawer();
 }
@@ -939,9 +1023,14 @@ function renderTable(){
       if(!t)return'<td>–</td>';
       const s=t.status;
       return`<td>
-        <select class="status-sel ${s}" onchange="qSC('${t.id}','${doc.id}',this)">
-          ${Object.entries(STATUS).map(([k,v])=>`<option value="${k}" ${s===k?'selected':''}>${v.i} ${statusLabel(k,l)}</option>`).join('')}
-        </select>
+        <div style="display:flex;align-items:center;gap:3px">
+          <select class="status-sel ${s}" onchange="qSC('${t.id}','${doc.id}',this)">
+            ${Object.entries(STATUS).map(([k,v])=>`<option value="${k}" ${s===k?'selected':''}>${v.i} ${statusLabel(k,l)}</option>`).join('')}
+          </select>
+          <button onclick="openUploadModal('${doc.id}','${l}')" title="Carica file ${l}"
+            style="background:none;border:none;cursor:pointer;font-size:13px;padding:1px 3px;opacity:0.45;transition:.15s;flex-shrink:0"
+            onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.45">📤</button>
+        </div>
       </td>`;
     }).join('');
     return`<tr>
@@ -1042,7 +1131,7 @@ function openLangSheet(docId){
 function renderSheetLangs(){
   const doc=allDocs.find(d=>d.id===sheetDocId);
   if(!doc)return;
-  document.getElementById('sheet-langs').innerHTML=LANGS.map(lang=>{
+  document.getElementById('sheet-langs').innerHTML=['EN','FR','DE'].map(lang=>{
     const t=getTr(doc.id,lang);
     const s=t?.status||'missing';
     const sc=STATUS[s]||{};
@@ -1476,7 +1565,7 @@ function renderNuovi(){
     if(wrap) wrap.innerHTML='<div style="padding:40px;text-align:center;color:var(--text3)"><div class="sp-sm" style="display:inline-block;margin-bottom:8px"></div><br>Caricamento…</div>';
     return;
   }
-  // Only show docs with created_at set (inserted from app after v3.9)
+  // Only show docs with created_at set (inserted from app after v4.0)
   const sorted=[...allDocs]
     .filter(d=>!!d.created_at)
     .sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
@@ -1489,7 +1578,7 @@ function renderNuovi(){
   const wrap=document.getElementById('nuovi-wrap');
   if(!wrap)return;
   if(!filtered.length){
-    wrap.innerHTML='<div style="padding:40px;text-align:center;color:var(--text3)"><div style="font-size:24px;margin-bottom:12px">🆕</div><div style="font-weight:700;margin-bottom:6px">Nessun nuovo documento</div><div style="font-size:12px">I documenti aggiunti dall\'app dalla v3.9 in poi appariranno qui</div></div>';
+    wrap.innerHTML='<div style="padding:40px;text-align:center;color:var(--text3)"><div style="font-size:24px;margin-bottom:12px">🆕</div><div style="font-weight:700;margin-bottom:6px">Nessun nuovo documento</div><div style="font-size:12px">I documenti aggiunti dall\'app dalla v4.0 in poi appariranno qui</div></div>';
     return;
   }
 
@@ -1517,6 +1606,191 @@ function renderNuovi(){
             <div style="width:${pct}%;height:100%;background:${pc};border-radius:99px"></div>
           </div>
         </div>
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+
+// ── UPLOAD A DRIVE ─────────────────────────────────────────────────────────
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwpGpJE3dlvzjnERtq8Nz_sO1J2zL7I7MWM0ivXeJ3_ITNgrjM7WeT4SI-B47PqDBMnTA/exec';
+let uploadFile = null;
+let allUploads = JSON.parse(localStorage.getItem('dl_uploads')||'[]');
+
+function openUploadModal(docId, lang) {
+  const doc = allDocs.find(d=>d.id===docId);
+  if(!doc) return;
+  document.getElementById('upload-doc-id').value = docId;
+  document.getElementById('upload-lang').value = lang;
+  document.getElementById('upload-doc-name').textContent = doc.name;
+  const flags = {EN:'🇬🇧',FR:'🇫🇷',DE:'🇩🇪'};
+  const names = {EN:'English',FR:'Français',DE:'Deutsch'};
+  document.getElementById('upload-lang-info').textContent = `Il file verrà caricato nella cartella Google Drive ${flags[lang]} ${names[lang]}`;
+  document.getElementById('upload-err').style.display='none';
+  document.getElementById('upload-ok').style.display='none';
+  document.getElementById('upload-progress').style.display='none';
+  clearUploadFile();
+  uploadFile = null;
+  document.getElementById('upload-modal').classList.add('open');
+}
+
+function closeUploadModal() {
+  document.getElementById('upload-modal').classList.remove('open');
+  uploadFile = null;
+}
+
+function handleFileSelect(input) {
+  if(input.files[0]) setUploadFile(input.files[0]);
+}
+
+function handleFileDrop(e) {
+  e.preventDefault();
+  document.getElementById('upload-drop-zone').style.borderColor='var(--border)';
+  document.getElementById('upload-drop-zone').style.background='#f8fafc';
+  if(e.dataTransfer.files[0]) setUploadFile(e.dataTransfer.files[0]);
+}
+
+function setUploadFile(file) {
+  uploadFile = file;
+  const preview = document.getElementById('upload-file-preview');
+  document.getElementById('upload-file-name').textContent = file.name;
+  document.getElementById('upload-file-size').textContent = (file.size/1024/1024).toFixed(2)+' MB';
+  preview.style.display = 'flex';
+}
+
+function clearUploadFile() {
+  uploadFile = null;
+  document.getElementById('upload-file-preview').style.display='none';
+  document.getElementById('upload-file-input').value='';
+}
+
+async function submitUpload() {
+  const docId = document.getElementById('upload-doc-id').value;
+  const lang = document.getElementById('upload-lang').value;
+  const uploader = document.getElementById('upload-uploader').value.trim();
+  const errEl = document.getElementById('upload-err');
+  const okEl = document.getElementById('upload-ok');
+  errEl.style.display='none'; okEl.style.display='none';
+
+  if(!uploader) { errEl.textContent='Inserisci il tuo nome'; errEl.style.display='block'; return; }
+  if(!uploadFile) { errEl.textContent='Seleziona un file'; errEl.style.display='block'; return; }
+  if(uploadFile.size > 15*1024*1024) { errEl.textContent='File troppo grande (max 15MB)'; errEl.style.display='block'; return; }
+
+  const doc = allDocs.find(d=>d.id===docId);
+  const btn = document.getElementById('upload-save-btn');
+  btn.innerHTML = '<span class="sp-sm"></span> Caricamento…'; btn.disabled = true;
+
+  // Show progress
+  const prog = document.getElementById('upload-progress');
+  const progBar = document.getElementById('upload-progress-bar');
+  const progText = document.getElementById('upload-progress-text');
+  prog.style.display='block';
+  progBar.style.width='20%';
+  progText.textContent = 'Lettura file…';
+
+  try {
+    // Read file as base64
+    const base64 = await new Promise((res,rej) => {
+      const reader = new FileReader();
+      reader.onload = e => res(e.target.result.split(',')[1]);
+      reader.onerror = rej;
+      reader.readAsDataURL(uploadFile);
+    });
+
+    progBar.style.width='50%';
+    progText.textContent = 'Caricamento su Google Drive…';
+
+    const resp = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        lang, docName: doc.name, docId,
+        fileName: uploadFile.name,
+        fileData: base64,
+        fileType: uploadFile.type,
+        uploaderName: uploader,
+      })
+    });
+
+    progBar.style.width='90%';
+    const result = await resp.json();
+
+    if(!result.ok) throw new Error(result.error||'Errore sconosciuto');
+
+    progBar.style.width='100%';
+    progText.textContent = 'Completato!';
+
+    // Mark translation as completed
+    const tr = allTr.find(t=>t.document_id===docId&&t.language===lang);
+    if(tr) {
+      await sb.from('translations').update({status:'completed',last_updated:new Date().toISOString()}).eq('id',tr.id);
+      tr.status='completed'; tr.last_updated=new Date().toISOString();
+    }
+
+    // Save upload record
+    const uploadRecord = {
+      id: Date.now().toString(),
+      docId, docName: doc.name, lang,
+      fileName: uploadFile.name,
+      uploaderName: uploader,
+      fileUrl: result.fileUrl,
+      uploadedAt: new Date().toISOString(),
+    };
+    allUploads.unshift(uploadRecord);
+    localStorage.setItem('dl_uploads', JSON.stringify(allUploads.slice(0,200)));
+
+    // Also save to Supabase app_settings for cross-device visibility
+    await saveSetting('doc_uploads', allUploads.slice(0,200));
+
+    okEl.textContent = `✓ File caricato su Drive! La traduzione ${lang} è stata marcata come Completata.`;
+    okEl.style.display='block';
+    btn.textContent='📤 Carica su Drive'; btn.disabled=false;
+    renderKPIs(); renderLangGrid(); renderTable();
+    toast(`✓ File ${lang} caricato su Drive!`);
+
+    setTimeout(()=>closeUploadModal(), 2500);
+
+  } catch(err) {
+    progBar.style.width='0%';
+    prog.style.display='none';
+    errEl.textContent = 'Errore: '+err.message;
+    errEl.style.display='block';
+    btn.textContent='📤 Carica su Drive'; btn.disabled=false;
+  }
+}
+
+// ── RENDER UPLOADS PAGE ────────────────────────────────────────────────────
+function renderUploads() {
+  const q = (document.getElementById('ul-search')?.value||'').toLowerCase();
+  const lang = document.getElementById('ul-lang')?.value||'';
+  const wrap = document.getElementById('uploads-wrap');
+  if(!wrap) return;
+
+  const filtered = allUploads.filter(u=>{
+    if(lang&&u.lang!==lang) return false;
+    if(q&&!u.docName.toLowerCase().includes(q)) return false;
+    return true;
+  });
+
+  if(!filtered.length) {
+    wrap.innerHTML='<div style="padding:40px;text-align:center;color:var(--text3)"><div style="font-size:24px;margin-bottom:12px">📤</div><div style="font-weight:700;margin-bottom:6px">Nessun caricamento ancora</div><div style="font-size:12px">Quando un traduttore carica un file apparirà qui</div></div>';
+    return;
+  }
+
+  const flags = {EN:'🇬🇧',FR:'🇫🇷',DE:'🇩🇪'};
+  wrap.innerHTML = `<div>${filtered.map(u=>{
+    const rb = recBadge(u.uploadedAt);
+    return `<div class="cl-item">
+      <div class="cl-dot" style="background:var(--brand)"></div>
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span style="font-weight:700;font-size:13px">${u.docName}</span>
+          <span style="background:#eff6ff;color:var(--brand);font-size:10px;font-weight:800;padding:1px 8px;border-radius:99px">${flags[u.lang]||''} ${u.lang}</span>
+          ${rb}
+        </div>
+        <div style="font-size:11px;color:var(--text3);margin-top:3px">
+          👤 ${u.uploaderName} · 📄 ${u.fileName} · ${new Date(u.uploadedAt).toLocaleString('it-IT')}
+        </div>
+        ${u.fileUrl?`<a href="${u.fileUrl}" target="_blank" style="font-size:12px;color:var(--brand);font-weight:600;margin-top:4px;display:inline-block">🔗 Apri su Google Drive</a>`:''}
       </div>
     </div>`;
   }).join('')}</div>`;
@@ -1608,6 +1882,7 @@ async function loadSettings(){
         if(row.key==='emailjs_config')   ejsConfig=JSON.parse(row.value)||{};
         if(row.key==='recency_badges')   recencyBadges=JSON.parse(row.value)||DEFAULT_BADGES;
         if(row.key==='col_widths')       colWidths=JSON.parse(row.value)||{doc:260,cat:150};
+      if(row.key==='doc_uploads')      allUploads=JSON.parse(row.value)||[];
       }catch(e){console.error('Settings parse error:',row.key,e);}
     }
     if(ejsConfig.pubkey){try{emailjs.init(ejsConfig.pubkey);}catch(e){}}
