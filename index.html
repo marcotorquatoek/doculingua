@@ -11,7 +11,7 @@
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 <link rel="icon" type="image/png" href="icon.png">
 <meta name="theme-color" content="#1e3a8a">
-<title>DocuLingua v6.4</title>
+<title>DocuLingua v6.8</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <style>
@@ -234,7 +234,7 @@ tbody tr:hover td{background:#f8fafc}
         <circle cx="37" cy="37" r="10" fill="#3b82f6"/>
         <path d="M32 37 L36 41 L43 33" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
       </svg>
-      DocuLingua <span style="font-size:10px;opacity:.4;margin-left:2px">v6.4</span>
+      DocuLingua <span style="font-size:10px;opacity:.4;margin-left:2px">v6.8</span>
     </div>
     <button class="hamburger" onclick="toggleDrawer()">
       <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M3 6h18M3 12h18M3 18h18"/></svg>
@@ -262,7 +262,7 @@ tbody tr:hover td{background:#f8fafc}
         </div>
         <div class="sidebar-logo-text">
           <span>DocuLingua</span>
-          <small style="color:rgba(255,255,255,0.5)">v6.4</small>
+          <small style="color:rgba(255,255,255,0.5)">v6.8</small>
         </div>
       </div>
       <div class="sidebar-section">Principale</div>
@@ -770,7 +770,7 @@ tbody tr:hover td{background:#f8fafc}
 <script>
 const SUPABASE_URL='https://smhuniliucxtderrcfjc.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtaHVuaWxpdWN4dGRlcnJjZmpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MDU1MjAsImV4cCI6MjA5MDE4MTUyMH0.gHaZxhf569rw00H7mZfJglxfpKpEAZTbUtegsXUhJCc';
-const APP_VER='v6.4';
+const APP_VER='v6.8';
 const {createClient}=supabase;
 const sb=createClient(SUPABASE_URL,SUPABASE_KEY);
 
@@ -807,7 +807,7 @@ function todayStr(){
 
 
 function newBadge(createdAt){
-  // Only show NEW if document has a real created_at (set by app after v6.4)
+  // Only show NEW if document has a real created_at (set by app after v6.8)
   // Documents imported from Excel have NULL created_at — never show NEW
   if(!createdAt) return '';
   const d=new Date(createdAt), now=new Date(), days=(now-d)/86400000;
@@ -1163,7 +1163,7 @@ function openLangSheet(docId){
 function renderSheetLangs(){
   const doc=allDocs.find(d=>d.id===sheetDocId);
   if(!doc)return;
-  document.getElementById('sheet-langs').innerHTML=['EN','FR','DE'].map(lang=>{
+  document.getElementById('sheet-langs').innerHTML=LANGS.map(lang=>{
     const t=getTr(doc.id,lang);
     const s=t?.status||'missing';
     const sc=STATUS[s]||{};
@@ -1231,6 +1231,7 @@ function renderStorico(){
           <span style="font-weight:700;font-size:13px">${doc?.name||'–'}</span>
           <span style="font-family:monospace;font-size:11px;background:#f1f5f9;padding:1px 6px;border-radius:4px;font-weight:700">${cl.version}</span>
           ${rb}
+          <button onclick="openEditCL('${cl.id}')" style="background:none;border:1px solid var(--border);color:var(--text2);font-size:11px;font-weight:600;padding:2px 8px;border-radius:6px;cursor:pointer;margin-left:auto">✏️ Modifica</button>
         </div>
         <div class="cl-meta">${doc?.category||''} · ${cl.date||''} · Registrato: ${fmt(cl.created_at)}</div>
         <div class="cl-notes">${cl.notes}</div>
@@ -1292,11 +1293,12 @@ function renderByLangPage(){
     }).join('');
 
     return`<div class="table-wrap" style="margin-bottom:14px">
-      <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <div onclick="toggleLangSection('bl-body-${lang}')"
+        style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-wrap:wrap;cursor:pointer;user-select:none">
         <span style="font-size:24px">${flagImg(lang)}</span>
         <div>
           <div style="font-weight:800;font-size:15px">${LNAMES[lang]}</div>
-          <div style="font-size:12px;color:var(--text3)">${comp}/${total} completate</div>
+          <div style="font-size:12px;color:var(--text3)">${comp}/${total} completate · ${rows.length} da lavorare</div>
         </div>
         <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
           <div style="font-size:20px;font-weight:800;color:${c}">${pct}%</div>
@@ -1305,15 +1307,18 @@ function renderByLangPage(){
             <circle cx="24" cy="24" r="18" fill="none" stroke="${c}" stroke-width="6"
               stroke-dasharray="${(pct/100)*113} 113" stroke-linecap="round"/>
           </svg>
+          <span id="bl-arrow-${lang}" style="font-size:16px;color:var(--text3)">▶</span>
         </div>
       </div>
-      ${rows.length>0?`
-        <div class="table-scroll"><table><thead><tr>
-          <th>Documento</th><th>Categoria</th><th>Stato</th><th>📋 Ultimo changelog</th><th>Aggiornato</th><th></th>
-        </tr></thead><tbody>${tableRows}</tbody></table></div>
-        <div style="display:none" id="bl-mob-${lang}">${mRows}</div>
-        <div class="table-footer">${rows.length} documenti da lavorare</div>
-      `:'<div style="padding:14px 16px;color:var(--green);font-weight:600;font-size:13px">✓ Tutte le traduzioni sono aggiornate</div>'}
+      <div id="bl-body-${lang}" style="display:none">
+        ${rows.length>0?`
+          <div class="table-scroll"><table><thead><tr>
+            <th>Documento</th><th>Categoria</th><th>Stato</th><th>📋 Ultimo changelog</th><th>Aggiornato</th><th></th>
+          </tr></thead><tbody>${tableRows}</tbody></table></div>
+          <div style="display:none" id="bl-mob-${lang}">${mRows}</div>
+          <div class="table-footer">${rows.length} documenti da lavorare</div>
+        `:'<div style="padding:14px 16px;color:var(--green);font-weight:600;font-size:13px">✓ Tutte le traduzioni sono aggiornate</div>'}
+      </div>
     </div>`;
   }).join('');
 
@@ -1608,7 +1613,7 @@ function renderNuovi(){
     if(wrap) wrap.innerHTML='<div style="padding:40px;text-align:center;color:var(--text3)"><div class="sp-sm" style="display:inline-block;margin-bottom:8px"></div><br>Caricamento…</div>';
     return;
   }
-  // Only show docs with created_at set (inserted from app after v6.4)
+  // Only show docs with created_at set (inserted from app after v6.8)
   const sorted=[...allDocs]
     .filter(d=>!!d.created_at)
     .sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
@@ -1621,7 +1626,7 @@ function renderNuovi(){
   const wrap=document.getElementById('nuovi-wrap');
   if(!wrap)return;
   if(!filtered.length){
-    wrap.innerHTML='<div style="padding:40px;text-align:center;color:var(--text3)"><div style="font-size:24px;margin-bottom:12px">🆕</div><div style="font-weight:700;margin-bottom:6px">Nessun nuovo documento</div><div style="font-size:12px">I documenti aggiunti dall\'app dalla v6.4 in poi appariranno qui</div></div>';
+    wrap.innerHTML='<div style="padding:40px;text-align:center;color:var(--text3)"><div style="font-size:24px;margin-bottom:12px">🆕</div><div style="font-weight:700;margin-bottom:6px">Nessun nuovo documento</div><div style="font-size:12px">I documenti aggiunti dall\'app dalla v6.8 in poi appariranno qui</div></div>';
     return;
   }
 
@@ -1853,6 +1858,23 @@ let resizeState = null;
 
 
 
+
+function toggleLangSection(id){
+  const body = document.getElementById(id);
+  const lang = id.replace('bl-body-','');
+  const arrow = document.getElementById('bl-arrow-'+lang);
+  if(!body) return;
+  const open = body.style.display === 'none';
+  body.style.display = open ? 'block' : 'none';
+  if(arrow) arrow.textContent = open ? '▼' : '▶';
+  // Show mobile rows if needed
+  if(open && window.innerWidth<=768){
+    const mobEl=document.getElementById('bl-mob-'+lang);
+    const tableEl=body.querySelector('.table-scroll');
+    if(mobEl&&tableEl){tableEl.style.display='none';mobEl.style.display='block';}
+  }
+}
+
 // ── MOBILE NAV ─────────────────────────────────────────────
 function toggleDrawer(){
   const d=document.getElementById('mob-drawer'),o=document.getElementById('mob-overlay');
@@ -1908,9 +1930,15 @@ async function saveEditCL() {
   }
 
   btn.textContent = '💾 Salva modifiche'; btn.disabled = false;
+
+  // Update in memory immediately
+  const clEntry = allCL.find(c => c.id === id);
+  if (clEntry) { clEntry.version = ver; clEntry.date = date; clEntry.notes = notes; }
+
   closeEditCL();
   toast('✓ Aggiornamento modificato');
   await loadData();
+  renderStorico();
 }
 
 
